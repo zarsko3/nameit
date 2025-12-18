@@ -6,6 +6,7 @@ import OnboardingFlow from './components/OnboardingFlow';
 import SwipeCard from './components/SwipeCard';
 import History from './components/History';
 import InstallPrompt from './components/InstallPrompt';
+import NotificationPrompt from './components/NotificationPrompt';
 import Settings from './components/Settings';
 import { BabyName, AppView, UserProfile, SwipeRecord, Match, Gender, FilterConfig, RoomSettings } from './types';
 import { INITIAL_NAMES } from './constants';
@@ -43,6 +44,7 @@ const AppContent: React.FC = () => {
   const [pendingMatchNotification, setPendingMatchNotification] = useState<string | null>(null); // For partner notifications
   const previousMatchesRef = useRef<string[]>([]); // Track previous match IDs
   const [showFilters, setShowFilters] = useState(false);
+  const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
   const [isPartnerOnline, setIsPartnerOnline] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
 
@@ -366,6 +368,10 @@ const AppContent: React.FC = () => {
   // Onboarding flow complete handler
   const handleOnboardingFlowComplete = () => {
     setView('SWIPE');
+    // Show notification prompt after a short delay
+    setTimeout(() => {
+      setShowNotificationPrompt(true);
+    }, 2000);
   };
 
   // Update profile handler - also syncs shared settings to room for couples
@@ -847,6 +853,12 @@ const AppContent: React.FC = () => {
       )}
 
       <InstallPrompt isLoggedIn={profile !== null} />
+      
+      <NotificationPrompt 
+        userId={currentUser?.uid || null}
+        show={showNotificationPrompt && view === 'SWIPE'}
+        onClose={() => setShowNotificationPrompt(false)}
+      />
     </Layout>
   );
 };
