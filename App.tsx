@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Layout from './components/Layout';
 import Onboarding from './components/Onboarding';
+import OnboardingFlow from './components/OnboardingFlow';
 import SwipeCard from './components/SwipeCard';
 import History from './components/History';
 import InstallPrompt from './components/InstallPrompt';
@@ -48,7 +49,12 @@ const App: React.FC = () => {
     if (savedProfile) {
       const parsed = JSON.parse(savedProfile);
       setProfile(parsed);
-      setView('SWIPE');
+      // Check if user has completed onboarding
+      if (parsed.hasCompletedOnboarding) {
+        setView('SWIPE');
+      } else {
+        setView('ONBOARDING_FLOW');
+      }
       // Simulate partner "logging in" after a few seconds if they have a room
       setTimeout(() => setIsPartnerOnline(true), 3000);
     }
@@ -118,9 +124,15 @@ const App: React.FC = () => {
 
   const handleOnboardingComplete = (newProfile: UserProfile) => {
     setProfile(newProfile);
-    setView('SWIPE');
+    // Redirect to onboarding flow for new users
+    setView('ONBOARDING_FLOW');
     // Simulate partner connection
     setTimeout(() => setIsPartnerOnline(true), 4000);
+  };
+
+  // Called when onboarding flow is completed or skipped
+  const handleOnboardingFlowComplete = () => {
+    setView('SWIPE');
   };
 
   const triggerConfetti = () => {
@@ -217,10 +229,18 @@ const App: React.FC = () => {
     <Layout 
       activeView={view} 
       setActiveView={setView} 
-      showNav={view !== 'ONBOARDING'} 
+      showNav={view !== 'ONBOARDING' && view !== 'ONBOARDING_FLOW'} 
       isConnected={isPartnerOnline}
     >
       {view === 'ONBOARDING' && <Onboarding onComplete={handleOnboardingComplete} />}
+      
+      {view === 'ONBOARDING_FLOW' && profile && (
+        <OnboardingFlow 
+          profile={profile}
+          onUpdateProfile={handleUpdateProfile}
+          onComplete={handleOnboardingFlowComplete}
+        />
+      )}
       
       {view === 'SWIPE' && (
         <div className="h-full flex flex-col relative animate-fade-in overflow-hidden">

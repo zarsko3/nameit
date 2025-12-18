@@ -37,6 +37,8 @@ export interface UserProfile {
   // Exclusion lists (both hidden from swipe deck)
   protectedNames: string[];       // Family member names - respected but "taken" (שמות מוגנים)
   blacklistedNames: string[];     // Names to avoid for personal reasons (רשימה שחורה)
+  // Onboarding state
+  hasCompletedOnboarding: boolean; // Has user completed or skipped the onboarding flow
 }
 
 export interface SwipeRecord {
@@ -62,4 +64,4 @@ export interface FilterConfig {
   showTrendingOnly: boolean;   // Show only trending names
 }
 
-export type AppView = 'ONBOARDING' | 'SWIPE' | 'MATCHES' | 'SETTINGS';
+export type AppView = 'ONBOARDING' | 'ONBOARDING_FLOW' | 'SWIPE' | 'MATCHES' | 'SETTINGS';
