@@ -5,6 +5,14 @@ export enum Gender {
   UNISEX = 'UNISEX'
 }
 
+// Name style categories
+export enum NameStyle {
+  MODERN = 'MODERN',           // מודרני
+  CLASSIC = 'CLASSIC',         // קלאסי/מסורתי
+  INTERNATIONAL = 'INTERNATIONAL', // בינלאומי
+  UNIQUE = 'UNIQUE'            // ייחודי/נדיר
+}
+
 export interface BabyName {
   id: string;
   hebrew: string;
@@ -12,6 +20,8 @@ export interface BabyName {
   meaning: string;
   gender: Gender;
   popularity?: number;
+  style?: NameStyle[];  // Name can have multiple styles
+  isTrending?: boolean; // Is this name trending right now?
 }
 
 export interface UserProfile {
@@ -20,6 +30,10 @@ export interface UserProfile {
   roomId: string; // The shared code
   isPartnerConnected: boolean;
   genderPreference: Gender[];
+  // New user preferences
+  expectedGender: Gender | null;  // Expected baby gender (Boy/Girl/Unknown)
+  nameStyles: NameStyle[];        // Preferred name styles
+  showTrendingOnly: boolean;      // Filter to show only trending names
 }
 
 export interface SwipeRecord {
@@ -41,6 +55,8 @@ export interface FilterConfig {
   minLength: number;
   maxLength: number;
   startingLetter: string;
+  nameStyles: NameStyle[];     // Filter by name styles
+  showTrendingOnly: boolean;   // Show only trending names
 }
 
 export type AppView = 'ONBOARDING' | 'SWIPE' | 'MATCHES' | 'SETTINGS';

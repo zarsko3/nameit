@@ -5,7 +5,8 @@ import Onboarding from './components/Onboarding';
 import SwipeCard from './components/SwipeCard';
 import History from './components/History';
 import InstallPrompt from './components/InstallPrompt';
-import { BabyName, AppView, UserProfile, SwipeRecord, Match, Gender, FilterConfig } from './types';
+import Settings from './components/Settings';
+import { BabyName, AppView, UserProfile, SwipeRecord, Match, Gender, NameStyle, FilterConfig } from './types';
 import { INITIAL_NAMES } from './constants';
 import { Sparkles, SlidersHorizontal, X, CircleCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -27,7 +28,9 @@ const App: React.FC = () => {
     genders: [Gender.BOY, Gender.GIRL, Gender.UNISEX],
     minLength: 0,
     maxLength: 10,
-    startingLetter: ''
+    startingLetter: '',
+    nameStyles: [],
+    showTrendingOnly: false
   });
 
   // Minimal Splash Timer
@@ -61,12 +64,30 @@ const App: React.FC = () => {
 
   const filteredNames = useMemo(() => {
     return INITIAL_NAMES.filter(name => {
-      const matchesGender = filters.genders.includes(name.gender);
+      // Gender filter - use profile preference if set, otherwise use filter
+      let gendersToMatch = filters.genders;
+      if (profile?.expectedGender && profile.expectedGender !== Gender.UNISEX) {
+        gendersToMatch = [profile.expectedGender, Gender.UNISEX];
+      }
+      const matchesGender = gendersToMatch.includes(name.gender);
+      
+      // Length filter
       const matchesLength = name.hebrew.length >= filters.minLength && name.hebrew.length <= filters.maxLength;
+      
+      // Starting letter filter
       const matchesLetter = filters.startingLetter === '' || name.hebrew.startsWith(filters.startingLetter);
-      return matchesGender && matchesLength && matchesLetter;
+      
+      // Name style filter - from profile preferences
+      const userStyles = profile?.nameStyles || [];
+      const matchesStyle = userStyles.length === 0 || 
+        (name.style && name.style.some(s => userStyles.includes(s)));
+      
+      // Trending filter - from profile preferences
+      const matchesTrending = !profile?.showTrendingOnly || name.isTrending;
+      
+      return matchesGender && matchesLength && matchesLetter && matchesStyle && matchesTrending;
     });
-  }, [filters]);
+  }, [filters, profile?.expectedGender, profile?.nameStyles, profile?.showTrendingOnly]);
 
   useEffect(() => {
     if (currentNameIndex >= filteredNames.length && filteredNames.length > 0) {
@@ -141,6 +162,19 @@ const App: React.FC = () => {
         ? prev.genders.filter(g => g !== gender)
         : [...prev.genders, gender]
     }));
+  };
+
+  // Update user profile preferences
+  const handleUpdateProfile = (updates: Partial<UserProfile>) => {
+    if (profile) {
+      setProfile({ ...profile, ...updates });
+    }
+  };
+
+  // Logout handler
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.reload();
   };
 
   if (isSplash) {
@@ -265,40 +299,12 @@ const App: React.FC = () => {
       )}
 
       {view === 'SETTINGS' && (
-        <div className="p-10 space-y-8 animate-fade-in">
-            <h2 className="text-3xl font-bold text-gray-700 tracking-tight">הגדרות</h2>
-            <div className="space-y-4">
-                <div className="p-6 bg-gray-50 rounded-[2.5rem] flex items-center justify-between border border-gray-100 shadow-sm">
-                    <div>
-                        <p className="text-[10px] font-bold text-gray-300 mb-1 uppercase tracking-widest">משתמש</p>
-                        <p className="font-bold text-2xl text-gray-600 tracking-tight">{profile?.name}</p>
-                    </div>
-                    <div className="w-16 h-16 bg-white border border-gray-100 text-emerald-400 rounded-3xl flex items-center justify-center text-3xl font-bold">
-                        {profile?.name?.[0]}
-                    </div>
-                </div>
-
-                <div className="p-6 bg-gray-50 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                    <p className="text-[10px] font-bold text-gray-300 mb-4 uppercase tracking-widest">קוד חדר משותף</p>
-                    <div className="flex items-center justify-between">
-                        <span className="font-mono text-2xl font-bold text-emerald-500 tracking-tight">{profile?.roomId}</span>
-                        <div className={`px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest border ${isPartnerOnline ? 'bg-emerald-50 text-emerald-500 border-emerald-100' : 'bg-rose-50 text-rose-400 border-rose-100'}`}>
-                            {isPartnerOnline ? 'מחוברים' : 'ממתין'}
-                        </div>
-                    </div>
-                </div>
-
-                <button 
-                    onClick={() => {
-                        localStorage.clear();
-                        window.location.reload();
-                    }}
-                    className="w-full p-6 bg-white border border-red-50 text-red-300 font-bold rounded-2xl hover:bg-red-50 transition-all active:scale-95 text-sm uppercase tracking-widest mt-6"
-                >
-                    יציאה
-                </button>
-            </div>
-        </div>
+        <Settings 
+          profile={profile}
+          isPartnerOnline={isPartnerOnline}
+          onUpdateProfile={handleUpdateProfile}
+          onLogout={handleLogout}
+        />
       )}
 
       {showMatchCelebration && (
