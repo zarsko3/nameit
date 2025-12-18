@@ -8,7 +8,8 @@ import {
   where,
   getDocs,
   onSnapshot,
-  Unsubscribe
+  Unsubscribe,
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { UserProfile, SwipeRecord, Match } from '../types';
@@ -24,23 +25,29 @@ const MATCHES_COLLECTION = 'matches';
  * Create or update user profile in Firestore
  */
 export const saveUserProfile = async (uid: string, profile: Partial<UserProfile>): Promise<void> => {
+  console.log('💾 Saving to Firestore:', { uid, profile });
+  
   const userRef = doc(db, USERS_COLLECTION, uid);
   const docSnap = await getDoc(userRef);
   
   if (docSnap.exists()) {
     // Update existing profile
+    console.log('📝 Updating existing user document...');
     await updateDoc(userRef, {
       ...profile,
-      updatedAt: new Date().toISOString()
+      updatedAt: serverTimestamp()
     });
+    console.log('✅ User profile updated successfully!');
   } else {
     // Create new profile
+    console.log('🆕 Creating new user document...');
     await setDoc(userRef, {
       ...profile,
       id: uid,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     });
+    console.log('✅ User profile created successfully!');
   }
 };
 
@@ -84,10 +91,14 @@ export const saveSwipe = async (swipe: SwipeRecord): Promise<void> => {
   const swipeId = `${swipe.roomId}_${swipe.userId}_${swipe.nameId}`;
   const swipeRef = doc(db, SWIPES_COLLECTION, swipeId);
   
+  console.log('👆 Saving swipe:', { swipeId, liked: swipe.liked });
+  
   await setDoc(swipeRef, {
     ...swipe,
-    createdAt: new Date().toISOString()
+    createdAt: serverTimestamp()
   });
+  
+  console.log('✅ Swipe saved!');
 };
 
 /**
@@ -126,11 +137,15 @@ export const saveMatch = async (roomId: string, match: Match): Promise<void> => 
   const matchId = `${roomId}_${match.nameId}`;
   const matchRef = doc(db, MATCHES_COLLECTION, matchId);
   
+  console.log('💕 Saving match:', { matchId, roomId });
+  
   await setDoc(matchRef, {
     ...match,
     roomId,
-    createdAt: new Date().toISOString()
+    createdAt: serverTimestamp()
   });
+  
+  console.log('✅ Match saved!');
 };
 
 /**
