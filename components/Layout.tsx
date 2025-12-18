@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { AppView } from '../types';
-import { Heart, List, Settings as SettingsIcon, Sparkles, Wifi, WifiOff } from 'lucide-react';
+import { Heart, List, Settings as SettingsIcon, Wifi, WifiOff } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,10 +18,11 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, sh
       <header className="px-6 py-4 border-b border-gray-100 bg-white flex flex-col shrink-0">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <Sparkles size={18} className="text-emerald-400" />
-            </div>
-            <h1 className="text-xl font-bold text-gray-700 tracking-tight">NameIT</h1>
+            <img 
+              src="/LOGO.png" 
+              alt="NameIT" 
+              className="h-10 w-auto object-contain"
+            />
           </div>
           
           {showNav && (

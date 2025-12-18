@@ -212,12 +212,13 @@ const App: React.FC = () => {
 
   if (isSplash) {
     return (
-      <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-[200]">
+      <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-[200]">
         <div className="animate-splash flex flex-col items-center">
-            <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mb-6">
-                <Sparkles size={32} className="text-emerald-400" />
-            </div>
-            <h1 className="text-4xl font-bold text-gray-700 tracking-tight">NameIT</h1>
+            <img 
+              src="/LOGO.png" 
+              alt="NameIT" 
+              className="w-48 h-48 object-contain"
+            />
         </div>
       </div>
     );

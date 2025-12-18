@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserProfile, Gender } from '../types';
-import { ArrowLeft, Sparkles, Users, Heart } from 'lucide-react';
+import { ArrowLeft, Users, Heart } from 'lucide-react';
 
 interface OnboardingProps {
   onComplete: (profile: UserProfile) => void;
@@ -34,16 +34,15 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         
         {/* Top Section - Logo & Welcome */}
         <div className="text-center animate-fade-up">
-          <div className="relative inline-block mb-6">
-            {/* Decorative rings */}
-            <div className="absolute inset-0 w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-emerald-200/40 to-teal-200/40 blur-xl animate-pulse" />
-            <div className="relative w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-2xl shadow-emerald-200/50">
-              <Sparkles size={44} className="text-white" />
-            </div>
+          <div className="relative inline-block mb-4">
+            {/* Logo with glow effect */}
+            <div className="absolute inset-0 w-36 h-36 mx-auto bg-gradient-to-br from-pink-300/30 via-purple-300/20 to-teal-300/30 blur-2xl animate-pulse" />
+            <img 
+              src="/LOGO.png" 
+              alt="NameIT" 
+              className="relative w-36 h-36 object-contain drop-shadow-2xl"
+            />
           </div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-2 font-heebo">
-            ברוכים הבאים
-          </h2>
           <p className="text-gray-400 max-w-[220px] mx-auto text-sm leading-relaxed">
             בחירת שמות לתינוק שלכם, יחד ובקלות
           </p>
