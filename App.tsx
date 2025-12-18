@@ -38,6 +38,8 @@ const AppContent: React.FC = () => {
   const [swipes, setSwipes] = useState<SwipeRecord[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [showMatchCelebration, setShowMatchCelebration] = useState<BabyName | null>(null);
+  const [pendingMatchNotification, setPendingMatchNotification] = useState<string | null>(null); // For partner notifications
+  const previousMatchesRef = useRef<string[]>([]); // Track previous match IDs
   const [showFilters, setShowFilters] = useState(false);
   const [isPartnerOnline, setIsPartnerOnline] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
@@ -134,12 +136,35 @@ const AppContent: React.FC = () => {
     });
 
     const unsubMatches = subscribeToRoomMatches(profile.roomId, (roomMatches) => {
+      // Detect NEW matches for real-time partner notification
+      const currentMatchIds = roomMatches.map(m => m.nameId);
+      const newMatchIds = currentMatchIds.filter(id => !previousMatchesRef.current.includes(id));
+      
+      if (newMatchIds.length > 0 && previousMatchesRef.current.length > 0) {
+        // A new match was created - check if we should notify
+        const newMatchId = newMatchIds[0];
+        
+        // Only show notification if we're not already showing one (prevents double notification)
+        if (!showMatchCelebration && !pendingMatchNotification) {
+          console.log('💕 New match detected from partner!', newMatchId);
+          setPendingMatchNotification(newMatchId);
+        }
+      }
+      
+      // Update previous matches ref
+      previousMatchesRef.current = currentMatchIds;
       setMatches(roomMatches);
     });
 
     const unsubPartner = subscribeToPartnerConnection(profile.roomId, currentUser.uid, (connected) => {
       setIsPartnerOnline(connected);
     });
+
+    // Initialize previous matches ref on first load
+    if (previousMatchesRef.current.length === 0) {
+      // Don't trigger notifications for existing matches on load
+      previousMatchesRef.current = matches.map(m => m.nameId);
+    }
 
     // Subscribe to shared room settings (COUPLES SYNC)
     const unsubRoomSettings = subscribeToRoomSettings(profile.roomId, (settings) => {
@@ -270,6 +295,23 @@ const AppContent: React.FC = () => {
       console.log('🔄 Session updated due to room settings change');
     }
   }, [roomSettings?.protectedNames, roomSettings?.blacklistedNames, roomSettings?.expectedGender]);
+
+  // Handle pending match notification from partner (real-time)
+  useEffect(() => {
+    if (pendingMatchNotification) {
+      const matchedName = INITIAL_NAMES.find(n => n.id === pendingMatchNotification);
+      if (matchedName) {
+        // Show celebration with a small delay for dramatic effect
+        setTimeout(() => {
+          setShowMatchCelebration(matchedName);
+          triggerConfetti();
+          setPendingMatchNotification(null);
+        }, 500);
+      } else {
+        setPendingMatchNotification(null);
+      }
+    }
+  }, [pendingMatchNotification]);
 
   // Use session names for display (stable during swiping)
   const currentBabyName = sessionNames[currentNameIndex];
@@ -630,28 +672,100 @@ const AppContent: React.FC = () => {
       )}
 
       {showMatchCelebration && (
-        <div className="fixed inset-0 z-[100] bg-emerald-50/95 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500 safe-top safe-bottom">
-          <div className="mb-8 p-6 bg-white rounded-[3rem] shadow-xl animate-bounce">
-            <Sparkles size={72} className="text-emerald-400" />
-          </div>
-          
-          <h2 className="text-4xl font-bold mb-4 text-gray-800 leading-tight px-4 animate-in slide-in-from-top-4">
-            !יש התאמה
-          </h2>
-          <p className="text-lg mb-10 text-gray-500 font-medium">מצאתם שם ששניכם אוהבים:</p>
-          
-          <div className="w-72 h-72 bg-white rounded-[4rem] border-4 border-emerald-100 flex flex-col items-center justify-center mb-14 animate-pop shadow-[0_0_60px_rgba(16,185,129,0.15)] relative overflow-hidden">
-            <div className="absolute inset-0 bg-emerald-50/30 blur-2xl rounded-full scale-75"></div>
-            <h3 className="relative z-10 text-[84px] font-bold text-gray-800 mb-2 font-heebo tracking-tighter leading-none">{showMatchCelebration.hebrew}</h3>
-            <p className="relative z-10 text-emerald-400 font-bold text-xl tracking-widest uppercase opacity-70">{showMatchCelebration.transliteration}</p>
+        <div 
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 text-center safe-top safe-bottom overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%)',
+          }}
+        >
+          {/* Animated background hearts */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(12)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute text-emerald-200/40 animate-pulse"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  fontSize: `${20 + Math.random() * 40}px`,
+                  animationDelay: `${Math.random() * 2}s`,
+                  animationDuration: `${2 + Math.random() * 2}s`,
+                }}
+              >
+                💚
+              </div>
+            ))}
           </div>
 
-          <button 
-            onClick={() => setShowMatchCelebration(null)}
-            className="w-full max-w-[280px] py-6 bg-emerald-400 text-white rounded-[2.5rem] font-bold text-2xl shadow-[0_15px_30px_-5px_rgba(16,185,129,0.3)] hover:bg-emerald-500 active:scale-95 transition-all animate-in slide-in-from-bottom-8 duration-700"
-          >
-            ממשיכים להחליק
-          </button>
+          {/* Main content */}
+          <div className="relative z-10 flex flex-col items-center">
+            {/* Animated hearts icon */}
+            <div className="mb-6 relative">
+              <div className="absolute inset-0 bg-emerald-300/30 blur-3xl rounded-full scale-150 animate-pulse" />
+              <div className="relative p-5 bg-white rounded-[2.5rem] shadow-2xl shadow-emerald-200/50">
+                <div className="flex items-center gap-1">
+                  <span className="text-5xl animate-bounce" style={{ animationDelay: '0ms' }}>💚</span>
+                  <span className="text-5xl animate-bounce" style={{ animationDelay: '100ms' }}>💚</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Match text */}
+            <h2 
+              className="text-5xl font-black mb-2 text-emerald-600 leading-tight font-heebo"
+              style={{ 
+                textShadow: '0 4px 20px rgba(16, 185, 129, 0.3)',
+                animation: 'pulse 2s ease-in-out infinite'
+              }}
+            >
+              !יש התאמה
+            </h2>
+            <p className="text-lg mb-8 text-emerald-700/70 font-medium">מצאתם שם ששניכם אוהבים</p>
+            
+            {/* Name card */}
+            <div 
+              className="w-80 bg-white rounded-[3rem] p-8 mb-10 shadow-2xl shadow-emerald-300/30 relative overflow-hidden"
+              style={{
+                animation: 'pop 0.5s ease-out',
+              }}
+            >
+              {/* Decorative gradient */}
+              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-400" />
+              
+              {/* Sparkle decorations */}
+              <div className="absolute top-4 right-4 text-2xl animate-spin" style={{ animationDuration: '3s' }}>✨</div>
+              <div className="absolute bottom-4 left-4 text-2xl animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }}>✨</div>
+              
+              <div className="text-center py-4">
+                <h3 className="text-[72px] font-black text-gray-800 mb-3 font-heebo tracking-tight leading-none">
+                  {showMatchCelebration.hebrew}
+                </h3>
+                <p className="text-emerald-500 font-bold text-xl tracking-[0.3em] uppercase mb-4">
+                  {showMatchCelebration.transliteration}
+                </p>
+                <div className="mx-auto w-16 h-1 bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-300 rounded-full" />
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-col gap-3 w-full max-w-[300px]">
+              <button 
+                onClick={() => {
+                  setShowMatchCelebration(null);
+                  setView('MATCHES');
+                }}
+                className="w-full py-5 bg-white text-emerald-600 rounded-2xl font-bold text-lg border-2 border-emerald-200 hover:bg-emerald-50 active:scale-95 transition-all shadow-lg"
+              >
+                צפייה ברשימת ההתאמות
+              </button>
+              <button 
+                onClick={() => setShowMatchCelebration(null)}
+                className="w-full py-5 bg-emerald-500 text-white rounded-2xl font-bold text-lg shadow-xl shadow-emerald-300/40 hover:bg-emerald-600 active:scale-95 transition-all"
+              >
+                ממשיכים להחליק 💚
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
