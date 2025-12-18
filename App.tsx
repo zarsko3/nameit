@@ -29,7 +29,7 @@ import {
 } from './services/firestoreService';
 
 const AppContent: React.FC = () => {
-  const { currentUser, loading: authLoading, signUp, login, loginWithGoogle, logout } = useAuth();
+  const { currentUser, loading: authLoading, initialized: authInitialized, signUp, login, loginWithGoogle, logout } = useAuth();
   
   const [isSplash, setIsSplash] = useState(true);
   const [view, setView] = useState<AppView>('AUTH');
@@ -56,26 +56,41 @@ const AppContent: React.FC = () => {
     showTrendingOnly: false
   });
 
-  // Splash Timer
+  // Splash Timer - minimum display time
+  const [splashMinTimeComplete, setSplashMinTimeComplete] = useState(false);
+  
   useEffect(() => {
-    const timer = setTimeout(() => setIsSplash(false), 1800);
+    const timer = setTimeout(() => setSplashMinTimeComplete(true), 1800);
     return () => clearTimeout(timer);
   }, []);
 
-  // Handle auth state changes
+  // Splash is complete when BOTH min time passed AND auth is initialized
   useEffect(() => {
-    if (authLoading) return;
+    if (splashMinTimeComplete && authInitialized) {
+      setIsSplash(false);
+    }
+  }, [splashMinTimeComplete, authInitialized]);
+
+  // Handle auth state changes - only runs after auth is initialized
+  useEffect(() => {
+    // Wait for auth to be fully initialized before making routing decisions
+    if (!authInitialized || authLoading) return;
     
     if (!currentUser) {
+      // Only show AUTH screen after confirming no active session
+      console.log('🔐 No user session - showing login');
       setView('AUTH');
       setProfile(null);
       return;
     }
 
-    // User is logged in, load their profile
+    // User is logged in (either fresh login or restored session)
+    console.log('✅ User authenticated:', currentUser.email);
     setDataLoading(true);
+    
     getUserProfile(currentUser.uid).then((userProfile) => {
       if (userProfile) {
+        console.log('📋 Profile loaded, routing to appropriate view');
         setProfile(userProfile);
         if (!userProfile.roomId) {
           setView('ROOM_SETUP');
@@ -86,11 +101,16 @@ const AppContent: React.FC = () => {
         }
       } else {
         // New user - needs room setup
+        console.log('👤 New user - starting room setup');
         setView('ROOM_SETUP');
       }
       setDataLoading(false);
+    }).catch((error) => {
+      console.error('Failed to load profile:', error);
+      setDataLoading(false);
+      setView('AUTH'); // Fallback to auth on error
     });
-  }, [currentUser, authLoading]);
+  }, [currentUser, authLoading, authInitialized]);
 
   // Subscribe to profile changes
   useEffect(() => {
@@ -396,7 +416,7 @@ const AppContent: React.FC = () => {
     setView('AUTH');
   };
 
-  // Show splash screen
+  // Show splash screen (waits for both min time AND auth initialization)
   if (isSplash) {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-[200]">
@@ -406,17 +426,28 @@ const AppContent: React.FC = () => {
             alt="NameIT" 
             className="w-72 h-72 object-contain"
           />
+          {/* Show subtle loading indicator if still checking auth */}
+          {!authInitialized && (
+            <div className="mt-8">
+              <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
-  // Show loading while checking auth
-  if (authLoading || dataLoading) {
+  // Show loading while fetching user data (after auth is confirmed)
+  if (dataLoading) {
     return (
       <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-[200]">
-        <div className="w-12 h-12 border-4 border-emerald-100 border-t-emerald-500 rounded-full animate-spin" />
-        <p className="mt-4 text-gray-400 text-sm">טוען...</p>
+        <img 
+          src="/LOGO.png" 
+          alt="NameIT" 
+          className="w-24 h-24 object-contain mb-6 opacity-30"
+        />
+        <div className="w-10 h-10 border-3 border-emerald-100 border-t-emerald-500 rounded-full animate-spin" />
+        <p className="mt-4 text-gray-400 text-sm font-medium">מתחברים...</p>
       </div>
     );
   }
