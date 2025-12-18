@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { AppView } from '../types';
-import { Heart, List, Settings as SettingsIcon, Wifi, WifiOff } from 'lucide-react';
+import { Heart, List, Settings as SettingsIcon } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,23 +15,12 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, sh
   return (
     <div className="flex flex-col h-screen max-w-md mx-auto bg-white shadow-sm relative overflow-hidden font-assistant safe-top safe-bottom">
       {/* Header */}
-      <header className="px-6 py-4 border-b border-gray-100 bg-white flex flex-col shrink-0">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2">
-            <img 
-              src="/LOGO.png" 
-              alt="NameIT" 
-              className="h-14 w-auto object-contain"
-            />
-          </div>
-          
-          {showNav && (
-            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border transition-colors ${isConnected ? 'bg-emerald-50 text-emerald-500 border-emerald-100' : 'bg-rose-50 text-rose-400 border-rose-100'}`}>
-              {isConnected ? <Wifi size={12} /> : <WifiOff size={12} />}
-              <span>{isConnected ? 'מחוברים!' : 'ממתין לחיבור...'}</span>
-            </div>
-          )}
-        </div>
+      <header className="px-6 py-4 border-b border-gray-100 bg-white flex items-center justify-center shrink-0">
+        <img 
+          src="/LOGO.png" 
+          alt="NameIT" 
+          className="h-14 w-auto object-contain"
+        />
       </header>
 
       {/* Main Content */}
