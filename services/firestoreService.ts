@@ -12,12 +12,13 @@ import {
   serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { UserProfile, SwipeRecord, Match } from '../types';
+import { UserProfile, SwipeRecord, Match, RoomSettings } from '../types';
 
 // Collection names
 const USERS_COLLECTION = 'users';
 const SWIPES_COLLECTION = 'swipes';
 const MATCHES_COLLECTION = 'matches';
+const ROOMS_COLLECTION = 'rooms';
 
 // ============ USER PROFILE OPERATIONS ============
 
@@ -213,6 +214,77 @@ export const subscribeToPartnerConnection = (
   return onSnapshot(q, (querySnapshot) => {
     const hasPartner = querySnapshot.docs.some(doc => doc.id !== currentUserId);
     callback(hasPartner);
+  });
+};
+
+// ============ ROOM SETTINGS OPERATIONS (COUPLES SYNC) ============
+
+/**
+ * Save or update shared room settings
+ * This syncs settings between all users in the same room
+ */
+export const saveRoomSettings = async (
+  roomId: string, 
+  settings: Partial<RoomSettings>,
+  userId: string
+): Promise<void> => {
+  console.log('🔄 Syncing room settings:', { roomId, settings });
+  
+  const roomRef = doc(db, ROOMS_COLLECTION, roomId);
+  const docSnap = await getDoc(roomRef);
+  
+  if (docSnap.exists()) {
+    await updateDoc(roomRef, {
+      ...settings,
+      updatedAt: serverTimestamp(),
+      updatedBy: userId
+    });
+    console.log('✅ Room settings updated!');
+  } else {
+    await setDoc(roomRef, {
+      roomId,
+      ...settings,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      updatedBy: userId
+    });
+    console.log('✅ Room settings created!');
+  }
+};
+
+/**
+ * Get room settings
+ */
+export const getRoomSettings = async (roomId: string): Promise<RoomSettings | null> => {
+  const roomRef = doc(db, ROOMS_COLLECTION, roomId);
+  const docSnap = await getDoc(roomRef);
+  
+  if (docSnap.exists()) {
+    return docSnap.data() as RoomSettings;
+  }
+  return null;
+};
+
+/**
+ * Subscribe to room settings changes (real-time sync for couples)
+ * When partner changes settings, callback fires immediately
+ */
+export const subscribeToRoomSettings = (
+  roomId: string,
+  callback: (settings: RoomSettings | null) => void
+): Unsubscribe => {
+  const roomRef = doc(db, ROOMS_COLLECTION, roomId);
+  
+  console.log('👂 Subscribing to room settings:', roomId);
+  
+  return onSnapshot(roomRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const settings = docSnap.data() as RoomSettings;
+      console.log('📡 Room settings updated:', settings);
+      callback(settings);
+    } else {
+      callback(null);
+    }
   });
 };
 

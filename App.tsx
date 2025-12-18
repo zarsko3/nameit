@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Layout from './components/Layout';
 import AuthScreen from './components/AuthScreen';
 import RoomSetup from './components/RoomSetup';
@@ -7,7 +7,7 @@ import SwipeCard from './components/SwipeCard';
 import History from './components/History';
 import InstallPrompt from './components/InstallPrompt';
 import Settings from './components/Settings';
-import { BabyName, AppView, UserProfile, SwipeRecord, Match, Gender, FilterConfig } from './types';
+import { BabyName, AppView, UserProfile, SwipeRecord, Match, Gender, FilterConfig, RoomSettings } from './types';
 import { INITIAL_NAMES } from './constants';
 import { Sparkles, SlidersHorizontal, X, CircleCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -22,7 +22,10 @@ import {
   subscribeToRoomSwipes,
   saveMatch,
   subscribeToRoomMatches,
-  subscribeToPartnerConnection
+  subscribeToPartnerConnection,
+  saveRoomSettings,
+  getRoomSettings,
+  subscribeToRoomSettings
 } from './services/firestoreService';
 
 const AppContent: React.FC = () => {
@@ -31,13 +34,18 @@ const AppContent: React.FC = () => {
   const [isSplash, setIsSplash] = useState(true);
   const [view, setView] = useState<AppView>('AUTH');
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [roomSettings, setRoomSettings] = useState<RoomSettings | null>(null);
   const [swipes, setSwipes] = useState<SwipeRecord[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [currentNameIndex, setCurrentNameIndex] = useState(0);
   const [showMatchCelebration, setShowMatchCelebration] = useState<BabyName | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [isPartnerOnline, setIsPartnerOnline] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
+
+  // Session-stable name list to prevent jumping during swipes
+  const [sessionNames, setSessionNames] = useState<BabyName[]>([]);
+  const [currentNameIndex, setCurrentNameIndex] = useState(0);
+  const sessionInitialized = useRef(false);
 
   const [filters, setFilters] = useState<FilterConfig>({
     genders: [Gender.BOY, Gender.GIRL, Gender.UNISEX],
@@ -97,7 +105,7 @@ const AppContent: React.FC = () => {
     return () => unsubscribe();
   }, [currentUser]);
 
-  // Subscribe to room data (swipes, matches, partner)
+  // Subscribe to room data (swipes, matches, partner, AND shared settings)
   useEffect(() => {
     if (!profile?.roomId || !currentUser) return;
 
@@ -113,17 +121,44 @@ const AppContent: React.FC = () => {
       setIsPartnerOnline(connected);
     });
 
+    // Subscribe to shared room settings (COUPLES SYNC)
+    const unsubRoomSettings = subscribeToRoomSettings(profile.roomId, (settings) => {
+      if (settings) {
+        console.log('📡 Room settings synced from partner:', settings);
+        setRoomSettings(settings);
+      }
+    });
+
+    // Load initial room settings
+    getRoomSettings(profile.roomId).then((settings) => {
+      if (settings) {
+        setRoomSettings(settings);
+      }
+    });
+
     return () => {
       unsubSwipes();
       unsubMatches();
       unsubPartner();
+      unsubRoomSettings();
     };
   }, [profile?.roomId, currentUser]);
 
-  // Filter names based on preferences
-  const filteredNames = useMemo(() => {
-    const protectedNames = (profile?.protectedNames || []).map(n => n.toLowerCase());
-    const blacklistedNames = (profile?.blacklistedNames || []).map(n => n.toLowerCase());
+  // Get effective settings (room settings take priority for couples sync)
+  const effectiveSettings = useMemo(() => {
+    return {
+      expectedGender: roomSettings?.expectedGender ?? profile?.expectedGender ?? null,
+      nameStyles: roomSettings?.nameStyles ?? profile?.nameStyles ?? [],
+      showTrendingOnly: roomSettings?.showTrendingOnly ?? profile?.showTrendingOnly ?? false,
+      protectedNames: roomSettings?.protectedNames ?? profile?.protectedNames ?? [],
+      blacklistedNames: roomSettings?.blacklistedNames ?? profile?.blacklistedNames ?? [],
+    };
+  }, [roomSettings, profile]);
+
+  // Calculate available names (used for session initialization)
+  const calculateFilteredNames = useCallback(() => {
+    const protectedNames = (effectiveSettings.protectedNames).map(n => n.toLowerCase());
+    const blacklistedNames = (effectiveSettings.blacklistedNames).map(n => n.toLowerCase());
     const swipedNameIds = swipes.filter(s => s.userId === currentUser?.uid).map(s => s.nameId);
     
     return INITIAL_NAMES.filter(name => {
@@ -144,29 +179,66 @@ const AppContent: React.FC = () => {
       if (isProtected || isBlacklisted) return false;
       
       let gendersToMatch = filters.genders;
-      if (profile?.expectedGender && profile.expectedGender !== Gender.UNISEX) {
-        gendersToMatch = [profile.expectedGender, Gender.UNISEX];
+      if (effectiveSettings.expectedGender && effectiveSettings.expectedGender !== Gender.UNISEX) {
+        gendersToMatch = [effectiveSettings.expectedGender, Gender.UNISEX];
       }
       const matchesGender = gendersToMatch.includes(name.gender);
       
       const matchesLength = name.hebrew.length >= filters.minLength && name.hebrew.length <= filters.maxLength;
       const matchesLetter = filters.startingLetter === '' || name.hebrew.startsWith(filters.startingLetter);
       
-      const userStyles = profile?.nameStyles || [];
+      const userStyles = effectiveSettings.nameStyles;
       const matchesStyle = userStyles.length === 0 || 
         (name.style && name.style.some(s => userStyles.includes(s)));
       
-      const matchesTrending = !profile?.showTrendingOnly || name.isTrending;
+      const matchesTrending = !effectiveSettings.showTrendingOnly || name.isTrending;
       
       return matchesGender && matchesLength && matchesLetter && matchesStyle && matchesTrending;
     });
-  }, [filters, profile, swipes, currentUser?.uid]);
+  }, [filters, effectiveSettings, swipes, currentUser?.uid]);
 
+  // Initialize session names when entering SWIPE view or when settings change significantly
   useEffect(() => {
-    if (currentNameIndex >= filteredNames.length && filteredNames.length > 0) {
-      setCurrentNameIndex(0);
+    if (view === 'SWIPE' && profile?.roomId) {
+      // Only initialize once per session, or when coming back from settings
+      if (!sessionInitialized.current || sessionNames.length === 0) {
+        const newNames = calculateFilteredNames();
+        setSessionNames(newNames);
+        setCurrentNameIndex(0);
+        sessionInitialized.current = true;
+        console.log('📋 Session initialized with', newNames.length, 'names');
+      }
     }
-  }, [filteredNames, currentNameIndex]);
+  }, [view, profile?.roomId]);
+
+  // Reset session when leaving SWIPE view
+  useEffect(() => {
+    if (view !== 'SWIPE') {
+      sessionInitialized.current = false;
+    }
+  }, [view]);
+
+  // Re-initialize when room settings change (partner updated filters)
+  useEffect(() => {
+    if (view === 'SWIPE' && roomSettings && sessionInitialized.current) {
+      const newNames = calculateFilteredNames();
+      // Only update if protected/blacklisted names changed (important changes)
+      // Keep current position if possible
+      const currentName = sessionNames[currentNameIndex];
+      setSessionNames(newNames);
+      
+      if (currentName) {
+        const newIndex = newNames.findIndex(n => n.id === currentName.id);
+        if (newIndex >= 0) {
+          setCurrentNameIndex(newIndex);
+        }
+      }
+      console.log('🔄 Session updated due to room settings change');
+    }
+  }, [roomSettings?.protectedNames, roomSettings?.blacklistedNames, roomSettings?.expectedGender]);
+
+  // Use session names for display (stable during swiping)
+  const currentBabyName = sessionNames[currentNameIndex];
 
   // Auth success handler
   const handleAuthSuccess = async (uid: string, email: string, displayName: string) => {
@@ -217,13 +289,30 @@ const AppContent: React.FC = () => {
     setView('SWIPE');
   };
 
-  // Update profile handler
+  // Update profile handler - also syncs shared settings to room for couples
   const handleUpdateProfile = async (updates: Partial<UserProfile>) => {
     if (!currentUser || !profile) return;
     
     const updatedProfile = { ...profile, ...updates };
     await saveUserProfile(currentUser.uid, updates);
     setProfile(updatedProfile);
+
+    // Sync shared settings to room (for couples real-time sync)
+    if (profile.roomId) {
+      const sharedSettings: Partial<RoomSettings> = {};
+      
+      // Only sync settings that should be shared between partners
+      if (updates.expectedGender !== undefined) sharedSettings.expectedGender = updates.expectedGender;
+      if (updates.nameStyles !== undefined) sharedSettings.nameStyles = updates.nameStyles;
+      if (updates.showTrendingOnly !== undefined) sharedSettings.showTrendingOnly = updates.showTrendingOnly;
+      if (updates.protectedNames !== undefined) sharedSettings.protectedNames = updates.protectedNames;
+      if (updates.blacklistedNames !== undefined) sharedSettings.blacklistedNames = updates.blacklistedNames;
+      
+      if (Object.keys(sharedSettings).length > 0) {
+        console.log('📤 Syncing settings to room for partner:', sharedSettings);
+        await saveRoomSettings(profile.roomId, sharedSettings, currentUser.uid);
+      }
+    }
   };
 
   const triggerConfetti = () => {
@@ -237,7 +326,7 @@ const AppContent: React.FC = () => {
 
   const handleSwipe = async (liked: boolean) => {
     if (!profile || !currentUser) return;
-    const currentName = filteredNames[currentNameIndex];
+    const currentName = sessionNames[currentNameIndex];
     if (!currentName) return;
 
     const newSwipe: SwipeRecord = {
@@ -273,6 +362,7 @@ const AppContent: React.FC = () => {
       }
     }
     
+    // Move to next name in the stable session list
     setCurrentNameIndex(prev => prev + 1);
   };
 
@@ -331,8 +421,6 @@ const AppContent: React.FC = () => {
     );
   }
 
-  const currentBabyName = filteredNames[currentNameIndex];
-
   return (
     <Layout 
       activeView={view} 
@@ -378,14 +466,14 @@ const AppContent: React.FC = () => {
 
           <div className="flex-1 flex flex-col items-center justify-center relative">
             {currentBabyName ? (
-              <SwipeCard 
-                key={currentBabyName.id}
-                name={currentBabyName} 
-                onSwipe={handleSwipe} 
-                onUndo={undoLastSwipe}
-                canUndo={currentNameIndex > 0}
-                progress={currentNameIndex / Math.max(filteredNames.length, 1)}
-              />
+                <SwipeCard 
+                  key={currentBabyName.id}
+                  name={currentBabyName} 
+                  onSwipe={handleSwipe} 
+                  onUndo={undoLastSwipe}
+                  canUndo={currentNameIndex > 0}
+                  progress={currentNameIndex / Math.max(sessionNames.length, 1)}
+                />
             ) : (
               <div className="text-center p-12 bg-gray-50 rounded-[3rem] border-none animate-pop mx-8">
                 <div className="w-20 h-20 bg-emerald-50 text-emerald-400 rounded-3xl flex items-center justify-center mx-auto mb-6">

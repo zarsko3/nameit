@@ -55,6 +55,18 @@ export interface Match {
   rating: number; // 1-5 stars
 }
 
+// Shared room settings for couples sync
+export interface RoomSettings {
+  roomId: string;
+  expectedGender: Gender | null;
+  nameStyles: NameStyle[];
+  showTrendingOnly: boolean;
+  protectedNames: string[];
+  blacklistedNames: string[];
+  updatedAt?: any; // Firestore timestamp
+  updatedBy?: string; // User ID who last updated
+}
+
 export interface FilterConfig {
   genders: Gender[];
   minLength: number;
