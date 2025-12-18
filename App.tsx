@@ -357,6 +357,43 @@ const AppContent: React.FC = () => {
     }
   };
 
+  // Dev login handler - bypasses Firebase auth for local testing
+  const handleDevLogin = async (uid: string, email: string, displayName: string, roomId: string) => {
+    console.log('🔧 DEV LOGIN: Setting up test user...');
+    console.log(`   UID: ${uid}`);
+    console.log(`   Room: ${roomId}`);
+    
+    // Create or get dev profile with pre-configured room
+    const existingProfile = await getUserProfile(uid);
+    
+    if (existingProfile) {
+      console.log('📂 Dev profile exists, loading...');
+      setProfile(existingProfile);
+      setView('SWIPE');
+    } else {
+      console.log('📝 Creating new dev profile...');
+      const devProfile: UserProfile = {
+        id: uid,
+        name: displayName,
+        roomId: roomId, // Pre-configured test room
+        isPartnerConnected: false,
+        genderPreference: [Gender.BOY, Gender.GIRL, Gender.UNISEX],
+        expectedGender: null,
+        nameStyles: [],
+        showTrendingOnly: false,
+        protectedNames: [],
+        blacklistedNames: [],
+        dislikedNames: [],
+        hasCompletedOnboarding: true // Skip onboarding for dev
+      };
+      await saveUserProfile(uid, devProfile);
+      setProfile(devProfile);
+      setView('SWIPE');
+    }
+    
+    console.log('✅ Dev login complete! Ready to test.');
+  };
+
   // Room setup complete handler
   const handleRoomSetupComplete = async (roomId: string) => {
     if (!currentUser || !profile) return;
@@ -660,6 +697,7 @@ const AppContent: React.FC = () => {
       {view === 'AUTH' && (
         <AuthScreen 
           onAuthSuccess={handleAuthSuccess}
+          onDevLogin={handleDevLogin}
           signUp={signUp}
           login={login}
           loginWithGoogle={loginWithGoogle}

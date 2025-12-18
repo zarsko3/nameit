@@ -1,8 +1,20 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, User, Eye, EyeOff, AlertCircle, Terminal } from 'lucide-react';
+
+// Check if we're in development mode (Vite)
+const isDev = import.meta.env.DEV;
+
+// Dev admin credentials - only works locally
+const DEV_ADMIN = {
+  uid: 'dev-admin-001',
+  email: 'admin@nameit.dev',
+  displayName: 'Admin (Dev)',
+  roomId: 'dev-test-room'
+};
 
 interface AuthScreenProps {
   onAuthSuccess: (uid: string, email: string, displayName: string) => void;
+  onDevLogin?: (uid: string, email: string, displayName: string, roomId: string) => void;
   signUp: (email: string, password: string, displayName: string) => Promise<any>;
   login: (email: string, password: string) => Promise<any>;
   loginWithGoogle: () => Promise<any>;
@@ -18,7 +30,7 @@ const GoogleLogo = () => (
   </svg>
 );
 
-const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, loginWithGoogle }) => {
+const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, onDevLogin, signUp, login, loginWithGoogle }) => {
   const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,6 +39,32 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, l
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [devLoading, setDevLoading] = useState(false);
+
+  // Quick dev login handler - only works in development
+  const handleDevLogin = async () => {
+    if (!isDev) {
+      console.warn('🚫 Dev login attempted in production - blocked!');
+      return;
+    }
+    
+    console.log('🔧 DEV MODE: Quick admin login...');
+    setDevLoading(true);
+    setError('');
+    
+    // Small delay for UX
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    if (onDevLogin) {
+      // Use the special dev login handler that skips Firebase
+      onDevLogin(DEV_ADMIN.uid, DEV_ADMIN.email, DEV_ADMIN.displayName, DEV_ADMIN.roomId);
+    } else {
+      // Fallback: use regular auth success
+      onAuthSuccess(DEV_ADMIN.uid, DEV_ADMIN.email, DEV_ADMIN.displayName);
+    }
+    
+    setDevLoading(false);
+  };
 
   const getErrorMessage = (errorCode: string): string => {
     switch (errorCode) {
@@ -59,6 +97,14 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, l
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    // Check for admin shortcut (only in development)
+    if (isDev && email === 'admin' && password === 'admin') {
+      console.log('🔧 DEV MODE: Admin credentials detected, using quick login...');
+      await handleDevLogin();
+      setLoading(false);
+      return;
+    }
 
     try {
       if (isLogin) {
@@ -269,6 +315,29 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, l
                   )}
                 </button>
               </form>
+
+              {/* Dev Login Button - Only visible in development mode */}
+              {isDev && (
+                <div className="pt-2 border-t border-dashed border-orange-200/50">
+                  <button
+                    onClick={handleDevLogin}
+                    disabled={devLoading || loading || googleLoading}
+                    className="w-full py-2.5 bg-gradient-to-r from-orange-400/20 to-amber-400/20 border border-orange-300/50 text-orange-600 rounded-xl font-medium text-sm flex items-center justify-center gap-2 hover:from-orange-400/30 hover:to-amber-400/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    {devLoading ? (
+                      <div className="w-4 h-4 border-2 border-orange-300 border-t-orange-600 rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <Terminal size={16} />
+                        <span>Dev Login (localhost only)</span>
+                      </>
+                    )}
+                  </button>
+                  <p className="text-[10px] text-orange-400/70 text-center mt-1.5">
+                    Or type: admin / admin
+                  </p>
+                </div>
+              )}
             </div>
           </div>
           
