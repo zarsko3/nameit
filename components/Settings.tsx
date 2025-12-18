@@ -19,8 +19,15 @@ import {
   Plus,
   X,
   AlertTriangle,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Database,
+  Upload,
+  Terminal
 } from 'lucide-react';
+import { uploadExistingNames, countNamesInFirestore } from '../services/migrationService';
+
+// Check if we're in development mode
+const isDev = import.meta.env.DEV;
 
 interface SettingsProps {
   profile: UserProfile | null;
@@ -151,6 +158,123 @@ const PremiumSection: React.FC<{
     </div>
   </div>
 );
+
+// Dev Admin Panel - Only shows in development mode
+const DevAdminPanel: React.FC = () => {
+  const [isUploading, setIsUploading] = useState(false);
+  const [result, setResult] = useState<{ uploaded: number; errors: number } | null>(null);
+  const [firestoreCount, setFirestoreCount] = useState<number | null>(null);
+
+  const handleCheckCount = async () => {
+    const count = await countNamesInFirestore();
+    setFirestoreCount(count);
+    console.log(`📊 Names in Firestore: ${count}`);
+  };
+
+  const handleUploadNames = async () => {
+    if (isUploading) return;
+    
+    const confirmed = window.confirm(
+      '⚠️ This will upload all 306 names to Firestore.\n\n' +
+      'Existing names with the same ID will be overwritten.\n\n' +
+      'Continue?'
+    );
+    
+    if (!confirmed) return;
+    
+    setIsUploading(true);
+    setResult(null);
+    
+    try {
+      const uploadResult = await uploadExistingNames();
+      setResult({
+        uploaded: uploadResult.uploaded,
+        errors: uploadResult.errors.length
+      });
+      
+      // Refresh count
+      const count = await countNamesInFirestore();
+      setFirestoreCount(count);
+      
+    } catch (error) {
+      console.error('Migration failed:', error);
+      setResult({ uploaded: 0, errors: 1 });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return (
+    <div className="glass-card rounded-3xl p-5 border-2 border-dashed border-orange-300/50 bg-orange-50/30 animate-fade-up" style={{ animationDelay: '0.38s' }}>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg">
+          <Terminal size={18} className="text-white" />
+        </div>
+        <div>
+          <p className="font-bold text-orange-700 font-heebo">Dev Admin Panel</p>
+          <p className="text-[10px] text-orange-400">localhost only</p>
+        </div>
+      </div>
+      
+      {/* Database Stats */}
+      <div className="bg-white/60 rounded-xl p-3 mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Database size={16} className="text-gray-400" />
+          <span className="text-sm text-gray-600">Names in Firestore:</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-mono font-bold text-gray-800">
+            {firestoreCount !== null ? firestoreCount : '—'}
+          </span>
+          <button
+            onClick={handleCheckCount}
+            className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded-lg text-gray-500 transition-all"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+      
+      {/* Upload Button */}
+      <button
+        onClick={handleUploadNames}
+        disabled={isUploading}
+        className="w-full py-3 bg-gradient-to-r from-orange-400 to-amber-400 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:from-orange-500 hover:to-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-orange-200/40"
+      >
+        {isUploading ? (
+          <>
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span>Uploading...</span>
+          </>
+        ) : (
+          <>
+            <Upload size={18} />
+            <span>Upload 306 Names to Firestore</span>
+          </>
+        )}
+      </button>
+      
+      {/* Result */}
+      {result && (
+        <div className={`mt-3 p-3 rounded-xl text-sm ${
+          result.errors === 0 
+            ? 'bg-emerald-50 text-emerald-700' 
+            : 'bg-red-50 text-red-700'
+        }`}>
+          {result.errors === 0 ? (
+            <>✅ Successfully uploaded {result.uploaded} names!</>
+          ) : (
+            <>❌ Upload failed with {result.errors} errors. Check console.</>
+          )}
+        </div>
+      )}
+      
+      <p className="text-[10px] text-orange-400/70 text-center mt-3">
+        This panel is only visible in development mode
+      </p>
+    </div>
+  );
+};
 
 const Settings: React.FC<SettingsProps> = ({ 
   profile, 
@@ -442,6 +566,9 @@ const Settings: React.FC<SettingsProps> = ({
               שתפו את קוד החדר <span className="font-mono font-bold bg-white/60 px-2 py-0.5 rounded text-emerald-600">{profile.roomId}</span> כדי להחליק ביחד!
             </p>
           </div>
+
+          {/* Dev Admin Panel - Only visible in development */}
+          {isDev && <DevAdminPanel />}
 
           {/* Logout */}
           <button 
