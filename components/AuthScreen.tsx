@@ -97,25 +97,43 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, l
   };
 
   return (
-    <div className="h-full flex flex-col mesh-gradient overflow-hidden" dir="rtl">
-      <div className="flex-1 scroll-hidden">
-        <div className="min-h-full flex flex-col items-center justify-between px-6 py-10 safe-top safe-bottom">
+    <div className="h-full flex flex-col mesh-gradient" dir="rtl">
+      {/* Scrollable container with hidden scrollbar */}
+      <div 
+        className="flex-1 overflow-y-auto overflow-x-hidden"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch'
+        }}
+      >
+        <style>{`
+          .auth-scroll::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
+        
+        {/* Content wrapper - centers on large screens, flows naturally on small */}
+        <div className="auth-scroll min-h-full flex flex-col items-center justify-center px-6 py-8 safe-top safe-bottom">
+          
+          {/* Spacer for top breathing room */}
+          <div className="flex-shrink-0 h-4 sm:h-8" />
           
           {/* Logo */}
-          <div className="text-center animate-fade-up">
+          <div className="text-center animate-fade-up flex-shrink-0 mb-6">
             <div className="relative inline-block">
-              <div className="absolute inset-0 w-36 h-36 mx-auto bg-gradient-to-br from-pink-300/30 via-purple-300/20 to-teal-300/30 blur-2xl animate-pulse" />
+              <div className="absolute inset-0 w-28 h-28 sm:w-36 sm:h-36 mx-auto bg-gradient-to-br from-pink-300/30 via-purple-300/20 to-teal-300/30 blur-2xl animate-pulse" />
               <img 
                 src="/LOGO.png" 
                 alt="NameIT" 
-                className="relative w-36 h-36 object-contain drop-shadow-2xl"
+                className="relative w-28 h-28 sm:w-36 sm:h-36 object-contain drop-shadow-2xl"
               />
             </div>
           </div>
           
           {/* Auth Card */}
-          <div className="w-full max-w-sm animate-fade-up" style={{ animationDelay: '0.1s' }}>
-            <div className="glass-card rounded-[2rem] p-6 space-y-5">
+          <div className="w-full max-w-sm animate-fade-up flex-shrink-0" style={{ animationDelay: '0.1s' }}>
+            <div className="glass-card rounded-[2rem] p-5 sm:p-6 space-y-4 sm:space-y-5 shadow-2xl shadow-black/5">
               {/* Tabs */}
               <div className="flex gap-2 p-1.5 bg-gray-100/60 rounded-2xl">
                 <button
@@ -144,7 +162,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, l
               <button
                 onClick={handleGoogleSignIn}
                 disabled={googleLoading || loading}
-                className="w-full py-4 bg-white border-2 border-gray-100 rounded-2xl font-bold text-gray-700 flex items-center justify-center gap-3 hover:bg-gray-50 hover:border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm press-effect"
+                className="w-full py-3.5 sm:py-4 bg-white border-2 border-gray-100 rounded-2xl font-bold text-gray-700 flex items-center justify-center gap-3 hover:bg-gray-50 hover:border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm press-effect"
               >
                 {googleLoading ? (
                   <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
@@ -164,11 +182,11 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, l
               </div>
 
               {/* Email/Password Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 {/* Display Name (only for signup) */}
                 {!isLogin && (
                   <div className="animate-fade-in">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1 mb-2 block">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1 mb-1.5 block">
                       שם תצוגה
                     </label>
                     <div className="relative">
@@ -178,7 +196,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, l
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
                         placeholder="איך קוראים לך?"
-                        className="w-full px-5 py-4 pr-12 rounded-2xl bg-white/70 border border-gray-100 focus:bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 outline-none text-right font-medium placeholder:text-gray-300 transition-all"
+                        className="w-full px-5 py-3.5 sm:py-4 pr-12 rounded-2xl bg-white/70 border border-gray-100 focus:bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 outline-none text-right font-medium placeholder:text-gray-300 transition-all"
                       />
                     </div>
                   </div>
@@ -186,7 +204,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, l
 
                 {/* Email */}
                 <div>
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1 mb-2 block">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1 mb-1.5 block">
                     אימייל
                   </label>
                   <div className="relative">
@@ -197,14 +215,14 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, l
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="your@email.com"
                       dir="ltr"
-                      className="w-full px-5 py-4 pr-12 rounded-2xl bg-white/70 border border-gray-100 focus:bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 outline-none text-left font-medium placeholder:text-gray-300 transition-all"
+                      className="w-full px-5 py-3.5 sm:py-4 pr-12 rounded-2xl bg-white/70 border border-gray-100 focus:bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 outline-none text-left font-medium placeholder:text-gray-300 transition-all"
                     />
                   </div>
                 </div>
 
                 {/* Password */}
                 <div>
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1 mb-2 block">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1 mb-1.5 block">
                     סיסמה
                   </label>
                   <div className="relative">
@@ -215,7 +233,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, l
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                       dir="ltr"
-                      className="w-full px-12 py-4 rounded-2xl bg-white/70 border border-gray-100 focus:bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 outline-none text-left font-medium placeholder:text-gray-300 transition-all"
+                      className="w-full px-12 py-3.5 sm:py-4 rounded-2xl bg-white/70 border border-gray-100 focus:bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 outline-none text-left font-medium placeholder:text-gray-300 transition-all"
                     />
                     <button
                       type="button"
@@ -229,7 +247,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, l
 
                 {/* Error Message */}
                 {error && (
-                  <div className="flex items-center gap-2 p-3.5 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm animate-fade-in">
+                  <div className="flex items-center gap-2 p-3 sm:p-3.5 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm animate-fade-in">
                     <AlertCircle size={18} className="shrink-0" />
                     <span>{error}</span>
                   </div>
@@ -239,7 +257,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, l
                 <button
                   type="submit"
                   disabled={loading || googleLoading || !email || !password || (!isLogin && !displayName)}
-                  className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl shadow-emerald-200/40 hover:shadow-emerald-200/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all press-effect"
+                  className="w-full py-3.5 sm:py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl shadow-emerald-200/40 hover:shadow-emerald-200/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all press-effect"
                 >
                   {loading ? (
                     <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -255,7 +273,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, l
           </div>
           
           {/* Bottom Toggle */}
-          <p className="text-center text-sm text-gray-400 animate-fade-up" style={{ animationDelay: '0.2s' }}>
+          <p className="text-center text-sm text-gray-400 animate-fade-up flex-shrink-0 mt-6" style={{ animationDelay: '0.2s' }}>
             {isLogin ? 'עדיין אין לך חשבון?' : 'כבר יש לך חשבון?'}{' '}
             <button 
               onClick={() => { setIsLogin(!isLogin); setError(''); }}
@@ -264,6 +282,9 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, signUp, login, l
               {isLogin ? 'הרשמה' : 'התחברות'}
             </button>
           </p>
+          
+          {/* Bottom safe area spacer */}
+          <div className="flex-shrink-0 h-10 sm:h-6" />
         </div>
       </div>
     </div>
