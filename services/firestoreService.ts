@@ -142,6 +142,60 @@ export const deleteSwipe = async (roomId: string, userId: string, nameId: string
   console.log('✅ Swipe deleted!');
 };
 
+/**
+ * Check if a name has been liked by other users in the room
+ * Returns array of user IDs who liked this name
+ */
+export const checkForMatch = async (
+  roomId: string, 
+  nameId: string, 
+  currentUserId: string
+): Promise<{ isMatch: boolean; likedByUsers: string[] }> => {
+  console.log(`🔍 Checking match for name "${nameId}" in room "${roomId}"...`);
+  
+  const swipesRef = collection(db, SWIPES_COLLECTION);
+  
+  // Query for all likes of this specific name in this room
+  const q = query(
+    swipesRef,
+    where('roomId', '==', roomId),
+    where('nameId', '==', nameId),
+    where('liked', '==', true)
+  );
+  
+  const querySnapshot = await getDocs(q);
+  
+  const likedByUsers: string[] = [];
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    likedByUsers.push(data.userId);
+  });
+  
+  console.log(`👥 Users who liked "${nameId}": [${likedByUsers.join(', ')}]`);
+  
+  // Check if at least one OTHER user (not current user) has liked this name
+  const otherUsersWhoLiked = likedByUsers.filter(uid => uid !== currentUserId);
+  const isMatch = otherUsersWhoLiked.length > 0;
+  
+  if (isMatch) {
+    console.log(`💕 MATCH FOUND! "${nameId}" liked by current user AND ${otherUsersWhoLiked.join(', ')}`);
+  } else {
+    console.log(`⏳ No match yet - waiting for partner to like "${nameId}"`);
+  }
+  
+  return { isMatch, likedByUsers };
+};
+
+/**
+ * Check if a match already exists for this name in this room
+ */
+export const matchExists = async (roomId: string, nameId: string): Promise<boolean> => {
+  const matchId = `${roomId}_${nameId}`;
+  const matchRef = doc(db, MATCHES_COLLECTION, matchId);
+  const docSnap = await getDoc(matchRef);
+  return docSnap.exists();
+};
+
 // ============ MATCH OPERATIONS ============
 
 /**

@@ -24,6 +24,8 @@ import {
   subscribeToRoomSwipes,
   saveMatch,
   deleteMatch,
+  matchExists,
+  checkForMatch,
   subscribeToRoomMatches,
   subscribeToPartnerConnection,
   saveRoomSettings,
@@ -414,6 +416,12 @@ const AppContent: React.FC = () => {
     const currentName = sessionNames[currentNameIndex];
     if (!currentName) return;
 
+    console.log(`\n${'='.repeat(50)}`);
+    console.log(`🎯 SWIPE: ${liked ? '❤️ LIKE' : '👎 DISLIKE'} for "${currentName.hebrew}" (ID: ${currentName.id})`);
+    console.log(`👤 User: ${currentUser.uid}`);
+    console.log(`🏠 Room: ${profile.roomId}`);
+    console.log(`${'='.repeat(50)}`);
+
     const newSwipe: SwipeRecord = {
       nameId: currentName.id,
       liked,
@@ -422,8 +430,9 @@ const AppContent: React.FC = () => {
       timestamp: Date.now()
     };
 
-    // Save swipe to Firestore
+    // Save swipe to Firestore FIRST
     await saveSwipe(newSwipe);
+    console.log('✅ Swipe saved to Firestore');
 
     // If DISLIKED (swiped left) - add to permanent disliked list
     if (!liked) {
@@ -450,32 +459,51 @@ const AppContent: React.FC = () => {
 
     // Check for match (both partners liked the same name)
     if (liked) {
-      const partnerLiked = swipes.some(s => 
-        s.nameId === currentName.id && 
-        s.userId !== currentUser.uid && 
-        s.liked
+      console.log('\n🔍 CHECKING FOR MATCH...');
+      
+      // Query Firestore directly to check if partner already liked this name
+      // This is more reliable than using local state
+      const { isMatch, likedByUsers } = await checkForMatch(
+        profile.roomId,
+        currentName.id,
+        currentUser.uid
       );
       
-      if (partnerLiked) {
-        const newMatch: Match = {
-          nameId: currentName.id,
-          timestamp: Date.now(),
-          rating: 0
-        };
-        await saveMatch(profile.roomId, newMatch);
+      console.log(`📊 Match check result: isMatch=${isMatch}, likedBy=[${likedByUsers.join(', ')}]`);
+      
+      if (isMatch) {
+        // Double-check that this match doesn't already exist
+        const alreadyMatched = await matchExists(profile.roomId, currentName.id);
         
-        // Trigger push notification to partner
-        try {
-          const { triggerMatchNotification } = await import('./services/notificationService');
-          await triggerMatchNotification(profile.roomId, currentUser.uid, currentName.hebrew);
-        } catch (notifError) {
-          console.log('Could not send notification:', notifError);
+        if (alreadyMatched) {
+          console.log('⚠️ Match already exists in database, skipping...');
+        } else {
+          console.log('🎉 NEW MATCH CONFIRMED! Creating match record...');
+          
+          const newMatch: Match = {
+            nameId: currentName.id,
+            timestamp: Date.now(),
+            rating: 0
+          };
+          await saveMatch(profile.roomId, newMatch);
+          console.log('✅ Match saved to Firestore');
+          
+          // Trigger push notification to partner
+          try {
+            const { triggerMatchNotification } = await import('./services/notificationService');
+            await triggerMatchNotification(profile.roomId, currentUser.uid, currentName.hebrew);
+            console.log('📤 Push notification triggered');
+          } catch (notifError) {
+            console.log('⚠️ Could not send notification:', notifError);
+          }
+          
+          // Show celebration UI
+          setTimeout(() => {
+            console.log('🎊 Showing match celebration UI');
+            setShowMatchCelebration(currentName);
+            triggerConfetti();
+          }, 350);
         }
-        
-        setTimeout(() => {
-          setShowMatchCelebration(currentName);
-          triggerConfetti();
-        }, 350);
       }
     }
     
@@ -484,6 +512,7 @@ const AppContent: React.FC = () => {
     
     // Move to next name in the stable session list
     setCurrentNameIndex(prev => prev + 1);
+    console.log(`\n➡️ Moving to next name (index: ${currentNameIndex + 1})`);
   };
 
   // Track last swiped name for undo
