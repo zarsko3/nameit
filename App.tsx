@@ -166,38 +166,52 @@ const AppContent: React.FC = () => {
 
   // Get effective settings (room settings take priority for couples sync)
   const effectiveSettings = useMemo(() => {
+    // Merge disliked names from both user profile and room settings
+    const userDisliked = profile?.dislikedNames ?? [];
+    const roomDisliked = roomSettings?.dislikedNames ?? [];
+    const mergedDisliked = [...new Set([...userDisliked, ...roomDisliked])];
+    
     return {
       expectedGender: roomSettings?.expectedGender ?? profile?.expectedGender ?? null,
       nameStyles: roomSettings?.nameStyles ?? profile?.nameStyles ?? [],
       showTrendingOnly: roomSettings?.showTrendingOnly ?? profile?.showTrendingOnly ?? false,
       protectedNames: roomSettings?.protectedNames ?? profile?.protectedNames ?? [],
       blacklistedNames: roomSettings?.blacklistedNames ?? profile?.blacklistedNames ?? [],
+      dislikedNames: mergedDisliked, // Combined from user + room
     };
   }, [roomSettings, profile]);
 
   // Calculate available names (used for session initialization)
+  // TRIPLE-LAYER FILTERING: Blacklist + Protected + Disliked
   const calculateFilteredNames = useCallback(() => {
     const protectedNames = (effectiveSettings.protectedNames).map(n => n.toLowerCase());
     const blacklistedNames = (effectiveSettings.blacklistedNames).map(n => n.toLowerCase());
+    const dislikedNameIds = effectiveSettings.dislikedNames; // Already name IDs
     const swipedNameIds = swipes.filter(s => s.userId === currentUser?.uid).map(s => s.nameId);
     
     return INITIAL_NAMES.filter(name => {
-      // Skip already swiped names
+      // LAYER 1: Skip already swiped names in this session
       if (swipedNameIds.includes(name.id)) return false;
+      
+      // LAYER 2: Skip permanently disliked names (swiped left previously)
+      if (dislikedNameIds.includes(name.id)) return false;
 
       const nameHebrew = name.hebrew.toLowerCase();
       const nameTranslit = name.transliteration.toLowerCase();
       
+      // LAYER 3a: Skip protected/family names
       const isProtected = protectedNames.some(p => 
         nameHebrew.includes(p) || nameTranslit.includes(p) || p.includes(nameHebrew)
       );
       
+      // LAYER 3b: Skip manually blacklisted names
       const isBlacklisted = blacklistedNames.some(b => 
         nameHebrew.includes(b) || nameTranslit.includes(b) || b.includes(nameHebrew)
       );
       
       if (isProtected || isBlacklisted) return false;
       
+      // Apply preference filters
       let gendersToMatch = filters.genders;
       if (effectiveSettings.expectedGender && effectiveSettings.expectedGender !== Gender.UNISEX) {
         gendersToMatch = [effectiveSettings.expectedGender, Gender.UNISEX];
@@ -286,6 +300,7 @@ const AppContent: React.FC = () => {
         showTrendingOnly: false,
         protectedNames: [],
         blacklistedNames: [],
+        dislikedNames: [], // Track permanently disliked names
         hasCompletedOnboarding: false
       };
       await saveUserProfile(uid, newProfile);
@@ -357,8 +372,31 @@ const AppContent: React.FC = () => {
       timestamp: Date.now()
     };
 
-    // Save to Firestore
+    // Save swipe to Firestore
     await saveSwipe(newSwipe);
+
+    // If DISLIKED (swiped left) - add to permanent disliked list
+    if (!liked) {
+      const currentDisliked = profile.dislikedNames || [];
+      if (!currentDisliked.includes(currentName.id)) {
+        const updatedDisliked = [...currentDisliked, currentName.id];
+        
+        // Save to user profile
+        await saveUserProfile(currentUser.uid, { dislikedNames: updatedDisliked });
+        
+        // Sync to room for partner (so they also skip this name)
+        if (profile.roomId) {
+          const roomDisliked = roomSettings?.dislikedNames || [];
+          const mergedRoomDisliked = [...new Set([...roomDisliked, currentName.id])];
+          await saveRoomSettings(profile.roomId, { dislikedNames: mergedRoomDisliked }, currentUser.uid);
+        }
+        
+        // Update local state immediately
+        setProfile(prev => prev ? { ...prev, dislikedNames: updatedDisliked } : prev);
+        
+        console.log('👎 Name disliked and saved:', currentName.hebrew);
+      }
+    }
 
     // Check for match (both partners liked the same name)
     if (liked) {

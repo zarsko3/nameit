@@ -37,6 +37,7 @@ export interface UserProfile {
   // Exclusion lists (both hidden from swipe deck)
   protectedNames: string[];       // Family member names - respected but "taken" (שמות מוגנים)
   blacklistedNames: string[];     // Names to avoid for personal reasons (רשימה שחורה)
+  dislikedNames: string[];        // Name IDs that were swiped left - never show again
   // Onboarding state
   hasCompletedOnboarding: boolean; // Has user completed or skipped the onboarding flow
 }
@@ -63,6 +64,7 @@ export interface RoomSettings {
   showTrendingOnly: boolean;
   protectedNames: string[];
   blacklistedNames: string[];
+  dislikedNames: string[];        // Synced disliked name IDs from both partners
   updatedAt?: any; // Firestore timestamp
   updatedBy?: string; // User ID who last updated
 }
