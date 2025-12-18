@@ -24,8 +24,8 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       nameStyles: [],              // All styles
       showTrendingOnly: false,     // Show all names
       // Exclusion lists
-      blacklist: [],               // No blacklisted names
-      familyNames: []              // No family names to exclude
+      protectedNames: [],          // No protected family names
+      blacklistedNames: []         // No blacklisted names
     });
   };
 

@@ -64,20 +64,26 @@ const App: React.FC = () => {
 
   const filteredNames = useMemo(() => {
     // Normalize exclusion lists (lowercase for case-insensitive matching)
-    const blacklist = (profile?.blacklist || []).map(n => n.toLowerCase());
-    const familyNames = (profile?.familyNames || []).map(n => n.toLowerCase());
+    const protectedNames = (profile?.protectedNames || []).map(n => n.toLowerCase());
+    const blacklistedNames = (profile?.blacklistedNames || []).map(n => n.toLowerCase());
     
     return INITIAL_NAMES.filter(name => {
-      // Exclusion filter - check blacklist and family names
+      // Exclusion filter - check protected names (family) and blacklisted names
       const nameHebrew = name.hebrew.toLowerCase();
       const nameTranslit = name.transliteration.toLowerCase();
-      const isBlacklisted = blacklist.some(b => 
+      
+      // Check if name is protected (family member name)
+      const isProtected = protectedNames.some(p => 
+        nameHebrew.includes(p) || nameTranslit.includes(p) || p.includes(nameHebrew)
+      );
+      
+      // Check if name is blacklisted (names to avoid)
+      const isBlacklisted = blacklistedNames.some(b => 
         nameHebrew.includes(b) || nameTranslit.includes(b) || b.includes(nameHebrew)
       );
-      const isFamilyName = familyNames.some(f => 
-        nameHebrew.includes(f) || nameTranslit.includes(f) || f.includes(nameHebrew)
-      );
-      if (isBlacklisted || isFamilyName) return false;
+      
+      // Exclude both protected and blacklisted names from swipe deck
+      if (isProtected || isBlacklisted) return false;
       
       // Gender filter - use profile preference if set, otherwise use filter
       let gendersToMatch = filters.genders;
@@ -102,7 +108,7 @@ const App: React.FC = () => {
       
       return matchesGender && matchesLength && matchesLetter && matchesStyle && matchesTrending;
     });
-  }, [filters, profile?.expectedGender, profile?.nameStyles, profile?.showTrendingOnly, profile?.blacklist, profile?.familyNames]);
+  }, [filters, profile?.expectedGender, profile?.nameStyles, profile?.showTrendingOnly, profile?.protectedNames, profile?.blacklistedNames]);
 
   useEffect(() => {
     if (currentNameIndex >= filteredNames.length && filteredNames.length > 0) {

@@ -34,9 +34,9 @@ export interface UserProfile {
   expectedGender: Gender | null;  // Expected baby gender (Boy/Girl/Unknown)
   nameStyles: NameStyle[];        // Preferred name styles
   showTrendingOnly: boolean;      // Filter to show only trending names
-  // Exclusion lists
-  blacklist: string[];            // Names to never show (שמות ברשימה שחורה)
-  familyNames: string[];          // Existing family names to exclude (שמות משפחה)
+  // Exclusion lists (both hidden from swipe deck)
+  protectedNames: string[];       // Family member names - respected but "taken" (שמות מוגנים)
+  blacklistedNames: string[];     // Names to avoid for personal reasons (רשימה שחורה)
 }
 
 export interface SwipeRecord {

@@ -14,10 +14,11 @@ import {
   LogOut,
   Users,
   Link2,
-  Ban,
-  UserX,
+  ShieldCheck,
+  Trash2,
   Plus,
-  X
+  X,
+  AlertTriangle
 } from 'lucide-react';
 
 interface SettingsProps {
@@ -25,7 +26,6 @@ interface SettingsProps {
   isPartnerOnline: boolean;
   onUpdateProfile: (updates: Partial<UserProfile>) => void;
   onLogout: () => void;
-  // For shared liked names
   swipes: SwipeRecord[];
   names: BabyName[];
 }
@@ -38,14 +38,15 @@ const NAME_STYLE_OPTIONS = [
   { value: NameStyle.UNIQUE, label: 'ייחודי', icon: Star, description: 'שמות נדירים ומיוחדים' },
 ];
 
-// Tag Input Component for Blacklist and Family Names
+// Styled Tag Input Component with variant support
 const TagInput: React.FC<{
   tags: string[];
   onAdd: (tag: string) => void;
   onRemove: (tag: string) => void;
   placeholder: string;
   emptyMessage: string;
-}> = ({ tags, onAdd, onRemove, placeholder, emptyMessage }) => {
+  variant: 'protected' | 'blacklist';
+}> = ({ tags, onAdd, onRemove, placeholder, emptyMessage, variant }) => {
   const [inputValue, setInputValue] = useState('');
 
   const handleAdd = () => {
@@ -63,6 +64,14 @@ const TagInput: React.FC<{
     }
   };
 
+  // Variant-specific styling
+  const isBlacklist = variant === 'blacklist';
+  const buttonBg = isBlacklist ? 'bg-red-500 hover:bg-red-600' : 'bg-slate-500 hover:bg-slate-600';
+  const tagBg = isBlacklist ? 'bg-red-50 text-red-700 border-red-100' : 'bg-slate-50 text-slate-700 border-slate-100';
+  const tagHover = isBlacklist ? 'hover:bg-red-100' : 'hover:bg-slate-100';
+  const removeHover = isBlacklist ? 'group-hover:bg-red-200 group-hover:text-red-600' : 'group-hover:bg-slate-200 group-hover:text-slate-600';
+  const inputRing = isBlacklist ? 'focus:ring-red-100' : 'focus:ring-slate-100';
+
   return (
     <div className="space-y-3">
       {/* Input row */}
@@ -73,12 +82,12 @@ const TagInput: React.FC<{
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="flex-1 p-3 bg-gray-50 rounded-xl border border-gray-100 focus:ring-2 focus:ring-emerald-100 outline-none text-right font-medium placeholder:text-gray-300 transition-all"
+          className={`flex-1 p-3 bg-gray-50 rounded-xl border border-gray-100 focus:ring-2 ${inputRing} outline-none text-right font-medium placeholder:text-gray-300 transition-all`}
         />
         <button
           onClick={handleAdd}
           disabled={!inputValue.trim()}
-          className="px-4 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+          className={`px-4 ${buttonBg} text-white rounded-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95`}
         >
           <Plus size={20} />
         </button>
@@ -92,12 +101,14 @@ const TagInput: React.FC<{
           tags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium group hover:bg-gray-200 transition-colors"
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${tagBg} border rounded-full text-sm font-medium group ${tagHover} transition-colors`}
             >
+              {isBlacklist && <AlertTriangle size={12} className="text-red-400" />}
+              {!isBlacklist && <ShieldCheck size={12} className="text-slate-400" />}
               {tag}
               <button
                 onClick={() => onRemove(tag)}
-                className="w-5 h-5 rounded-full bg-gray-200 group-hover:bg-red-100 group-hover:text-red-500 flex items-center justify-center transition-colors"
+                className={`w-5 h-5 rounded-full bg-white/60 ${removeHover} flex items-center justify-center transition-colors`}
               >
                 <X size={12} />
               </button>
@@ -119,8 +130,8 @@ const Settings: React.FC<SettingsProps> = ({
 }) => {
   const [showPreferences, setShowPreferences] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+  const [showProtected, setShowProtected] = useState(false);
   const [showBlacklist, setShowBlacklist] = useState(false);
-  const [showFamilyNames, setShowFamilyNames] = useState(false);
   const [showLikedNames, setShowLikedNames] = useState(false);
 
   if (!profile) return null;
@@ -147,30 +158,30 @@ const Settings: React.FC<SettingsProps> = ({
     onUpdateProfile({ showTrendingOnly: !profile.showTrendingOnly });
   };
 
+  // Protected Names handlers
+  const addProtectedName = (name: string) => {
+    const current = profile.protectedNames || [];
+    if (!current.includes(name)) {
+      onUpdateProfile({ protectedNames: [...current, name] });
+    }
+  };
+
+  const removeProtectedName = (name: string) => {
+    const current = profile.protectedNames || [];
+    onUpdateProfile({ protectedNames: current.filter(n => n !== name) });
+  };
+
   // Blacklist handlers
   const addToBlacklist = (name: string) => {
-    const currentBlacklist = profile.blacklist || [];
-    if (!currentBlacklist.includes(name)) {
-      onUpdateProfile({ blacklist: [...currentBlacklist, name] });
+    const current = profile.blacklistedNames || [];
+    if (!current.includes(name)) {
+      onUpdateProfile({ blacklistedNames: [...current, name] });
     }
   };
 
   const removeFromBlacklist = (name: string) => {
-    const currentBlacklist = profile.blacklist || [];
-    onUpdateProfile({ blacklist: currentBlacklist.filter(n => n !== name) });
-  };
-
-  // Family Names handlers
-  const addFamilyName = (name: string) => {
-    const currentFamilyNames = profile.familyNames || [];
-    if (!currentFamilyNames.includes(name)) {
-      onUpdateProfile({ familyNames: [...currentFamilyNames, name] });
-    }
-  };
-
-  const removeFamilyName = (name: string) => {
-    const currentFamilyNames = profile.familyNames || [];
-    onUpdateProfile({ familyNames: currentFamilyNames.filter(n => n !== name) });
+    const current = profile.blacklistedNames || [];
+    onUpdateProfile({ blacklistedNames: current.filter(n => n !== name) });
   };
 
   return (
@@ -349,70 +360,86 @@ const Settings: React.FC<SettingsProps> = ({
         )}
       </div>
 
-      {/* Blacklist Section */}
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* Protected Names Section - Clean & Neutral Design */}
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <button 
+          onClick={() => setShowProtected(!showProtected)}
+          className="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+              <ShieldCheck size={22} className="text-slate-500" />
+            </div>
+            <div className="text-right">
+              <p className="font-bold text-lg text-gray-800 font-heebo">שמות מוגנים</p>
+              <p className="text-sm text-gray-400">
+                {(profile.protectedNames || []).length} שמות של בני משפחה
+              </p>
+            </div>
+          </div>
+          {showProtected ? <ChevronUp size={22} className="text-gray-400" /> : <ChevronDown size={22} className="text-gray-400" />}
+        </button>
+        
+        {showProtected && (
+          <div className="px-5 pb-5 border-t border-slate-50 pt-4">
+            {/* Info banner */}
+            <div className="bg-slate-50 rounded-xl p-3 mb-4 flex items-start gap-2">
+              <ShieldCheck size={16} className="text-slate-400 mt-0.5 shrink-0" />
+              <p className="text-xs text-slate-500 leading-relaxed">
+                שמות של בני משפחה אהובים שכבר "תפוסים". אנו מכבדים אותם, אך לא נציג אותם בהחלקות.
+              </p>
+            </div>
+            
+            <TagInput
+              tags={profile.protectedNames || []}
+              onAdd={addProtectedName}
+              onRemove={removeProtectedName}
+              placeholder="למשל: סבתא שרה, דוד משה..."
+              emptyMessage="אין שמות מוגנים עדיין"
+              variant="protected"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Blacklist Section - Warning/Negative Design */}
+      <div className="bg-white rounded-3xl border border-red-100 shadow-sm overflow-hidden">
         <button 
           onClick={() => setShowBlacklist(!showBlacklist)}
-          className="w-full p-5 flex items-center justify-between hover:bg-gray-50 transition-colors"
+          className="w-full p-5 flex items-center justify-between hover:bg-red-50/50 transition-colors"
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
-              <Ban size={22} className="text-red-400" />
+              <Trash2 size={22} className="text-red-400" />
             </div>
             <div className="text-right">
-              <p className="font-bold text-lg text-gray-800 font-heebo">שמות ברשימה שחורה</p>
-              <p className="text-sm text-gray-400">{(profile.blacklist || []).length} שמות חסומים</p>
+              <p className="font-bold text-lg text-gray-800 font-heebo">רשימה שחורה</p>
+              <p className="text-sm text-red-400">
+                {(profile.blacklistedNames || []).length} שמות חסומים
+              </p>
             </div>
           </div>
           {showBlacklist ? <ChevronUp size={22} className="text-gray-400" /> : <ChevronDown size={22} className="text-gray-400" />}
         </button>
         
         {showBlacklist && (
-          <div className="px-5 pb-5 border-t border-gray-50 pt-4">
+          <div className="px-5 pb-5 border-t border-red-50 pt-4">
+            {/* Warning banner */}
+            <div className="bg-red-50 rounded-xl p-3 mb-4 flex items-start gap-2 border border-red-100">
+              <AlertTriangle size={16} className="text-red-400 mt-0.5 shrink-0" />
+              <p className="text-xs text-red-600 leading-relaxed">
+                שמות שמעדיפים להימנע מהם מסיבות אישיות. שמות אלו לעולם לא יופיעו בהחלקות.
+              </p>
+            </div>
+            
             <TagInput
-              tags={profile.blacklist || []}
+              tags={profile.blacklistedNames || []}
               onAdd={addToBlacklist}
               onRemove={removeFromBlacklist}
               placeholder="הקלידו שם להוספה..."
               emptyMessage="אין שמות ברשימה השחורה"
+              variant="blacklist"
             />
-            <p className="text-xs text-gray-400 mt-3 text-center">
-              שמות אלו לעולם לא יוצגו בהחלקות
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Family Names Section */}
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-        <button 
-          onClick={() => setShowFamilyNames(!showFamilyNames)}
-          className="w-full p-5 flex items-center justify-between hover:bg-gray-50 transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center">
-              <UserX size={22} className="text-violet-400" />
-            </div>
-            <div className="text-right">
-              <p className="font-bold text-lg text-gray-800 font-heebo">שמות משפחה</p>
-              <p className="text-sm text-gray-400">{(profile.familyNames || []).length} שמות קיימים במשפחה</p>
-            </div>
-          </div>
-          {showFamilyNames ? <ChevronUp size={22} className="text-gray-400" /> : <ChevronDown size={22} className="text-gray-400" />}
-        </button>
-        
-        {showFamilyNames && (
-          <div className="px-5 pb-5 border-t border-gray-50 pt-4">
-            <TagInput
-              tags={profile.familyNames || []}
-              onAdd={addFamilyName}
-              onRemove={removeFamilyName}
-              placeholder="הקלידו שם משפחה..."
-              emptyMessage="אין שמות משפחה ברשימה"
-            />
-            <p className="text-xs text-gray-400 mt-3 text-center">
-              שמות של בני משפחה קיימים לא יוצגו
-            </p>
           </div>
         )}
       </div>
