@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserProfile, Gender } from '../types';
-import { ArrowLeft, Sparkles, Users } from 'lucide-react';
+import { ArrowLeft, Sparkles, Users, Heart } from 'lucide-react';
 
 interface OnboardingProps {
   onComplete: (profile: UserProfile) => void;
@@ -16,43 +16,45 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       id: Math.random().toString(36).substring(7),
       name,
       roomId: roomId.trim().toLowerCase(),
-      isPartnerConnected: false, // In a real app, this would check Firebase
+      isPartnerConnected: false,
       genderPreference: [Gender.BOY, Gender.GIRL, Gender.UNISEX],
-      // Preferences with defaults
-      expectedGender: null,        // Not specified yet
-      nameStyles: [],              // All styles
-      showTrendingOnly: false,     // Show all names
-      // Exclusion lists
-      protectedNames: [],          // No protected family names
-      blacklistedNames: [],        // No blacklisted names
-      // Onboarding
-      hasCompletedOnboarding: false // Will go through onboarding flow
+      expectedGender: null,
+      nameStyles: [],
+      showTrendingOnly: false,
+      protectedNames: [],
+      blacklistedNames: [],
+      hasCompletedOnboarding: false
     });
   };
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-b from-white via-white to-gray-50" dir="rtl">
-      {/* Scrollable Content with Safe Areas */}
-      <div className="flex-1 overflow-y-auto scroll-smooth">
-        <div className="min-h-full flex flex-col items-center justify-center px-8 py-12 safe-top safe-bottom">
-          {/* Logo / Icon */}
-          <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-3xl flex items-center justify-center mb-8 shadow-lg shadow-emerald-100/50">
-            <Sparkles size={40} className="text-emerald-500" />
+    <div className="h-full flex flex-col mesh-gradient overflow-hidden" dir="rtl">
+      {/* Full-Height Centered Layout */}
+      <div className="flex-1 flex flex-col items-center justify-between px-8 py-12 safe-top safe-bottom">
+        
+        {/* Top Section - Logo & Welcome */}
+        <div className="text-center animate-fade-up">
+          <div className="relative inline-block mb-6">
+            {/* Decorative rings */}
+            <div className="absolute inset-0 w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-emerald-200/40 to-teal-200/40 blur-xl animate-pulse" />
+            <div className="relative w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-2xl shadow-emerald-200/50">
+              <Sparkles size={44} className="text-white" />
+            </div>
           </div>
-          
-          {/* Header */}
-          <h2 className="text-3xl font-bold text-gray-800 mb-2 font-heebo text-center">
-            ברוכים הבאים ל-NameIT
+          <h2 className="text-3xl font-bold text-gray-800 mb-2 font-heebo">
+            ברוכים הבאים
           </h2>
-          <p className="text-gray-400 mb-10 max-w-[260px] text-center leading-relaxed">
-            בחירת שמות יחד, בפשטות ובאהבה.
+          <p className="text-gray-400 max-w-[220px] mx-auto text-sm leading-relaxed">
+            בחירת שמות לתינוק שלכם, יחד ובקלות
           </p>
-          
-          {/* Form Card */}
-          <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-5">
+        </div>
+        
+        {/* Middle Section - Form Card */}
+        <div className="w-full max-w-sm animate-fade-up" style={{ animationDelay: '0.1s' }}>
+          <div className="glass-card rounded-[2rem] p-6 space-y-5">
             {/* Name Input */}
             <div>
-              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-1 mb-2 block">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1 mb-2 block">
                 איך קוראים לך?
               </label>
               <input 
@@ -60,14 +62,14 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 placeholder="הזינו שם..."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full p-4 rounded-2xl bg-gray-50 border border-gray-100 focus:ring-2 focus:ring-emerald-100 focus:border-emerald-200 outline-none text-center text-lg font-bold placeholder:font-normal placeholder:text-gray-300 transition-all"
+                className="w-full px-5 py-4 rounded-2xl bg-white/60 border border-white/50 focus:bg-white focus:ring-2 focus:ring-emerald-200 outline-none text-center text-lg font-bold placeholder:font-normal placeholder:text-gray-300 transition-all"
               />
             </div>
 
             {/* Room Code Input */}
             <div>
-              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-1 mb-2 block">
-                הזינו קוד משותף
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1 mb-2 block">
+                קוד משותף
               </label>
               <div className="relative">
                 <Users className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
@@ -76,27 +78,39 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   placeholder="למשל: baby2025"
                   value={roomId}
                   onChange={(e) => setRoomId(e.target.value)}
-                  className="w-full p-4 pr-12 rounded-2xl bg-gray-50 border border-gray-100 focus:ring-2 focus:ring-emerald-100 focus:border-emerald-200 outline-none text-center text-lg font-bold placeholder:font-normal placeholder:text-gray-300 transition-all"
+                  className="w-full px-5 py-4 pr-12 rounded-2xl bg-white/60 border border-white/50 focus:bg-white focus:ring-2 focus:ring-emerald-200 outline-none text-center text-lg font-bold placeholder:font-normal placeholder:text-gray-300 transition-all"
                 />
               </div>
-              <p className="mt-2.5 text-xs text-gray-400 text-center leading-relaxed">
+              <p className="mt-3 text-[11px] text-gray-400 text-center leading-relaxed">
                 הזינו קוד זהה לשל בן/בת הזוג כדי להתחבר
               </p>
             </div>
           </div>
-          
-          {/* Submit Button */}
+        </div>
+        
+        {/* Bottom Section - CTA Button */}
+        <div className="w-full max-w-sm animate-fade-up" style={{ animationDelay: '0.2s' }}>
           <button 
             disabled={!name || !roomId}
             onClick={handleFinish}
-            className="w-full max-w-sm mt-8 p-4 bg-emerald-500 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-emerald-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-200/50 active:scale-[0.98]"
+            className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl shadow-emerald-200/40 hover:shadow-emerald-200/60 disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none transition-all press-effect"
           >
             יוצאים לדרך
             <ArrowLeft size={20} />
           </button>
           
-          {/* Bottom spacing */}
-          <div className="h-8" />
+          {/* Trust badges */}
+          <div className="flex items-center justify-center gap-6 mt-6 text-gray-300">
+            <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider">
+              <Heart size={12} className="text-pink-300" />
+              <span>פרטיות מלאה</span>
+            </div>
+            <div className="w-1 h-1 bg-gray-200 rounded-full" />
+            <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider">
+              <Users size={12} className="text-emerald-300" />
+              <span>סנכרון מיידי</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserProfile, Gender, NameStyle } from '../types';
 import { 
   Sparkles, 
@@ -27,14 +27,14 @@ const TOTAL_STEPS = 3;
 
 // Name style options
 const NAME_STYLE_OPTIONS = [
-  { value: NameStyle.MODERN, label: 'מודרני', icon: Sparkles, description: 'שמות עכשוויים ורעננים', color: 'emerald' },
-  { value: NameStyle.CLASSIC, label: 'קלאסי', icon: Crown, description: 'שמות מסורתיים ונצחיים', color: 'amber' },
-  { value: NameStyle.INTERNATIONAL, label: 'בינלאומי', icon: Globe, description: 'שמות שעובדים בכל שפה', color: 'blue' },
-  { value: NameStyle.UNIQUE, label: 'ייחודי', icon: Star, description: 'שמות נדירים ומיוחדים', color: 'purple' },
+  { value: NameStyle.MODERN, label: 'מודרני', icon: Sparkles, description: 'שמות עכשוויים ורעננים' },
+  { value: NameStyle.CLASSIC, label: 'קלאסי', icon: Crown, description: 'שמות מסורתיים ונצחיים' },
+  { value: NameStyle.INTERNATIONAL, label: 'בינלאומי', icon: Globe, description: 'שמות שעובדים בכל שפה' },
+  { value: NameStyle.UNIQUE, label: 'ייחודי', icon: Star, description: 'שמות נדירים ומיוחדים' },
 ];
 
-// Simple Tag Input for exclusions
-const SimpleTagInput: React.FC<{
+// Premium Tag Input
+const PremiumTagInput: React.FC<{
   tags: string[];
   onAdd: (tag: string) => void;
   onRemove: (tag: string) => void;
@@ -61,25 +61,37 @@ const SimpleTagInput: React.FC<{
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAdd())}
           placeholder={placeholder}
-          className={`flex-1 p-3.5 bg-white rounded-xl border ${isBlacklist ? 'border-red-200 focus:ring-red-100' : 'border-slate-200 focus:ring-slate-100'} focus:ring-2 outline-none text-right font-medium placeholder:text-gray-300 transition-all`}
+          className={`flex-1 px-4 py-3.5 glass-card rounded-2xl outline-none text-right font-medium placeholder:text-gray-300 transition-all focus:ring-2 ${
+            isBlacklist ? 'focus:ring-red-200' : 'focus:ring-emerald-200'
+          }`}
         />
         <button
           onClick={handleAdd}
           disabled={!inputValue.trim()}
-          className={`px-4 ${isBlacklist ? 'bg-red-500 hover:bg-red-600' : 'bg-slate-500 hover:bg-slate-600'} text-white rounded-xl font-bold disabled:opacity-30 transition-all active:scale-95`}
+          className={`w-12 h-12 rounded-2xl font-bold disabled:opacity-30 transition-all active:scale-95 flex items-center justify-center ${
+            isBlacklist 
+              ? 'bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg shadow-red-200/50' 
+              : 'bg-gradient-to-br from-slate-500 to-slate-600 text-white shadow-lg shadow-slate-200/50'
+          }`}
         >
           <Plus size={20} />
         </button>
       </div>
-      <div className="flex flex-wrap gap-2 min-h-[36px]">
-        {tags.map((tag) => (
+      <div className="flex flex-wrap gap-2 min-h-[40px]">
+        {tags.map((tag, index) => (
           <span
             key={tag}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${isBlacklist ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-700'} rounded-full text-sm font-medium`}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium animate-scale-in glass-card ${
+              isBlacklist ? 'text-red-700' : 'text-slate-700'
+            }`}
+            style={{ animationDelay: `${index * 0.05}s` }}
           >
             {tag}
-            <button onClick={() => onRemove(tag)} className="hover:text-red-500 transition-colors">
-              <X size={14} />
+            <button 
+              onClick={() => onRemove(tag)} 
+              className="w-5 h-5 rounded-full bg-white/60 hover:bg-red-100 hover:text-red-500 flex items-center justify-center transition-all"
+            >
+              <X size={12} />
             </button>
           </span>
         ))}
@@ -94,10 +106,10 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   onComplete 
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [isAnimating, setIsAnimating] = useState(false);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('left');
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Local state for preferences before saving
+  // Local state for preferences
   const [selectedGender, setSelectedGender] = useState<Gender | null>(profile.expectedGender);
   const [selectedStyles, setSelectedStyles] = useState<NameStyle[]>(profile.nameStyles || []);
   const [protectedNames, setProtectedNames] = useState<string[]>(profile.protectedNames || []);
@@ -105,15 +117,14 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
   const goToStep = (step: number, direction: 'left' | 'right') => {
     setSlideDirection(direction);
-    setIsAnimating(true);
+    setIsTransitioning(true);
     setTimeout(() => {
       setCurrentStep(step);
-      setIsAnimating(false);
-    }, 200);
+      setTimeout(() => setIsTransitioning(false), 50);
+    }, 250);
   };
 
   const handleNext = () => {
-    // Save current step data
     if (currentStep === 1) {
       onUpdateProfile({ expectedGender: selectedGender });
     } else if (currentStep === 2) {
@@ -125,14 +136,12 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     if (currentStep < TOTAL_STEPS) {
       goToStep(currentStep + 1, 'left');
     } else {
-      // Complete onboarding
       onUpdateProfile({ hasCompletedOnboarding: true });
       onComplete();
     }
   };
 
   const handleSkip = () => {
-    // Mark as completed and go to main app
     onUpdateProfile({ hasCompletedOnboarding: true });
     onComplete();
   };
@@ -151,251 +160,217 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     );
   };
 
-  // Progress dots
-  const ProgressDots = () => (
-    <div className="flex justify-center gap-2">
-      {Array.from({ length: TOTAL_STEPS }, (_, i) => (
-        <div
-          key={i}
-          className={`h-2 rounded-full transition-all duration-300 ${
-            i + 1 === currentStep 
-              ? 'w-8 bg-emerald-500' 
-              : i + 1 < currentStep 
-                ? 'w-2 bg-emerald-300' 
-                : 'w-2 bg-gray-200'
-          }`}
-        />
-      ))}
-    </div>
-  );
+  // Get animation class based on transition state
+  const getAnimationClass = () => {
+    if (isTransitioning) {
+      return slideDirection === 'left' 
+        ? 'opacity-0 translate-x-8' 
+        : 'opacity-0 -translate-x-8';
+    }
+    return 'opacity-100 translate-x-0';
+  };
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-b from-white via-gray-50/50 to-gray-100" dir="rtl">
-      {/* Fixed Header with Safe Area */}
-      <div className="shrink-0 bg-white/80 backdrop-blur-sm border-b border-gray-100 safe-top">
+    <div className="h-full flex flex-col mesh-gradient overflow-hidden" dir="rtl">
+      {/* Premium Header */}
+      <div className="shrink-0 glass-solid safe-top">
         <div className="px-5 py-4 flex justify-between items-center">
           {currentStep > 1 ? (
             <button 
               onClick={handleBack}
-              className="flex items-center gap-1 text-gray-400 hover:text-gray-600 transition-colors py-2"
+              className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-all py-2 press-effect"
             >
-              <ArrowRight size={20} />
+              <ArrowRight size={18} />
               <span className="text-sm font-medium">חזרה</span>
             </button>
           ) : (
             <div className="w-16" />
           )}
           
-          {/* Step indicator in header */}
+          {/* Progress Indicator */}
           <div className="flex flex-col items-center">
-            <p className="text-xs text-gray-400 mb-1.5">שלב {currentStep} מתוך {TOTAL_STEPS}</p>
-            <ProgressDots />
+            <div className="flex gap-2 mb-1">
+              {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+                <div
+                  key={i}
+                  className={`h-1.5 rounded-full transition-all duration-500 ${
+                    i + 1 === currentStep 
+                      ? 'w-8 bg-gradient-to-r from-emerald-400 to-teal-500' 
+                      : i + 1 < currentStep 
+                        ? 'w-1.5 bg-emerald-300' 
+                        : 'w-1.5 bg-gray-200'
+                  }`}
+                />
+              ))}
+            </div>
+            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+              {currentStep} / {TOTAL_STEPS}
+            </p>
           </div>
           
           <button 
             onClick={handleSkip}
-            className="text-gray-400 hover:text-gray-600 text-sm font-medium transition-colors py-2"
+            className="text-gray-400 hover:text-gray-600 text-sm font-medium transition-all py-2"
           >
             דלג
           </button>
         </div>
       </div>
 
-      {/* Scrollable Content Area */}
-      <div className="flex-1 overflow-y-auto scroll-smooth">
+      {/* Full-Height Content Area */}
+      <div className="flex-1 flex flex-col scroll-hidden">
         <div 
-          className={`min-h-full flex flex-col px-6 py-8 transition-all duration-200 ${
-            isAnimating 
-              ? slideDirection === 'left' 
-                ? 'opacity-0 -translate-x-4' 
-                : 'opacity-0 translate-x-4'
-              : 'opacity-100 translate-x-0'
-          }`}
+          className={`flex-1 flex flex-col px-6 py-6 transition-all duration-300 ease-out ${getAnimationClass()}`}
         >
           {/* Step 1: Gender Selection */}
           {currentStep === 1 && (
-            <div className="flex-1 flex flex-col">
-              {/* Header Card */}
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-pink-100 to-rose-100 rounded-2xl flex items-center justify-center shrink-0">
-                    <Baby size={28} className="text-pink-500" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-800 font-heebo mb-1">
-                      מה המגדר הצפוי?
-                    </h2>
-                    <p className="text-gray-400 text-sm">
-                      בחרו כדי שנציג שמות מתאימים
-                    </p>
-                  </div>
+            <div className="flex-1 flex flex-col justify-between">
+              {/* Header */}
+              <div className="text-center mb-6">
+                <div className="w-20 h-20 mx-auto mb-5 rounded-3xl bg-gradient-to-br from-pink-100 via-rose-50 to-orange-50 flex items-center justify-center shadow-lg shadow-pink-100/50">
+                  <Baby size={36} className="text-pink-500" />
                 </div>
+                <h2 className="text-2xl font-bold text-gray-800 font-heebo mb-2">
+                  מה המגדר הצפוי?
+                </h2>
+                <p className="text-gray-400 text-sm max-w-[240px] mx-auto">
+                  בחרו כדי שנציג לכם שמות מתאימים
+                </p>
               </div>
 
-              {/* Options */}
-              <div className="space-y-3">
-                <button
-                  onClick={() => setSelectedGender(Gender.BOY)}
-                  className={`w-full p-5 rounded-2xl font-bold transition-all flex items-center gap-4 ${
-                    selectedGender === Gender.BOY
-                      ? 'bg-blue-500 text-white shadow-lg shadow-blue-200/50'
-                      : 'bg-white text-blue-600 border-2 border-blue-100 hover:border-blue-200 hover:bg-blue-50/50'
-                  }`}
-                >
-                  <span className="text-3xl">👦</span>
-                  <div className="text-right flex-1">
-                    <span className="text-lg block">בן</span>
-                    <p className={`text-sm ${selectedGender === Gender.BOY ? 'text-blue-100' : 'text-gray-400'}`}>
-                      נציג שמות לבנים
-                    </p>
-                  </div>
-                  {selectedGender === Gender.BOY && (
-                    <Check size={24} />
-                  )}
-                </button>
+              {/* Options - Centered */}
+              <div className="flex-1 flex flex-col justify-center space-y-3 max-w-sm mx-auto w-full">
+                {[
+                  { value: Gender.BOY, emoji: '👦', label: 'בן', desc: 'נציג שמות לבנים', color: 'blue' },
+                  { value: Gender.GIRL, emoji: '👧', label: 'בת', desc: 'נציג שמות לבנות', color: 'pink' },
+                  { value: null, emoji: '✨', label: 'עדיין לא יודעים', desc: 'נציג את כל השמות', color: 'purple' },
+                ].map((option, index) => {
+                  const isSelected = selectedGender === option.value;
+                  const colorClasses = {
+                    blue: isSelected ? 'from-blue-500 to-blue-600 shadow-blue-200/60' : 'hover:border-blue-200',
+                    pink: isSelected ? 'from-pink-500 to-rose-500 shadow-pink-200/60' : 'hover:border-pink-200',
+                    purple: isSelected ? 'from-purple-500 to-violet-500 shadow-purple-200/60' : 'hover:border-purple-200',
+                  }[option.color];
 
-                <button
-                  onClick={() => setSelectedGender(Gender.GIRL)}
-                  className={`w-full p-5 rounded-2xl font-bold transition-all flex items-center gap-4 ${
-                    selectedGender === Gender.GIRL
-                      ? 'bg-pink-500 text-white shadow-lg shadow-pink-200/50'
-                      : 'bg-white text-pink-600 border-2 border-pink-100 hover:border-pink-200 hover:bg-pink-50/50'
-                  }`}
-                >
-                  <span className="text-3xl">👧</span>
-                  <div className="text-right flex-1">
-                    <span className="text-lg block">בת</span>
-                    <p className={`text-sm ${selectedGender === Gender.GIRL ? 'text-pink-100' : 'text-gray-400'}`}>
-                      נציג שמות לבנות
-                    </p>
-                  </div>
-                  {selectedGender === Gender.GIRL && (
-                    <Check size={24} />
-                  )}
-                </button>
-
-                <button
-                  onClick={() => setSelectedGender(null)}
-                  className={`w-full p-5 rounded-2xl font-bold transition-all flex items-center gap-4 ${
-                    selectedGender === null
-                      ? 'bg-purple-500 text-white shadow-lg shadow-purple-200/50'
-                      : 'bg-white text-purple-600 border-2 border-purple-100 hover:border-purple-200 hover:bg-purple-50/50'
-                  }`}
-                >
-                  <span className="text-3xl">✨</span>
-                  <div className="text-right flex-1">
-                    <span className="text-lg block">עדיין לא יודעים</span>
-                    <p className={`text-sm ${selectedGender === null ? 'text-purple-100' : 'text-gray-400'}`}>
-                      נציג את כל השמות
-                    </p>
-                  </div>
-                  {selectedGender === null && (
-                    <Check size={24} />
-                  )}
-                </button>
-              </div>
-              
-              {/* Spacer for bottom button */}
-              <div className="h-32" />
-            </div>
-          )}
-
-          {/* Step 2: Style Preferences */}
-          {currentStep === 2 && (
-            <div className="flex-1 flex flex-col">
-              {/* Header Card */}
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center shrink-0">
-                    <Palette size={28} className="text-emerald-500" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-800 font-heebo mb-1">
-                      איזה סגנון שמות?
-                    </h2>
-                    <p className="text-gray-400 text-sm">
-                      בחרו אחד או יותר (אופציונלי)
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Style Grid */}
-              <div className="grid grid-cols-2 gap-3">
-                {NAME_STYLE_OPTIONS.map((option) => {
-                  const Icon = option.icon;
-                  const isSelected = selectedStyles.includes(option.value);
                   return (
                     <button
-                      key={option.value}
-                      onClick={() => toggleStyle(option.value)}
-                      className={`p-5 rounded-2xl transition-all text-right relative overflow-hidden ${
+                      key={option.label}
+                      onClick={() => setSelectedGender(option.value)}
+                      className={`w-full p-5 rounded-3xl font-bold transition-all flex items-center gap-4 press-effect animate-fade-up ${
                         isSelected
-                          ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200/50'
-                          : 'bg-white text-gray-700 border-2 border-gray-100 hover:border-emerald-200 hover:bg-emerald-50/30'
+                          ? `bg-gradient-to-br ${colorClasses} text-white shadow-xl`
+                          : `glass-card ${colorClasses}`
                       }`}
+                      style={{ animationDelay: `${index * 0.1}s` }}
                     >
-                      {isSelected && (
-                        <div className="absolute top-3 left-3">
-                          <Check size={18} />
-                        </div>
-                      )}
-                      <Icon size={28} className={`mb-3 ${isSelected ? 'text-white' : 'text-emerald-400'}`} />
-                      <p className="font-bold text-lg mb-1">{option.label}</p>
-                      <p className={`text-xs leading-relaxed ${isSelected ? 'text-emerald-100' : 'text-gray-400'}`}>
-                        {option.description}
-                      </p>
+                      <span className="text-3xl">{option.emoji}</span>
+                      <div className="text-right flex-1">
+                        <span className="text-lg block">{option.label}</span>
+                        <p className={`text-sm ${isSelected ? 'text-white/80' : 'text-gray-400'}`}>
+                          {option.desc}
+                        </p>
+                      </div>
+                      {isSelected && <Check size={24} />}
                     </button>
                   );
                 })}
               </div>
 
-              {selectedStyles.length === 0 && (
-                <div className="mt-6 bg-gray-50 rounded-2xl p-4 text-center">
-                  <p className="text-sm text-gray-400">
-                    לא בחרתם? נציג לכם את כל סגנונות השמות
-                  </p>
+              {/* Spacer */}
+              <div className="h-4" />
+            </div>
+          )}
+
+          {/* Step 2: Style Preferences */}
+          {currentStep === 2 && (
+            <div className="flex-1 flex flex-col justify-between">
+              {/* Header */}
+              <div className="text-center mb-6">
+                <div className="w-20 h-20 mx-auto mb-5 rounded-3xl bg-gradient-to-br from-emerald-100 via-teal-50 to-cyan-50 flex items-center justify-center shadow-lg shadow-emerald-100/50">
+                  <Palette size={36} className="text-emerald-500" />
                 </div>
-              )}
-              
-              {/* Spacer for bottom button */}
-              <div className="h-32" />
+                <h2 className="text-2xl font-bold text-gray-800 font-heebo mb-2">
+                  איזה סגנון שמות?
+                </h2>
+                <p className="text-gray-400 text-sm max-w-[260px] mx-auto">
+                  בחרו אחד או יותר, או דלגו לכל השמות
+                </p>
+              </div>
+
+              {/* Grid - Centered */}
+              <div className="flex-1 flex flex-col justify-center">
+                <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto w-full">
+                  {NAME_STYLE_OPTIONS.map((option, index) => {
+                    const Icon = option.icon;
+                    const isSelected = selectedStyles.includes(option.value);
+                    return (
+                      <button
+                        key={option.value}
+                        onClick={() => toggleStyle(option.value)}
+                        className={`p-5 rounded-3xl transition-all text-right relative overflow-hidden press-effect animate-fade-up ${
+                          isSelected
+                            ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-xl shadow-emerald-200/50'
+                            : 'glass-card hover:shadow-lg'
+                        }`}
+                        style={{ animationDelay: `${index * 0.08}s` }}
+                      >
+                        {isSelected && (
+                          <div className="absolute top-3 left-3 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                            <Check size={14} />
+                          </div>
+                        )}
+                        <Icon size={28} className={`mb-3 ${isSelected ? 'text-white' : 'text-emerald-400'}`} />
+                        <p className="font-bold text-base mb-0.5">{option.label}</p>
+                        <p className={`text-xs leading-snug ${isSelected ? 'text-emerald-100' : 'text-gray-400'}`}>
+                          {option.description}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {selectedStyles.length === 0 && (
+                  <p className="text-center text-sm text-gray-400 mt-6 animate-fade-in">
+                    לא בחרתם? נציג את כל סגנונות השמות
+                  </p>
+                )}
+              </div>
+
+              {/* Spacer */}
+              <div className="h-4" />
             </div>
           )}
 
           {/* Step 3: Exclusions */}
           {currentStep === 3 && (
             <div className="flex-1 flex flex-col">
-              {/* Header Card */}
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-slate-100 to-gray-100 rounded-2xl flex items-center justify-center shrink-0">
-                    <ListX size={28} className="text-slate-500" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-800 font-heebo mb-1">
-                      שמות להחריג
-                    </h2>
-                    <p className="text-gray-400 text-sm">
-                      שמות שלא תרצו לראות (אופציונלי)
-                    </p>
-                  </div>
+              {/* Header */}
+              <div className="text-center mb-6">
+                <div className="w-20 h-20 mx-auto mb-5 rounded-3xl bg-gradient-to-br from-slate-100 via-gray-50 to-zinc-50 flex items-center justify-center shadow-lg shadow-slate-100/50">
+                  <ListX size={36} className="text-slate-500" />
                 </div>
+                <h2 className="text-2xl font-bold text-gray-800 font-heebo mb-2">
+                  שמות להחריג
+                </h2>
+                <p className="text-gray-400 text-sm max-w-[260px] mx-auto">
+                  הוסיפו שמות שלא תרצו לראות (אופציונלי)
+                </p>
               </div>
 
-              <div className="space-y-5">
+              {/* Cards */}
+              <div className="flex-1 space-y-4 max-w-sm mx-auto w-full">
                 {/* Protected Names Card */}
-                <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                <div className="glass-card rounded-3xl p-5 animate-fade-up">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
-                      <ShieldCheck size={20} className="text-slate-500" />
+                    <div className="w-11 h-11 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center">
+                      <ShieldCheck size={22} className="text-slate-500" />
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-800">שמות מוגנים</h3>
                       <p className="text-xs text-gray-400">שמות של בני משפחה קיימים</p>
                     </div>
                   </div>
-                  <SimpleTagInput
+                  <PremiumTagInput
                     tags={protectedNames}
                     onAdd={(name) => setProtectedNames(prev => [...prev, name])}
                     onRemove={(name) => setProtectedNames(prev => prev.filter(n => n !== name))}
@@ -405,17 +380,17 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 </div>
 
                 {/* Blacklist Card */}
-                <div className="bg-white rounded-2xl p-5 border border-red-100 shadow-sm">
+                <div className="glass-card rounded-3xl p-5 animate-fade-up border-red-100/50" style={{ animationDelay: '0.1s' }}>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
-                      <Trash2 size={20} className="text-red-400" />
+                    <div className="w-11 h-11 bg-gradient-to-br from-red-50 to-rose-100 rounded-2xl flex items-center justify-center">
+                      <Trash2 size={22} className="text-red-400" />
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-800">רשימה שחורה</h3>
                       <p className="text-xs text-gray-400">שמות שמעדיפים להימנע מהם</p>
                     </div>
                   </div>
-                  <SimpleTagInput
+                  <PremiumTagInput
                     tags={blacklistedNames}
                     onAdd={(name) => setBlacklistedNames(prev => [...prev, name])}
                     onRemove={(name) => setBlacklistedNames(prev => prev.filter(n => n !== name))}
@@ -424,20 +399,17 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   />
                 </div>
               </div>
-              
-              {/* Spacer for bottom button */}
-              <div className="h-32" />
             </div>
           )}
         </div>
       </div>
 
-      {/* Fixed Bottom Navigation with Safe Area */}
-      <div className="shrink-0 bg-white/95 backdrop-blur-md border-t border-gray-100 safe-bottom">
-        <div className="px-6 py-4">
+      {/* Fixed Bottom Navigation - Glassmorphism */}
+      <div className="shrink-0 glass-solid safe-bottom">
+        <div className="px-6 py-5">
           <button
             onClick={handleNext}
-            className="w-full py-4 bg-emerald-500 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all active:scale-[0.98] shadow-lg shadow-emerald-200/50"
+            className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl shadow-emerald-200/40 hover:shadow-emerald-200/60 transition-all press-effect"
           >
             {currentStep === TOTAL_STEPS ? (
               <>
@@ -455,7 +427,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           {currentStep < TOTAL_STEPS && (
             <button
               onClick={handleSkip}
-              className="w-full mt-2 py-3 text-gray-400 font-medium text-sm hover:text-gray-600 transition-colors"
+              className="w-full mt-2 py-3 text-gray-400 font-medium text-sm hover:text-gray-600 transition-all"
             >
               אעשה את זה אחר כך
             </button>
