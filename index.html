@@ -22,10 +22,27 @@
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
     
     <title>NameIT - בחירת שמות לתינוקות</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts - Modern Hebrew Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200..800&family=Heebo:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS with Custom Font Configuration -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'hebrew': ['Heebo', 'Rubik', 'Assistant', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+              'heebo': ['Heebo', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+              'rubik': ['Rubik', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
     <style>
       :root {
         --mint: #E8F5E9;
@@ -36,16 +53,53 @@
         --text-main: #455A64;
         --safe-area-top: env(safe-area-inset-top, 0px);
         --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+        
+        /* Modern Hebrew Font Stack with Fallbacks */
+        --font-hebrew: 'Heebo', 'Rubik', 'Assistant', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       }
+      
+      /* Global Typography - Apply Modern Hebrew Fonts Everywhere */
+      * {
+        font-family: var(--font-hebrew);
+      }
+      
       body {
-        font-family: 'Assistant', sans-serif;
+        font-family: var(--font-hebrew);
         background-color: #FFFFFF;
         color: var(--text-main);
         overflow-x: hidden;
         height: 100vh;
         margin: 0;
+        font-weight: 400;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
-      .font-heebo { font-family: 'Heebo', sans-serif; }
+      
+      /* Headings - Use Heebo for better readability */
+      h1, h2, h3, h4, h5, h6 {
+        font-family: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+      }
+      
+      /* Body text - Use Rubik for comfortable reading */
+      p, span, div, button, input, textarea, select, label {
+        font-family: 'Rubik', 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      
+      /* Utility Classes */
+      .font-heebo { 
+        font-family: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      
+      .font-rubik { 
+        font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      
+      .font-hebrew {
+        font-family: var(--font-hebrew);
+      }
       
       /* Simple flat scrollbar */
       ::-webkit-scrollbar { width: 4px; }

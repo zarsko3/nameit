@@ -1,3 +1,151 @@
-/* NameIT - Additional styles */
-/* Main styles are defined inline in index.html */
+/* NameIT - Typography & Additional Styles */
+
+/* Font Loading Optimization */
+@font-face {
+  font-family: 'Heebo';
+  font-display: swap; /* Show fallback while loading, then swap */
+}
+
+@font-face {
+  font-family: 'Rubik';
+  font-display: swap;
+}
+
+/* Typography Scale - Modern Hebrew-Friendly Sizes */
+:root {
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;    /* 18px */
+  --font-size-xl: 1.25rem;     /* 20px */
+  --font-size-2xl: 1.5rem;      /* 24px */
+  --font-size-3xl: 1.875rem;    /* 30px */
+  --font-size-4xl: 2.25rem;     /* 36px */
+  --font-size-5xl: 3rem;        /* 48px */
+  
+  /* Line Heights - Optimized for Hebrew */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Letter Spacing - Better for Hebrew */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.05em;
+}
+
+/* Enhanced Typography for Hebrew Text */
+body {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+/* Headings Typography */
+h1 {
+  font-size: var(--font-size-4xl);
+  font-weight: 800;
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+h2 {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+h3 {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  line-height: var(--line-height-normal);
+}
+
+h4 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  line-height: var(--line-height-normal);
+}
+
+/* Button & UI Text */
+button {
+  font-weight: 600;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+/* Input Fields */
+input, textarea, select {
+  font-weight: 400;
+  line-height: var(--line-height-normal);
+}
+
+/* Small Text */
+small, .text-sm {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+/* Large Text */
+.text-lg {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+}
+
+/* Ensure RTL text rendering is smooth */
+[dir="rtl"] {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Additional Insights Modal - Enhanced Typography & Scrolling */
+.insights-modal-content {
+  /* Ensure proper spacing and readability */
+  scrollbar-width: thin;
+  scrollbar-color: #D1D5DB transparent;
+}
+
+.insights-modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.insights-modal-content::-webkit-scrollbar-track {
+  background: #F9FAFB;
+  border-radius: 4px;
+}
+
+.insights-modal-content::-webkit-scrollbar-thumb {
+  background-color: #D1D5DB;
+  border-radius: 4px;
+}
+
+.insights-modal-content::-webkit-scrollbar-thumb:hover {
+  background-color: #9CA3AF;
+}
+
+/* Insights Text Styling */
+.insights-text {
+  line-height: 1.6;
+  font-size: 1rem; /* 16px minimum for mobile readability */
+  color: #374151; /* Better contrast - gray-700 */
+  font-family: 'Rubik', 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.insights-header {
+  line-height: 1.4;
+  font-size: 1.25rem; /* 20px */
+  font-weight: 700;
+  color: #111827; /* gray-900 for maximum contrast */
+  font-family: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.insights-bullet {
+  line-height: 1.6;
+  font-size: 1rem; /* 16px */
+  font-weight: 500;
+  color: #1F2937; /* gray-800 */
+  padding-right: 1rem; /* RTL padding */
+  font-family: 'Rubik', 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 

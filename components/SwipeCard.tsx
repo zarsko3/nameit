@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { BabyName, Gender } from '../types';
 import { Heart, X, Info, Sparkles, RotateCcw } from 'lucide-react';
 import { getNameInsights } from '../services/gemini';
@@ -285,33 +286,124 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
                <p className="text-gray-500 font-medium leading-relaxed text-[18px]">{name.meaning}</p>
             </div>
           </div>
-
-          {/* Gemini Insights Overlay */}
-          {showInfo && (
-            <div className="absolute inset-0 bg-white/98 backdrop-blur-sm z-30 p-8 flex flex-col overflow-y-auto animate-pop rounded-[2.5rem]">
-               <div className="flex justify-between items-center mb-8 shrink-0">
-                  <h3 className="text-xl font-bold flex items-center gap-2 text-emerald-400">
-                      <Sparkles size={22} />
-                      תובנות נוספות
-                  </h3>
-                  <button onClick={() => setShowInfo(false)} className="text-gray-300 p-2 rounded-full hover:bg-gray-50"><X size={28} /></button>
-               </div>
-               <div className="space-y-6 text-right flex-1">
-                  {loadingInsights ? (
-                      <div className="flex flex-col items-center justify-center h-full gap-3">
-                          <div className="w-10 h-10 border-2 border-emerald-50 border-t-emerald-400 rounded-full animate-spin"></div>
-                          <p className="text-[12px] font-bold text-gray-300 uppercase tracking-widest">טוען תובנות...</p>
-                      </div>
-                  ) : (
-                      <div className="text-gray-600 leading-relaxed whitespace-pre-line text-[18px] font-medium">
-                          {insights}
-                      </div>
-                  )}
-               </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Gemini Insights Modal - PORTALED to document.body for z-index independence */}
+      {showInfo && createPortal(
+        <div 
+          className="fixed inset-0 flex items-center justify-center p-4"
+          style={{
+            zIndex: 9999, // Very high z-index to stay above everything
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+          onClick={(e) => {
+            // Close when clicking backdrop
+            if (e.target === e.currentTarget) {
+              setShowInfo(false);
+            }
+          }}
+          dir="rtl"
+        >
+          {/* Dark Backdrop Overlay - Full Screen */}
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+            onClick={() => setShowInfo(false)}
+            aria-hidden="true"
+          />
+          
+          {/* Modal Container - Centered, Large, Professional */}
+          <div 
+            className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-pop"
+            style={{
+              maxHeight: '80vh',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.1)',
+              position: 'relative', // Reset any inherited positioning
+              transform: 'none', // Reset any transforms
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+             {/* Header - Fixed at top with clear title */}
+             <div className="flex justify-between items-center px-6 pt-6 pb-4 shrink-0 border-b border-gray-200 bg-white rounded-t-3xl">
+                <h3 className="text-2xl font-bold flex items-center gap-2 text-emerald-500 font-heebo">
+                    <Sparkles size={26} />
+                    תובנות נוספות
+                </h3>
+                <button 
+                  onClick={() => setShowInfo(false)} 
+                  className="text-gray-400 p-2 rounded-full hover:bg-gray-100 hover:text-gray-700 transition-all active:scale-95"
+                  aria-label="סגור"
+                >
+                  <X size={26} strokeWidth={2.5} />
+                </button>
+             </div>
+             
+             {/* Content - Scrollable Area Only */}
+             <div className="flex-1 overflow-y-auto px-6 py-6 bg-white rounded-b-3xl insights-modal-content" style={{ minHeight: 0 }}>
+              {loadingInsights ? (
+                  <div className="flex flex-col items-center justify-center h-full gap-4 min-h-[200px]">
+                      <div className="w-12 h-12 border-2 border-emerald-100 border-t-emerald-500 rounded-full animate-spin"></div>
+                      <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider font-rubik">טוען תובנות...</p>
+                  </div>
+              ) : (
+                  <div 
+                    className="text-right space-y-5"
+                    style={{
+                      paddingRight: '0.5rem', // Extra RTL padding
+                      paddingBottom: '1rem', // Extra bottom padding for scroll
+                    }}
+                  >
+                      {/* Parse and format insights with better typography */}
+                      {insights && insights.split('\n').filter(p => p.trim()).map((paragraph, index) => {
+                        const trimmed = paragraph.trim();
+                        
+                        // Check if it's a header (contains ✨ and is shorter)
+                        const isHeader = trimmed.includes('✨') && trimmed.length < 80;
+                        // Check if it's a bullet point
+                        const isBullet = trimmed.startsWith('•');
+                        
+                        return (
+                          <div 
+                            key={index}
+                            className={`
+                              ${isHeader 
+                                ? 'text-gray-900 font-bold mb-2 font-heebo' 
+                                : isBullet 
+                                  ? 'text-gray-800 font-medium font-rubik' 
+                                  : 'text-gray-700 font-normal font-rubik'
+                              }
+                            `}
+                            style={{
+                              lineHeight: isHeader ? '1.5' : '1.6',
+                              fontSize: isHeader ? '1.125rem' : '1rem', // 18px for headers, 16px for body
+                              fontWeight: isHeader ? '700' : isBullet ? '500' : '400',
+                              color: isHeader ? '#111827' : isBullet ? '#1F2937' : '#374151',
+                              paddingRight: isBullet ? '0.75rem' : '0',
+                              marginBottom: isHeader ? '0.5rem' : '0',
+                            }}
+                          >
+                            {trimmed.replace(/^[•✨]\s*/, '')}
+                          </div>
+                        );
+                      })}
+                  </div>
+              )}
+             </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Action Buttons - Thumb Zone (approx lower 20%) 
           Button order matches swipe directions: LEFT = Dislike, RIGHT = Like
