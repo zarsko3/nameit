@@ -19,10 +19,13 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       roomId: roomId.trim().toLowerCase(),
       isPartnerConnected: false, // In a real app, this would check Firebase
       genderPreference: [Gender.BOY, Gender.GIRL, Gender.UNISEX],
-      // New preferences with defaults
+      // Preferences with defaults
       expectedGender: null,        // Not specified yet
       nameStyles: [],              // All styles
-      showTrendingOnly: false      // Show all names
+      showTrendingOnly: false,     // Show all names
+      // Exclusion lists
+      blacklist: [],               // No blacklisted names
+      familyNames: []              // No family names to exclude
     });
   };
 

@@ -30,10 +30,13 @@ export interface UserProfile {
   roomId: string; // The shared code
   isPartnerConnected: boolean;
   genderPreference: Gender[];
-  // New user preferences
+  // User preferences
   expectedGender: Gender | null;  // Expected baby gender (Boy/Girl/Unknown)
   nameStyles: NameStyle[];        // Preferred name styles
   showTrendingOnly: boolean;      // Filter to show only trending names
+  // Exclusion lists
+  blacklist: string[];            // Names to never show (שמות ברשימה שחורה)
+  familyNames: string[];          // Existing family names to exclude (שמות משפחה)
 }
 
 export interface SwipeRecord {

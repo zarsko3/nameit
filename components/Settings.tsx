@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserProfile, Gender, NameStyle } from '../types';
+import { UserProfile, Gender, NameStyle, BabyName, SwipeRecord } from '../types';
 import { 
   User, 
   Baby, 
@@ -13,7 +13,11 @@ import {
   ChevronUp,
   LogOut,
   Users,
-  Link2
+  Link2,
+  Ban,
+  UserX,
+  Plus,
+  X
 } from 'lucide-react';
 
 interface SettingsProps {
@@ -21,6 +25,9 @@ interface SettingsProps {
   isPartnerOnline: boolean;
   onUpdateProfile: (updates: Partial<UserProfile>) => void;
   onLogout: () => void;
+  // For shared liked names
+  swipes: SwipeRecord[];
+  names: BabyName[];
 }
 
 // Name style options with Hebrew labels
@@ -31,16 +38,98 @@ const NAME_STYLE_OPTIONS = [
   { value: NameStyle.UNIQUE, label: 'ייחודי', icon: Star, description: 'שמות נדירים ומיוחדים' },
 ];
 
+// Tag Input Component for Blacklist and Family Names
+const TagInput: React.FC<{
+  tags: string[];
+  onAdd: (tag: string) => void;
+  onRemove: (tag: string) => void;
+  placeholder: string;
+  emptyMessage: string;
+}> = ({ tags, onAdd, onRemove, placeholder, emptyMessage }) => {
+  const [inputValue, setInputValue] = useState('');
+
+  const handleAdd = () => {
+    const trimmed = inputValue.trim();
+    if (trimmed && !tags.includes(trimmed)) {
+      onAdd(trimmed);
+      setInputValue('');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAdd();
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      {/* Input row */}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className="flex-1 p-3 bg-gray-50 rounded-xl border border-gray-100 focus:ring-2 focus:ring-emerald-100 outline-none text-right font-medium placeholder:text-gray-300 transition-all"
+        />
+        <button
+          onClick={handleAdd}
+          disabled={!inputValue.trim()}
+          className="px-4 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+        >
+          <Plus size={20} />
+        </button>
+      </div>
+
+      {/* Tags display */}
+      <div className="flex flex-wrap gap-2 min-h-[40px]">
+        {tags.length === 0 ? (
+          <p className="text-sm text-gray-300 italic">{emptyMessage}</p>
+        ) : (
+          tags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium group hover:bg-gray-200 transition-colors"
+            >
+              {tag}
+              <button
+                onClick={() => onRemove(tag)}
+                className="w-5 h-5 rounded-full bg-gray-200 group-hover:bg-red-100 group-hover:text-red-500 flex items-center justify-center transition-colors"
+              >
+                <X size={12} />
+              </button>
+            </span>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
 const Settings: React.FC<SettingsProps> = ({ 
   profile, 
   isPartnerOnline, 
   onUpdateProfile, 
-  onLogout 
+  onLogout,
+  swipes,
+  names
 }) => {
   const [showPreferences, setShowPreferences] = useState(true);
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
+  const [showBlacklist, setShowBlacklist] = useState(false);
+  const [showFamilyNames, setShowFamilyNames] = useState(false);
+  const [showLikedNames, setShowLikedNames] = useState(false);
 
   if (!profile) return null;
+
+  // Get liked names from swipes
+  const likedNames = swipes
+    .filter(s => s.liked && s.roomId === profile.roomId)
+    .map(s => names.find(n => n.id === s.nameId))
+    .filter((n): n is BabyName => n !== undefined);
 
   const toggleNameStyle = (style: NameStyle) => {
     const currentStyles = profile.nameStyles || [];
@@ -58,8 +147,34 @@ const Settings: React.FC<SettingsProps> = ({
     onUpdateProfile({ showTrendingOnly: !profile.showTrendingOnly });
   };
 
+  // Blacklist handlers
+  const addToBlacklist = (name: string) => {
+    const currentBlacklist = profile.blacklist || [];
+    if (!currentBlacklist.includes(name)) {
+      onUpdateProfile({ blacklist: [...currentBlacklist, name] });
+    }
+  };
+
+  const removeFromBlacklist = (name: string) => {
+    const currentBlacklist = profile.blacklist || [];
+    onUpdateProfile({ blacklist: currentBlacklist.filter(n => n !== name) });
+  };
+
+  // Family Names handlers
+  const addFamilyName = (name: string) => {
+    const currentFamilyNames = profile.familyNames || [];
+    if (!currentFamilyNames.includes(name)) {
+      onUpdateProfile({ familyNames: [...currentFamilyNames, name] });
+    }
+  };
+
+  const removeFamilyName = (name: string) => {
+    const currentFamilyNames = profile.familyNames || [];
+    onUpdateProfile({ familyNames: currentFamilyNames.filter(n => n !== name) });
+  };
+
   return (
-    <div className="p-6 space-y-6 animate-fade-in overflow-y-auto" dir="rtl">
+    <div className="p-6 space-y-6 animate-fade-in overflow-y-auto pb-24" dir="rtl">
       {/* Header */}
       <h2 className="text-3xl font-bold text-gray-800 tracking-tight font-heebo">הגדרות</h2>
       
@@ -96,6 +211,49 @@ const Settings: React.FC<SettingsProps> = ({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Shared Liked Names Section */}
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+        <button 
+          onClick={() => setShowLikedNames(!showLikedNames)}
+          className="w-full p-5 flex items-center justify-between hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center">
+              <Heart size={22} className="text-rose-400" />
+            </div>
+            <div className="text-right">
+              <p className="font-bold text-lg text-gray-800 font-heebo">שמות שאהבנו</p>
+              <p className="text-sm text-gray-400">{likedNames.length} שמות שסומנו בלייק</p>
+            </div>
+          </div>
+          {showLikedNames ? <ChevronUp size={22} className="text-gray-400" /> : <ChevronDown size={22} className="text-gray-400" />}
+        </button>
+        
+        {showLikedNames && (
+          <div className="px-5 pb-5 border-t border-gray-50 pt-4">
+            {likedNames.length === 0 ? (
+              <p className="text-center text-gray-400 py-4">עדיין לא סימנתם שמות שאהבתם</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {likedNames.map((name) => (
+                  <div
+                    key={name.id}
+                    className="px-4 py-2 bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-100 rounded-xl flex items-center gap-2"
+                  >
+                    <Heart size={14} className="text-rose-400 fill-rose-400" />
+                    <span className="font-bold text-gray-700">{name.hebrew}</span>
+                    <span className="text-xs text-gray-400">({name.transliteration})</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-gray-400 mt-3 text-center">
+              רשימה זו משותפת לכל המשתמשים בחדר
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Baby Preferences Section */}
@@ -187,6 +345,74 @@ const Settings: React.FC<SettingsProps> = ({
                 })}
               </div>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Blacklist Section */}
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+        <button 
+          onClick={() => setShowBlacklist(!showBlacklist)}
+          className="w-full p-5 flex items-center justify-between hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
+              <Ban size={22} className="text-red-400" />
+            </div>
+            <div className="text-right">
+              <p className="font-bold text-lg text-gray-800 font-heebo">שמות ברשימה שחורה</p>
+              <p className="text-sm text-gray-400">{(profile.blacklist || []).length} שמות חסומים</p>
+            </div>
+          </div>
+          {showBlacklist ? <ChevronUp size={22} className="text-gray-400" /> : <ChevronDown size={22} className="text-gray-400" />}
+        </button>
+        
+        {showBlacklist && (
+          <div className="px-5 pb-5 border-t border-gray-50 pt-4">
+            <TagInput
+              tags={profile.blacklist || []}
+              onAdd={addToBlacklist}
+              onRemove={removeFromBlacklist}
+              placeholder="הקלידו שם להוספה..."
+              emptyMessage="אין שמות ברשימה השחורה"
+            />
+            <p className="text-xs text-gray-400 mt-3 text-center">
+              שמות אלו לעולם לא יוצגו בהחלקות
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Family Names Section */}
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+        <button 
+          onClick={() => setShowFamilyNames(!showFamilyNames)}
+          className="w-full p-5 flex items-center justify-between hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center">
+              <UserX size={22} className="text-violet-400" />
+            </div>
+            <div className="text-right">
+              <p className="font-bold text-lg text-gray-800 font-heebo">שמות משפחה</p>
+              <p className="text-sm text-gray-400">{(profile.familyNames || []).length} שמות קיימים במשפחה</p>
+            </div>
+          </div>
+          {showFamilyNames ? <ChevronUp size={22} className="text-gray-400" /> : <ChevronDown size={22} className="text-gray-400" />}
+        </button>
+        
+        {showFamilyNames && (
+          <div className="px-5 pb-5 border-t border-gray-50 pt-4">
+            <TagInput
+              tags={profile.familyNames || []}
+              onAdd={addFamilyName}
+              onRemove={removeFamilyName}
+              placeholder="הקלידו שם משפחה..."
+              emptyMessage="אין שמות משפחה ברשימה"
+            />
+            <p className="text-xs text-gray-400 mt-3 text-center">
+              שמות של בני משפחה קיימים לא יוצגו
+            </p>
           </div>
         )}
       </div>
@@ -284,4 +510,3 @@ const Settings: React.FC<SettingsProps> = ({
 };
 
 export default Settings;
-
