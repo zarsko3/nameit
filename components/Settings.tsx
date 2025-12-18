@@ -235,11 +235,14 @@ const Settings: React.FC<SettingsProps> = ({
                   </p>
                 </div>
               </div>
-              <div className={`w-14 h-8 rounded-full p-1 transition-all ${
-                profile.showTrendingOnly ? 'bg-white/30' : 'bg-gray-200'
-              }`}>
-                <div className={`w-6 h-6 rounded-full bg-white shadow-sm transition-transform ${
-                  profile.showTrendingOnly ? 'translate-x-0' : 'translate-x-6'
+              <div 
+                dir="ltr"
+                className={`w-14 h-8 rounded-full p-1 transition-all flex items-center ${
+                  profile.showTrendingOnly ? 'bg-white/30' : 'bg-gray-200'
+                }`}
+              >
+                <div className={`w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                  profile.showTrendingOnly ? 'translate-x-6' : 'translate-x-0'
                 }`}></div>
               </div>
             </div>
