@@ -64,4 +64,4 @@ export interface FilterConfig {
   showTrendingOnly: boolean;   // Show only trending names
 }
 
-export type AppView = 'ONBOARDING' | 'ONBOARDING_FLOW' | 'SWIPE' | 'MATCHES' | 'SETTINGS';
+export type AppView = 'AUTH' | 'ROOM_SETUP' | 'ONBOARDING' | 'ONBOARDING_FLOW' | 'SWIPE' | 'MATCHES' | 'SETTINGS';
