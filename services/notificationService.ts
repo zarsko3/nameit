@@ -1,9 +1,13 @@
 import { getMessaging, getToken, onMessage, MessagePayload } from 'firebase/messaging';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import app, { db } from '../firebase';
 
-// Your VAPID key from Firebase Console -> Project Settings -> Cloud Messaging -> Web Push certificates
-const VAPID_KEY = 'YOUR_VAPID_KEY_HERE'; // TODO: Replace with your actual VAPID key
+// VAPID key from Firebase Console -> Project Settings -> Cloud Messaging -> Web Push certificates
+const VAPID_KEY = 'BDailn00RHk3B32kaE0c8-uO3TTYdAoaUXf-JEEY39fLA5coNj10DIcE5xuY-fMtIH19IbFrTcZ9LGoBGwMfMGI';
+
+// Firebase Cloud Messaging Server Key (for testing only - in production use Cloud Functions)
+// Go to Firebase Console -> Project Settings -> Cloud Messaging -> Server key
+const FCM_SERVER_KEY = ''; // Leave empty for now - will use Cloud Functions
 
 let messaging: ReturnType<typeof getMessaging> | null = null;
 
@@ -36,6 +40,34 @@ export const initializeMessaging = async (): Promise<ReturnType<typeof getMessag
 };
 
 /**
+ * Register the Firebase Messaging Service Worker
+ */
+export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration | null> => {
+  if (!('serviceWorker' in navigator)) {
+    console.warn('Service workers not supported');
+    return null;
+  }
+
+  try {
+    // Register the service worker from the public folder
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+      scope: '/'
+    });
+    
+    console.log('✅ Service Worker registered with scope:', registration.scope);
+    
+    // Wait for the service worker to be ready
+    await navigator.serviceWorker.ready;
+    console.log('✅ Service Worker is ready');
+    
+    return registration;
+  } catch (error) {
+    console.error('❌ Service Worker registration failed:', error);
+    return null;
+  }
+};
+
+/**
  * Request notification permission and get FCM token
  */
 export const requestNotificationPermission = async (): Promise<string | null> => {
@@ -50,23 +82,26 @@ export const requestNotificationPermission = async (): Promise<string | null> =>
 
     console.log('🔔 Notification permission granted');
 
-    // Register service worker
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-    console.log('✅ Service Worker registered:', registration);
+    // Register service worker first
+    const registration = await registerServiceWorker();
+    if (!registration) {
+      console.error('Failed to register service worker');
+      return null;
+    }
 
-    // Get messaging instance
+    // Initialize messaging if not already done
     if (!messaging) {
       messaging = getMessaging(app);
     }
 
-    // Get FCM token
+    // Get FCM token with VAPID key
     const token = await getToken(messaging, {
       vapidKey: VAPID_KEY,
       serviceWorkerRegistration: registration
     });
 
     if (token) {
-      console.log('🔑 FCM Token obtained:', token.substring(0, 20) + '...');
+      console.log('🔑 FCM Token obtained:', token.substring(0, 30) + '...');
       return token;
     } else {
       console.warn('⚠️ No FCM token available');
@@ -86,7 +121,7 @@ export const saveFcmToken = async (userId: string, token: string): Promise<void>
     const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, {
       fcmToken: token,
-      fcmTokenUpdatedAt: new Date()
+      fcmTokenUpdatedAt: new Date().toISOString()
     });
     console.log('✅ FCM token saved to Firestore');
   } catch (error) {
@@ -100,8 +135,6 @@ export const saveFcmToken = async (userId: string, token: string): Promise<void>
  */
 export const getPartnerFcmToken = async (roomId: string, currentUserId: string): Promise<string | null> => {
   try {
-    // Query users in the same room
-    const { collection, query, where, getDocs } = await import('firebase/firestore');
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('roomId', '==', roomId));
     const querySnapshot = await getDocs(q);
@@ -110,10 +143,12 @@ export const getPartnerFcmToken = async (roomId: string, currentUserId: string):
       if (docSnap.id !== currentUserId) {
         const data = docSnap.data();
         if (data.fcmToken) {
+          console.log('📱 Found partner FCM token');
           return data.fcmToken;
         }
       }
     }
+    console.log('⚠️ Partner has no FCM token');
     return null;
   } catch (error) {
     console.error('Failed to get partner FCM token:', error);
@@ -126,8 +161,7 @@ export const getPartnerFcmToken = async (roomId: string, currentUserId: string):
  */
 export const onForegroundMessage = (callback: (payload: MessagePayload) => void): (() => void) | null => {
   if (!messaging) {
-    console.warn('Messaging not initialized');
-    return null;
+    messaging = getMessaging(app);
   }
 
   return onMessage(messaging, (payload) => {
@@ -137,72 +171,88 @@ export const onForegroundMessage = (callback: (payload: MessagePayload) => void)
 };
 
 /**
- * Send push notification via Firebase Cloud Messaging REST API
- * NOTE: This is for TESTING ONLY - in production, use Firebase Cloud Functions
- * because sending from client exposes your server key
+ * Send a local notification (for testing when app is in foreground)
  */
-export const sendMatchNotification = async (
-  partnerToken: string,
-  matchedNameHebrew: string
-): Promise<boolean> => {
-  // In production, this should be done via Firebase Cloud Functions
-  // For now, we'll just log what would be sent
-  console.log('📤 Would send notification to partner:', {
-    token: partnerToken.substring(0, 20) + '...',
-    title: 'יש לכם התאמה! 👶',
-    body: `שניכם אהבתם את השם "${matchedNameHebrew}"!`
-  });
+export const showLocalNotification = (title: string, body: string, icon?: string): void => {
+  if (Notification.permission !== 'granted') {
+    console.warn('Notification permission not granted');
+    return;
+  }
 
-  // To actually send notifications, you need a Firebase Cloud Function
-  // See the CLOUD_FUNCTION_EXAMPLE below
-  
-  return true;
+  new Notification(title, {
+    body,
+    icon: icon || '/LOGO.png',
+    badge: '/LOGO.png',
+    tag: 'nameit-match',
+    renotify: true,
+    requireInteraction: true,
+  });
 };
 
 /**
- * CLOUD FUNCTION EXAMPLE (for reference)
+ * Trigger match notification to partner
+ * This uses a workaround since we can't send FCM from client directly
  * 
- * Create a file: functions/src/index.ts
- * 
- * ```typescript
- * import * as functions from 'firebase-functions';
- * import * as admin from 'firebase-admin';
- * 
- * admin.initializeApp();
- * 
- * export const sendMatchNotification = functions.firestore
- *   .document('matches/{matchId}')
- *   .onCreate(async (snap, context) => {
- *     const match = snap.data();
- *     const roomId = match.roomId;
- *     
- *     // Get all users in the room
- *     const usersSnapshot = await admin.firestore()
- *       .collection('users')
- *       .where('roomId', '==', roomId)
- *       .get();
- *     
- *     const tokens: string[] = [];
- *     usersSnapshot.forEach(doc => {
- *       const token = doc.data().fcmToken;
- *       if (token) tokens.push(token);
- *     });
- *     
- *     if (tokens.length === 0) return;
- *     
- *     // Get the matched name
- *     // ... fetch name details ...
- *     
- *     const message = {
- *       notification: {
- *         title: 'יש לכם התאמה! 👶',
- *         body: 'שניכם אהבתם את אותו השם!'
- *       },
- *       tokens: tokens
- *     };
- *     
- *     return admin.messaging().sendEachForMulticast(message);
- *   });
- * ```
+ * Options:
+ * 1. Firebase Cloud Function (recommended for production)
+ * 2. Your own backend server
+ * 3. For testing: Show local notification if user is in foreground
  */
+export const triggerMatchNotification = async (
+  roomId: string,
+  currentUserId: string,
+  matchedNameHebrew: string
+): Promise<boolean> => {
+  try {
+    // Get partner's FCM token
+    const partnerToken = await getPartnerFcmToken(roomId, currentUserId);
+    
+    if (!partnerToken) {
+      console.log('⚠️ Cannot send notification - partner has no FCM token');
+      return false;
+    }
 
+    // NOTE: Sending FCM messages from client-side is NOT secure
+    // because it would expose your server key.
+    // 
+    // For production, use one of these approaches:
+    // 
+    // OPTION 1: Firebase Cloud Function (Recommended)
+    // The function triggers automatically when a match document is created
+    // See: functions/src/index.ts
+    //
+    // OPTION 2: Use Firebase Extensions
+    // Install "Trigger Email" or create a custom extension
+    //
+    // For now, we'll log what would be sent and return true
+    // The actual notification will be sent by the Cloud Function
+
+    console.log('📤 Match notification would be sent:', {
+      to: partnerToken.substring(0, 20) + '...',
+      notification: {
+        title: 'יש לכם התאמה! 👶',
+        body: `שניכם אהבתם את השם "${matchedNameHebrew}"!`
+      }
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Failed to trigger match notification:', error);
+    return false;
+  }
+};
+
+/**
+ * Test notification locally (shows notification on current device)
+ */
+export const testNotification = (): void => {
+  if (Notification.permission === 'granted') {
+    showLocalNotification(
+      'יש לכם התאמה! 👶',
+      'שניכם אהבתם את אותו השם!',
+      '/LOGO.png'
+    );
+  } else {
+    console.warn('Permission not granted. Request permission first.');
+  }
+};

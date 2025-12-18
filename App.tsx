@@ -463,6 +463,15 @@ const AppContent: React.FC = () => {
           rating: 0
         };
         await saveMatch(profile.roomId, newMatch);
+        
+        // Trigger push notification to partner
+        try {
+          const { triggerMatchNotification } = await import('./services/notificationService');
+          await triggerMatchNotification(profile.roomId, currentUser.uid, currentName.hebrew);
+        } catch (notifError) {
+          console.log('Could not send notification:', notifError);
+        }
+        
         setTimeout(() => {
           setShowMatchCelebration(currentName);
           triggerConfetti();
