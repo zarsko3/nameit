@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import Onboarding from './components/Onboarding';
 import SwipeCard from './components/SwipeCard';
 import History from './components/History';
+import InstallPrompt from './components/InstallPrompt';
 import { BabyName, AppView, UserProfile, SwipeRecord, Match, Gender, FilterConfig } from './types';
 import { INITIAL_NAMES } from './constants';
 import { Sparkles, SlidersHorizontal, X, CircleCheck } from 'lucide-react';
@@ -325,6 +326,9 @@ const App: React.FC = () => {
             </button>
         </div>
       )}
+
+      {/* PWA Install Prompt - Shows only on mobile, when logged in, and not in standalone mode */}
+      <InstallPrompt isLoggedIn={profile !== null} />
     </Layout>
   );
 };

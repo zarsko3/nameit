@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NameIT Icon Generator</title>
+  <style>
+    body { font-family: system-ui; padding: 20px; background: #f5f5f5; }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { color: #10B981; }
+    .icons { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px; }
+    .icon-box { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .icon-box img { display: block; margin: 0 auto 10px; }
+    button { background: #10B981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin: 5px; }
+    button:hover { background: #059669; }
+    .instructions { background: #E8F5E9; padding: 20px; border-radius: 12px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🍼 NameIT Icon Generator</h1>
+    <p>Generate PWA icons for your app. Click each button to download the icon.</p>
+    
+    <div class="icons" id="icons"></div>
+    
+    <div class="instructions">
+      <h3>📋 Instructions:</h3>
+      <ol>
+        <li>Click each "Download" button to save the icon</li>
+        <li>Save the files to <code>public/icons/</code> folder</li>
+        <li>Name them exactly as shown (icon-72x72.png, etc.)</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+    
+    function createIcon(size) {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#10B981');
+      gradient.addColorStop(1, '#059669');
+      
+      // Rounded rectangle background
+      const radius = size * 0.18;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, size, size, radius);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      
+      // White circle (baby head)
+      ctx.beginPath();
+      ctx.arc(size * 0.5, size * 0.35, size * 0.14, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+      
+      // White ellipse (baby body)
+      ctx.beginPath();
+      ctx.ellipse(size * 0.5, size * 0.62, size * 0.2, size * 0.15, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // "N" letter
+      ctx.font = `bold ${size * 0.15}px Arial`;
+      ctx.fillStyle = '#10B981';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('N', size * 0.5, size * 0.38);
+      
+      // Small heart
+      const heartSize = size * 0.1;
+      const hx = size * 0.5;
+      const hy = size * 0.75;
+      ctx.beginPath();
+      ctx.moveTo(hx, hy + heartSize * 0.3);
+      ctx.bezierCurveTo(hx - heartSize, hy - heartSize * 0.3, hx - heartSize, hy - heartSize, hx, hy - heartSize * 0.5);
+      ctx.bezierCurveTo(hx + heartSize, hy - heartSize, hx + heartSize, hy - heartSize * 0.3, hx, hy + heartSize * 0.3);
+      ctx.fillStyle = '#10B981';
+      ctx.fill();
+      
+      return canvas;
+    }
+    
+    function downloadIcon(size) {
+      const canvas = createIcon(size);
+      const link = document.createElement('a');
+      link.download = `icon-${size}x${size}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+    
+    // Generate preview icons
+    const container = document.getElementById('icons');
+    sizes.forEach(size => {
+      const box = document.createElement('div');
+      box.className = 'icon-box';
+      
+      const canvas = createIcon(size);
+      const img = document.createElement('img');
+      img.src = canvas.toDataURL();
+      img.style.width = Math.min(size, 128) + 'px';
+      img.style.height = Math.min(size, 128) + 'px';
+      
+      const label = document.createElement('div');
+      label.textContent = `${size}x${size}`;
+      
+      const btn = document.createElement('button');
+      btn.textContent = 'Download';
+      btn.onclick = () => downloadIcon(size);
+      
+      box.appendChild(img);
+      box.appendChild(label);
+      box.appendChild(btn);
+      container.appendChild(box);
+    });
+    
+    // Download all button
+    const allBtn = document.createElement('button');
+    allBtn.textContent = '⬇️ Download All Icons';
+    allBtn.style.display = 'block';
+    allBtn.style.margin = '20px auto';
+    allBtn.style.padding = '15px 30px';
+    allBtn.style.fontSize = '16px';
+    allBtn.onclick = () => {
+      sizes.forEach((size, i) => {
+        setTimeout(() => downloadIcon(size), i * 200);
+      });
+    };
+    container.parentNode.insertBefore(allBtn, container.nextSibling);
+  </script>
+</body>
+</html>
+
