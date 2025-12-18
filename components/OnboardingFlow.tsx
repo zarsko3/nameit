@@ -61,7 +61,7 @@ const SimpleTagInput: React.FC<{
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAdd())}
           placeholder={placeholder}
-          className={`flex-1 p-3 bg-white/80 rounded-xl border ${isBlacklist ? 'border-red-200 focus:ring-red-100' : 'border-slate-200 focus:ring-slate-100'} focus:ring-2 outline-none text-right font-medium placeholder:text-gray-300 transition-all`}
+          className={`flex-1 p-3.5 bg-white rounded-xl border ${isBlacklist ? 'border-red-200 focus:ring-red-100' : 'border-slate-200 focus:ring-slate-100'} focus:ring-2 outline-none text-right font-medium placeholder:text-gray-300 transition-all`}
         />
         <button
           onClick={handleAdd}
@@ -71,11 +71,11 @@ const SimpleTagInput: React.FC<{
           <Plus size={20} />
         </button>
       </div>
-      <div className="flex flex-wrap gap-2 min-h-[32px]">
+      <div className="flex flex-wrap gap-2 min-h-[36px]">
         {tags.map((tag) => (
           <span
             key={tag}
-            className={`inline-flex items-center gap-1 px-3 py-1 ${isBlacklist ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-700'} rounded-full text-sm font-medium`}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${isBlacklist ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-700'} rounded-full text-sm font-medium`}
           >
             {tag}
             <button onClick={() => onRemove(tag)} className="hover:text-red-500 transition-colors">
@@ -153,7 +153,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
   // Progress dots
   const ProgressDots = () => (
-    <div className="flex justify-center gap-2 mb-8">
+    <div className="flex justify-center gap-2">
       {Array.from({ length: TOTAL_STEPS }, (_, i) => (
         <div
           key={i}
@@ -169,44 +169,42 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     </div>
   );
 
-  // Step indicator text
-  const StepIndicator = () => (
-    <p className="text-center text-sm text-gray-400 mb-2">
-      שלב {currentStep} מתוך {TOTAL_STEPS}
-    </p>
-  );
-
   return (
-    <div className="h-full flex flex-col bg-gradient-to-b from-white to-gray-50 overflow-hidden" dir="rtl">
-      {/* Header with Skip */}
-      <div className="p-6 flex justify-between items-center shrink-0">
-        {currentStep > 1 ? (
+    <div className="h-full flex flex-col bg-gradient-to-b from-white via-gray-50/50 to-gray-100" dir="rtl">
+      {/* Fixed Header with Safe Area */}
+      <div className="shrink-0 bg-white/80 backdrop-blur-sm border-b border-gray-100 safe-top">
+        <div className="px-5 py-4 flex justify-between items-center">
+          {currentStep > 1 ? (
+            <button 
+              onClick={handleBack}
+              className="flex items-center gap-1 text-gray-400 hover:text-gray-600 transition-colors py-2"
+            >
+              <ArrowRight size={20} />
+              <span className="text-sm font-medium">חזרה</span>
+            </button>
+          ) : (
+            <div className="w-16" />
+          )}
+          
+          {/* Step indicator in header */}
+          <div className="flex flex-col items-center">
+            <p className="text-xs text-gray-400 mb-1.5">שלב {currentStep} מתוך {TOTAL_STEPS}</p>
+            <ProgressDots />
+          </div>
+          
           <button 
-            onClick={handleBack}
-            className="flex items-center gap-1 text-gray-400 hover:text-gray-600 transition-colors"
+            onClick={handleSkip}
+            className="text-gray-400 hover:text-gray-600 text-sm font-medium transition-colors py-2"
           >
-            <ArrowRight size={20} />
-            <span className="text-sm font-medium">חזרה</span>
+            דלג
           </button>
-        ) : (
-          <div />
-        )}
-        <button 
-          onClick={handleSkip}
-          className="text-gray-400 hover:text-gray-600 text-sm font-medium transition-colors"
-        >
-          דלג לאפליקציה
-        </button>
+        </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 flex flex-col px-6 overflow-hidden">
-        <StepIndicator />
-        <ProgressDots />
-
-        {/* Step Content with Animation */}
+      {/* Scrollable Content Area */}
+      <div className="flex-1 overflow-y-auto scroll-smooth">
         <div 
-          className={`flex-1 flex flex-col transition-all duration-200 ${
+          className={`min-h-full flex flex-col px-6 py-8 transition-all duration-200 ${
             isAnimating 
               ? slideDirection === 'left' 
                 ? 'opacity-0 -translate-x-4' 
@@ -217,36 +215,42 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           {/* Step 1: Gender Selection */}
           {currentStep === 1 && (
             <div className="flex-1 flex flex-col">
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Baby size={32} className="text-pink-400" />
+              {/* Header Card */}
+              <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-pink-100 to-rose-100 rounded-2xl flex items-center justify-center shrink-0">
+                    <Baby size={28} className="text-pink-500" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-800 font-heebo mb-1">
+                      מה המגדר הצפוי?
+                    </h2>
+                    <p className="text-gray-400 text-sm">
+                      בחרו כדי שנציג שמות מתאימים
+                    </p>
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2 font-heebo">
-                  מה המגדר הצפוי?
-                </h2>
-                <p className="text-gray-400 text-sm">
-                  בחרו את המגדר כדי שנציג לכם שמות מתאימים
-                </p>
               </div>
 
-              <div className="space-y-3 flex-1">
+              {/* Options */}
+              <div className="space-y-3">
                 <button
                   onClick={() => setSelectedGender(Gender.BOY)}
                   className={`w-full p-5 rounded-2xl font-bold transition-all flex items-center gap-4 ${
                     selectedGender === Gender.BOY
-                      ? 'bg-blue-500 text-white shadow-lg shadow-blue-200'
-                      : 'bg-white text-blue-500 border-2 border-blue-100 hover:border-blue-200'
+                      ? 'bg-blue-500 text-white shadow-lg shadow-blue-200/50'
+                      : 'bg-white text-blue-600 border-2 border-blue-100 hover:border-blue-200 hover:bg-blue-50/50'
                   }`}
                 >
                   <span className="text-3xl">👦</span>
-                  <div className="text-right">
-                    <span className="text-lg">בן</span>
+                  <div className="text-right flex-1">
+                    <span className="text-lg block">בן</span>
                     <p className={`text-sm ${selectedGender === Gender.BOY ? 'text-blue-100' : 'text-gray-400'}`}>
                       נציג שמות לבנים
                     </p>
                   </div>
                   {selectedGender === Gender.BOY && (
-                    <Check size={24} className="mr-auto" />
+                    <Check size={24} />
                   )}
                 </button>
 
@@ -254,19 +258,19 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   onClick={() => setSelectedGender(Gender.GIRL)}
                   className={`w-full p-5 rounded-2xl font-bold transition-all flex items-center gap-4 ${
                     selectedGender === Gender.GIRL
-                      ? 'bg-pink-500 text-white shadow-lg shadow-pink-200'
-                      : 'bg-white text-pink-500 border-2 border-pink-100 hover:border-pink-200'
+                      ? 'bg-pink-500 text-white shadow-lg shadow-pink-200/50'
+                      : 'bg-white text-pink-600 border-2 border-pink-100 hover:border-pink-200 hover:bg-pink-50/50'
                   }`}
                 >
                   <span className="text-3xl">👧</span>
-                  <div className="text-right">
-                    <span className="text-lg">בת</span>
+                  <div className="text-right flex-1">
+                    <span className="text-lg block">בת</span>
                     <p className={`text-sm ${selectedGender === Gender.GIRL ? 'text-pink-100' : 'text-gray-400'}`}>
                       נציג שמות לבנות
                     </p>
                   </div>
                   {selectedGender === Gender.GIRL && (
-                    <Check size={24} className="mr-auto" />
+                    <Check size={24} />
                   )}
                 </button>
 
@@ -274,41 +278,50 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   onClick={() => setSelectedGender(null)}
                   className={`w-full p-5 rounded-2xl font-bold transition-all flex items-center gap-4 ${
                     selectedGender === null
-                      ? 'bg-purple-500 text-white shadow-lg shadow-purple-200'
-                      : 'bg-white text-purple-500 border-2 border-purple-100 hover:border-purple-200'
+                      ? 'bg-purple-500 text-white shadow-lg shadow-purple-200/50'
+                      : 'bg-white text-purple-600 border-2 border-purple-100 hover:border-purple-200 hover:bg-purple-50/50'
                   }`}
                 >
                   <span className="text-3xl">✨</span>
-                  <div className="text-right">
-                    <span className="text-lg">עדיין לא יודעים</span>
+                  <div className="text-right flex-1">
+                    <span className="text-lg block">עדיין לא יודעים</span>
                     <p className={`text-sm ${selectedGender === null ? 'text-purple-100' : 'text-gray-400'}`}>
                       נציג את כל השמות
                     </p>
                   </div>
                   {selectedGender === null && (
-                    <Check size={24} className="mr-auto" />
+                    <Check size={24} />
                   )}
                 </button>
               </div>
+              
+              {/* Spacer for bottom button */}
+              <div className="h-32" />
             </div>
           )}
 
           {/* Step 2: Style Preferences */}
           {currentStep === 2 && (
             <div className="flex-1 flex flex-col">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Palette size={32} className="text-emerald-500" />
+              {/* Header Card */}
+              <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center shrink-0">
+                    <Palette size={28} className="text-emerald-500" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-800 font-heebo mb-1">
+                      איזה סגנון שמות?
+                    </h2>
+                    <p className="text-gray-400 text-sm">
+                      בחרו אחד או יותר (אופציונלי)
+                    </p>
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2 font-heebo">
-                  איזה סגנון שמות?
-                </h2>
-                <p className="text-gray-400 text-sm">
-                  בחרו סגנון אחד או יותר (או דלגו לכל השמות)
-                </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 flex-1">
+              {/* Style Grid */}
+              <div className="grid grid-cols-2 gap-3">
                 {NAME_STYLE_OPTIONS.map((option) => {
                   const Icon = option.icon;
                   const isSelected = selectedStyles.includes(option.value);
@@ -316,20 +329,20 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     <button
                       key={option.value}
                       onClick={() => toggleStyle(option.value)}
-                      className={`p-4 rounded-2xl transition-all text-right relative overflow-hidden ${
+                      className={`p-5 rounded-2xl transition-all text-right relative overflow-hidden ${
                         isSelected
-                          ? 'bg-emerald-500 text-white shadow-lg'
-                          : 'bg-white text-gray-700 border-2 border-gray-100 hover:border-emerald-200'
+                          ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200/50'
+                          : 'bg-white text-gray-700 border-2 border-gray-100 hover:border-emerald-200 hover:bg-emerald-50/30'
                       }`}
                     >
                       {isSelected && (
-                        <div className="absolute top-2 left-2">
+                        <div className="absolute top-3 left-3">
                           <Check size={18} />
                         </div>
                       )}
-                      <Icon size={28} className={`mb-2 ${isSelected ? 'text-white' : 'text-emerald-400'}`} />
+                      <Icon size={28} className={`mb-3 ${isSelected ? 'text-white' : 'text-emerald-400'}`} />
                       <p className="font-bold text-lg mb-1">{option.label}</p>
-                      <p className={`text-xs ${isSelected ? 'text-emerald-100' : 'text-gray-400'}`}>
+                      <p className={`text-xs leading-relaxed ${isSelected ? 'text-emerald-100' : 'text-gray-400'}`}>
                         {option.description}
                       </p>
                     </button>
@@ -338,38 +351,50 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               </div>
 
               {selectedStyles.length === 0 && (
-                <p className="text-center text-sm text-gray-400 mt-4">
-                  לא בחרתם? נציג לכם את כל סגנונות השמות
-                </p>
+                <div className="mt-6 bg-gray-50 rounded-2xl p-4 text-center">
+                  <p className="text-sm text-gray-400">
+                    לא בחרתם? נציג לכם את כל סגנונות השמות
+                  </p>
+                </div>
               )}
+              
+              {/* Spacer for bottom button */}
+              <div className="h-32" />
             </div>
           )}
 
           {/* Step 3: Exclusions */}
           {currentStep === 3 && (
-            <div className="flex-1 flex flex-col overflow-y-auto">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <ListX size={32} className="text-slate-500" />
+            <div className="flex-1 flex flex-col">
+              {/* Header Card */}
+              <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-slate-100 to-gray-100 rounded-2xl flex items-center justify-center shrink-0">
+                    <ListX size={28} className="text-slate-500" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-800 font-heebo mb-1">
+                      שמות להחריג
+                    </h2>
+                    <p className="text-gray-400 text-sm">
+                      שמות שלא תרצו לראות (אופציונלי)
+                    </p>
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2 font-heebo">
-                  שמות להחריג
-                </h2>
-                <p className="text-gray-400 text-sm">
-                  הוסיפו שמות שלא תרצו לראות (אופציונלי)
-                </p>
               </div>
 
-              <div className="space-y-6 flex-1">
-                {/* Protected Names */}
-                <div className="bg-white rounded-2xl p-4 border border-slate-100">
-                  <div className="flex items-center gap-2 mb-3">
-                    <ShieldCheck size={20} className="text-slate-500" />
-                    <h3 className="font-bold text-gray-800">שמות מוגנים</h3>
+              <div className="space-y-5">
+                {/* Protected Names Card */}
+                <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                      <ShieldCheck size={20} className="text-slate-500" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-800">שמות מוגנים</h3>
+                      <p className="text-xs text-gray-400">שמות של בני משפחה קיימים</p>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-400 mb-3">
-                    שמות של בני משפחה שכבר קיימים
-                  </p>
                   <SimpleTagInput
                     tags={protectedNames}
                     onAdd={(name) => setProtectedNames(prev => [...prev, name])}
@@ -379,15 +404,17 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   />
                 </div>
 
-                {/* Blacklist */}
-                <div className="bg-white rounded-2xl p-4 border border-red-100">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Trash2 size={20} className="text-red-400" />
-                    <h3 className="font-bold text-gray-800">רשימה שחורה</h3>
+                {/* Blacklist Card */}
+                <div className="bg-white rounded-2xl p-5 border border-red-100 shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
+                      <Trash2 size={20} className="text-red-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-800">רשימה שחורה</h3>
+                      <p className="text-xs text-gray-400">שמות שמעדיפים להימנע מהם</p>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-400 mb-3">
-                    שמות שמעדיפים להימנע מהם
-                  </p>
                   <SimpleTagInput
                     tags={blacklistedNames}
                     onAdd={(name) => setBlacklistedNames(prev => [...prev, name])}
@@ -397,42 +424,46 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   />
                 </div>
               </div>
+              
+              {/* Spacer for bottom button */}
+              <div className="h-32" />
             </div>
           )}
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="p-6 shrink-0 bg-white border-t border-gray-100">
-        <button
-          onClick={handleNext}
-          className="w-full py-4 bg-emerald-500 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all active:scale-[0.98] shadow-lg shadow-emerald-200"
-        >
-          {currentStep === TOTAL_STEPS ? (
-            <>
-              <span>יוצאים לדרך!</span>
-              <Sparkles size={22} />
-            </>
-          ) : (
-            <>
-              <span>המשך</span>
-              <ArrowLeft size={22} />
-            </>
-          )}
-        </button>
-        
-        {currentStep < TOTAL_STEPS && (
+      {/* Fixed Bottom Navigation with Safe Area */}
+      <div className="shrink-0 bg-white/95 backdrop-blur-md border-t border-gray-100 safe-bottom">
+        <div className="px-6 py-4">
           <button
-            onClick={handleSkip}
-            className="w-full mt-3 py-3 text-gray-400 font-medium text-sm hover:text-gray-600 transition-colors"
+            onClick={handleNext}
+            className="w-full py-4 bg-emerald-500 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all active:scale-[0.98] shadow-lg shadow-emerald-200/50"
           >
-            אעשה את זה אחר כך
+            {currentStep === TOTAL_STEPS ? (
+              <>
+                <span>יוצאים לדרך!</span>
+                <Sparkles size={22} />
+              </>
+            ) : (
+              <>
+                <span>המשך</span>
+                <ArrowLeft size={22} />
+              </>
+            )}
           </button>
-        )}
+          
+          {currentStep < TOTAL_STEPS && (
+            <button
+              onClick={handleSkip}
+              className="w-full mt-2 py-3 text-gray-400 font-medium text-sm hover:text-gray-600 transition-colors"
+            >
+              אעשה את זה אחר כך
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
 export default OnboardingFlow;
-
