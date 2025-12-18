@@ -26,7 +26,7 @@ import {
 } from './services/firestoreService';
 
 const AppContent: React.FC = () => {
-  const { currentUser, loading: authLoading, signUp, login, logout } = useAuth();
+  const { currentUser, loading: authLoading, signUp, login, loginWithGoogle, logout } = useAuth();
   
   const [isSplash, setIsSplash] = useState(true);
   const [view, setView] = useState<AppView>('AUTH');
@@ -345,6 +345,7 @@ const AppContent: React.FC = () => {
           onAuthSuccess={handleAuthSuccess}
           signUp={signUp}
           login={login}
+          loginWithGoogle={loginWithGoogle}
         />
       )}
 
