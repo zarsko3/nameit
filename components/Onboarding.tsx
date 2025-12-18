@@ -36,11 +36,11 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         <div className="text-center animate-fade-up">
           <div className="relative inline-block mb-4">
             {/* Logo with glow effect */}
-            <div className="absolute inset-0 w-36 h-36 mx-auto bg-gradient-to-br from-pink-300/30 via-purple-300/20 to-teal-300/30 blur-2xl animate-pulse" />
+            <div className="absolute inset-0 w-52 h-52 mx-auto bg-gradient-to-br from-pink-300/30 via-purple-300/20 to-teal-300/30 blur-2xl animate-pulse" />
             <img 
               src="/LOGO.png" 
               alt="NameIT" 
-              className="relative w-36 h-36 object-contain drop-shadow-2xl"
+              className="relative w-52 h-52 object-contain drop-shadow-2xl"
             />
           </div>
           <p className="text-gray-400 max-w-[220px] mx-auto text-sm leading-relaxed">

@@ -21,7 +21,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, sh
             <img 
               src="/LOGO.png" 
               alt="NameIT" 
-              className="h-10 w-auto object-contain"
+              className="h-14 w-auto object-contain"
             />
           </div>
           
