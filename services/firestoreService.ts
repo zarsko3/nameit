@@ -3,6 +3,7 @@ import {
   setDoc, 
   getDoc, 
   updateDoc,
+  deleteDoc,
   collection,
   query,
   where,
@@ -129,6 +130,18 @@ export const subscribeToRoomSwipes = (
   });
 };
 
+/**
+ * Delete a swipe record (for undo or unlike)
+ */
+export const deleteSwipe = async (roomId: string, userId: string, nameId: string): Promise<void> => {
+  const swipeId = `${roomId}_${userId}_${nameId}`;
+  const swipeRef = doc(db, SWIPES_COLLECTION, swipeId);
+  
+  console.log('🗑️ Deleting swipe:', swipeId);
+  await deleteDoc(swipeRef);
+  console.log('✅ Swipe deleted!');
+};
+
 // ============ MATCH OPERATIONS ============
 
 /**
@@ -157,6 +170,18 @@ export const updateMatchRating = async (roomId: string, nameId: string, rating: 
   const matchRef = doc(db, MATCHES_COLLECTION, matchId);
   
   await updateDoc(matchRef, { rating });
+};
+
+/**
+ * Delete a match (when one user unlikes a matched name)
+ */
+export const deleteMatch = async (roomId: string, nameId: string): Promise<void> => {
+  const matchId = `${roomId}_${nameId}`;
+  const matchRef = doc(db, MATCHES_COLLECTION, matchId);
+  
+  console.log('💔 Deleting match:', matchId);
+  await deleteDoc(matchRef);
+  console.log('✅ Match deleted!');
 };
 
 /**

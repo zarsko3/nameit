@@ -19,8 +19,10 @@ import {
   getUserProfile, 
   subscribeToUserProfile,
   saveSwipe,
+  deleteSwipe,
   subscribeToRoomSwipes,
   saveMatch,
+  deleteMatch,
   subscribeToRoomMatches,
   subscribeToPartnerConnection,
   saveRoomSettings,
@@ -462,21 +464,93 @@ const AppContent: React.FC = () => {
       }
     }
     
+    // Track this swipe for potential undo
+    lastSwipedNameRef.current = { nameId: currentName.id, liked };
+    
     // Move to next name in the stable session list
     setCurrentNameIndex(prev => prev + 1);
   };
 
-  const undoLastSwipe = () => {
-    // Note: Undo is more complex with Firestore - would need to delete the swipe doc
-    // For now, just move back in the local index
-    if (currentNameIndex > 0) {
+  // Track last swiped name for undo
+  const lastSwipedNameRef = useRef<{ nameId: string; liked: boolean } | null>(null);
+
+  const undoLastSwipe = async () => {
+    if (!profile || !currentUser || currentNameIndex <= 0) return;
+    
+    // Get the last swiped name from the session
+    const lastIndex = currentNameIndex - 1;
+    const lastSwipedName = sessionNames[lastIndex];
+    
+    if (lastSwipedName && lastSwipedNameRef.current?.nameId === lastSwipedName.id) {
+      try {
+        // Delete the swipe from Firestore
+        await deleteSwipe(profile.roomId, currentUser.uid, lastSwipedName.id);
+        
+        // If it was a like, also remove from dislikedNames if accidentally added
+        // (This shouldn't happen but just in case)
+        
+        // If it was a dislike, remove from dislikedNames
+        if (!lastSwipedNameRef.current.liked) {
+          const currentDisliked = profile.dislikedNames || [];
+          const updatedDisliked = currentDisliked.filter(id => id !== lastSwipedName.id);
+          await saveUserProfile(currentUser.uid, { dislikedNames: updatedDisliked });
+          setProfile(prev => prev ? { ...prev, dislikedNames: updatedDisliked } : prev);
+        }
+        
+        // Move back in the index
+        setCurrentNameIndex(prev => prev - 1);
+        lastSwipedNameRef.current = null;
+        
+        console.log('↩️ Undo successful for:', lastSwipedName.hebrew);
+      } catch (error) {
+        console.error('Failed to undo swipe:', error);
+      }
+    } else {
+      // Fallback: just move back locally if we don't have the swipe info
       setCurrentNameIndex(prev => prev - 1);
+    }
+  };
+
+  // Remove a liked name (from History screen)
+  const handleRemoveLike = async (nameId: string) => {
+    if (!profile || !currentUser) return;
+    
+    try {
+      // Delete the swipe from Firestore
+      await deleteSwipe(profile.roomId, currentUser.uid, nameId);
+      console.log('💔 Like removed for name:', nameId);
+    } catch (error) {
+      console.error('Failed to remove like:', error);
+    }
+  };
+
+  // Remove a match (from History screen)
+  const handleRemoveMatch = async (nameId: string) => {
+    if (!profile || !currentUser) return;
+    
+    try {
+      // Delete the match from Firestore
+      await deleteMatch(profile.roomId, nameId);
+      
+      // Also delete the user's swipe for this name
+      await deleteSwipe(profile.roomId, currentUser.uid, nameId);
+      
+      console.log('💔 Match removed for name:', nameId);
+    } catch (error) {
+      console.error('Failed to remove match:', error);
     }
   };
 
   const handleRate = async (nameId: string, rating: number) => {
     if (!profile) return;
-    // Update in Firestore would go here
+    // Update in Firestore
+    try {
+      const { updateMatchRating } = await import('./services/firestoreService');
+      await updateMatchRating(profile.roomId, nameId, rating);
+    } catch (error) {
+      console.error('Failed to update rating:', error);
+    }
+    // Also update local state
     setMatches(prev => prev.map(m => m.nameId === nameId ? { ...m, rating } : m));
   };
 
@@ -655,8 +729,11 @@ const AppContent: React.FC = () => {
         <History 
           names={INITIAL_NAMES} 
           swipes={swipes} 
-          matches={matches} 
+          matches={matches}
+          currentUserId={currentUser?.uid}
           onRate={handleRate}
+          onRemoveLike={handleRemoveLike}
+          onRemoveMatch={handleRemoveMatch}
         />
       )}
 
