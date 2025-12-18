@@ -14,14 +14,16 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, showNav, isConnected }) => {
   return (
     <div className="flex flex-col h-screen max-w-md mx-auto bg-white shadow-sm relative overflow-hidden font-assistant safe-top safe-bottom">
-      {/* Header */}
-      <header className="px-6 py-4 border-b border-gray-100 bg-white flex items-center justify-center shrink-0">
-        <img 
-          src="/LOGO.png" 
-          alt="NameIT" 
-          className="h-14 w-auto object-contain"
-        />
-      </header>
+      {/* Header - only show on main app screens */}
+      {showNav && (
+        <header className="px-6 py-4 border-b border-gray-100 bg-white flex items-center justify-center shrink-0">
+          <img 
+            src="/LOGO.png" 
+            alt="NameIT" 
+            className="h-14 w-auto object-contain"
+          />
+        </header>
+      )}
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto relative bg-white">
