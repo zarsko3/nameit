@@ -60,14 +60,14 @@ const History: React.FC<HistoryProps> = ({
       <div className="p-6 space-y-8 pb-10">
         {/* Matches Section */}
         <section>
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-2">
-              <Award className="text-baby-pink-400" size={22} />
-              <h2 className="text-lg font-bold text-dreamy-slate-700">התאמות משותפות</h2>
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex items-center gap-3 bg-white/40 backdrop-blur-md border border-white/60 rounded-full px-6 py-2.5 shadow-sm">
+              <Award className="text-baby-pink-400" size={20} />
+              <h2 className="text-base font-bold text-dreamy-slate-700">התאמות משותפות</h2>
+              <span className="px-2.5 py-0.5 bg-baby-pink-100/80 text-baby-pink-500 rounded-full text-xs font-bold">
+                {matches.length}
+              </span>
             </div>
-            <span className="px-3 py-1 bg-baby-pink-100/80 text-baby-pink-500 rounded-full text-xs font-bold">
-              {matches.length} שמות
-            </span>
           </div>
           
           {matchedNames.length === 0 ? (
@@ -143,12 +143,14 @@ const History: React.FC<HistoryProps> = ({
 
         {/* Liked Names Section */}
         <section>
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-2">
-              <Heart className="text-baby-pink-300" size={20} />
-              <h2 className="text-sm font-bold text-dreamy-slate-500 uppercase tracking-wider">שמות שאהבתי</h2>
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex items-center gap-3 bg-white/40 backdrop-blur-md border border-white/60 rounded-full px-5 py-2 shadow-sm">
+              <Heart className="text-baby-pink-300" size={18} />
+              <h2 className="text-sm font-bold text-dreamy-slate-600">שמות שאהבתי</h2>
+              <span className="px-2 py-0.5 bg-baby-lavender-100/80 text-baby-lavender-400 rounded-full text-xs font-bold">
+                {likedNames.length}
+              </span>
             </div>
-            <span className="text-xs text-dreamy-slate-400">{likedNames.length} שמות</span>
           </div>
           
           {likedNames.length === 0 ? (

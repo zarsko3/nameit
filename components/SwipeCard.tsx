@@ -192,13 +192,13 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
   const animationStyles = getTransformStyles();
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden px-[55px]">
-      {/* Card Stack Container */}
-      <div className="relative w-[85%] max-w-xs min-h-[70vh] h-[94%]">
+    <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden px-3 md:px-6 py-2">
+      {/* Card Stack Container - Responsive: compact on mobile, clamped on desktop */}
+      <div className="relative w-[80%] max-w-[320px] md:w-[380px] md:max-w-md h-[55dvh] min-h-[420px] md:h-[65vh]">
         
         {/* Back Card (Bottom) - Blue Mist, wider fan */}
         <div 
-          className="absolute inset-0 rounded-[2.5rem] pointer-events-none box-border"
+          className="absolute inset-0 rounded-[2rem] md:rounded-[2.5rem] pointer-events-none box-border"
           style={{
             transform: 'rotate(-10deg) translateX(-10px)',
             transformOrigin: 'center center',
@@ -206,13 +206,13 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
             background: 'rgba(191, 219, 254, 0.55)',
             backdropFilter: 'blur(24px)',
             boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
-            border: '4.5px solid rgba(255, 255, 255, 0.8)',
+            border: '4px solid rgba(255, 255, 255, 0.8)',
           }}
         />
         
         {/* Middle Card - Pink Mist, wider fan */}
         <div 
-          className="absolute inset-0 rounded-[2.5rem] pointer-events-none box-border"
+          className="absolute inset-0 rounded-[2rem] md:rounded-[2.5rem] pointer-events-none box-border"
           style={{
             transform: 'rotate(7deg) translateX(8px)',
             transformOrigin: 'center center',
@@ -220,7 +220,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
             background: 'rgba(252, 211, 217, 0.55)',
             backdropFilter: 'blur(24px)',
             boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
-            border: '4.5px solid rgba(255, 255, 255, 0.8)',
+            border: '4px solid rgba(255, 255, 255, 0.8)',
           }}
         />
 
@@ -244,31 +244,31 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
           onMouseLeave={handleMouseLeave}
         >
           <div 
-            className={`w-full h-full rounded-[2.5rem] flex flex-col relative overflow-hidden box-border ${showInfo ? 'z-20' : ''}`}
+            className={`w-full h-full rounded-[2rem] md:rounded-[2.5rem] flex flex-col justify-between relative overflow-hidden box-border ${showInfo ? 'z-20' : ''}`}
             style={{
               background: cardTint,
               backdropFilter: 'blur(20px)',
               boxShadow: '0 10px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04)',
-              border: '4.5px solid rgba(255, 255, 255, 0.8)',
+              border: '4px solid rgba(255, 255, 255, 0.8)',
             }}
           >
           
-          {/* Swipe Direction Overlay Indicators */}
+          {/* Swipe Direction Overlay Indicators - Responsive */}
           {isDragging && swipeDirection && (
             <>
               {/* LIKE Indicator - Soft mint/teal (Right swipe) */}
               <div 
-                className="absolute inset-0 bg-baby-mint-200/40 rounded-[2.5rem] flex flex-col items-center justify-center z-40 pointer-events-none transition-opacity duration-150"
+                className="absolute inset-0 bg-baby-mint-200/40 rounded-[2rem] md:rounded-[2.5rem] flex flex-col items-center justify-center z-40 pointer-events-none transition-opacity duration-150"
                 style={{ opacity: swipeDirection === 'right' ? swipeIntensity : 0 }}
               >
                 <div 
-                  className="w-24 h-24 bg-gradient-to-br from-baby-mint-300 to-baby-mint-400 rounded-full flex items-center justify-center shadow-soft-mint"
+                  className="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-baby-mint-300 to-baby-mint-400 rounded-full flex items-center justify-center shadow-soft-mint"
                   style={{ transform: `scale(${0.5 + swipeIntensity * 0.5})` }}
                 >
-                  <Heart size={48} className="text-white" fill="white" />
+                  <Heart size={32} className="text-white md:w-12 md:h-12" fill="white" />
                 </div>
                 <span 
-                  className="mt-4 text-dreamy-slate-600 font-bold text-xl uppercase tracking-wider"
+                  className="mt-3 md:mt-4 text-dreamy-slate-600 font-bold text-base md:text-xl uppercase tracking-wider"
                   style={{ opacity: swipeIntensity }}
                 >
                   אהבתי
@@ -277,17 +277,17 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
               
               {/* DISLIKE Indicator - Soft rose/pink (Left swipe) */}
               <div 
-                className="absolute inset-0 bg-baby-pink-200/40 rounded-[2.5rem] flex flex-col items-center justify-center z-40 pointer-events-none transition-opacity duration-150"
+                className="absolute inset-0 bg-baby-pink-200/40 rounded-[2rem] md:rounded-[2.5rem] flex flex-col items-center justify-center z-40 pointer-events-none transition-opacity duration-150"
                 style={{ opacity: swipeDirection === 'left' ? swipeIntensity : 0 }}
               >
                 <div 
-                  className="w-24 h-24 bg-gradient-to-br from-baby-pink-300 to-baby-pink-400 rounded-full flex items-center justify-center shadow-soft-pink"
+                  className="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-baby-pink-300 to-baby-pink-400 rounded-full flex items-center justify-center shadow-soft-pink"
                   style={{ transform: `scale(${0.5 + swipeIntensity * 0.5})` }}
                 >
-                  <X size={48} className="text-white" />
+                  <X size={32} className="text-white md:w-12 md:h-12" />
                 </div>
                 <span 
-                  className="mt-4 text-dreamy-slate-600 font-bold text-xl uppercase tracking-wider"
+                  className="mt-3 md:mt-4 text-dreamy-slate-600 font-bold text-base md:text-xl uppercase tracking-wider"
                   style={{ opacity: swipeIntensity }}
                 >
                   לא אהבתי
@@ -296,78 +296,78 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
             </>
           )}
           
-          {/* ===== TOP SECTION: Header with Tags & Actions - Transparent, no borders ===== */}
-          <div className="w-full px-6 pt-6 flex justify-between items-center z-10 shrink-0 bg-transparent">
-             <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider border ${genderStyle.bg} ${genderStyle.text} ${genderStyle.border}`}>
+          {/* ===== TOP SECTION: Header with Tags & Actions - Responsive padding ===== */}
+          <div className="w-full px-4 md:px-6 pt-4 md:pt-6 flex justify-between items-center z-10 shrink-0 bg-transparent">
+             <span className={`px-3 md:px-4 py-1 md:py-1.5 rounded-full text-[10px] md:text-[11px] font-bold uppercase tracking-wider border ${genderStyle.bg} ${genderStyle.text} ${genderStyle.border}`}>
                {name.gender === Gender.BOY ? 'בן' : name.gender === Gender.GIRL ? 'בת' : 'יוניסקס'}
              </span>
-             <div className="flex gap-2">
+             <div className="flex gap-1.5 md:gap-2">
                 <button 
                   onClick={handleInfoClick}
-                  className="text-baby-blue-400 hover:text-baby-blue-500 transition-colors p-2.5 rounded-full bg-white/60 border border-white/50"
+                  className="text-baby-blue-400 hover:text-baby-blue-500 transition-colors p-2 md:p-2.5 rounded-full bg-white/60 border border-white/50"
                 >
-                  <Info size={20} />
+                  <Info size={18} className="md:w-5 md:h-5" />
                 </button>
                 {canUndo && (
                   <button 
                     onClick={onUndo}
-                    className="text-dreamy-slate-500 p-2.5 rounded-full bg-white/60 border border-white/50 hover:bg-white/80 transition-all flex items-center gap-1.5 px-3"
+                    className="text-dreamy-slate-500 p-2 md:p-2.5 rounded-full bg-white/60 border border-white/50 hover:bg-white/80 transition-all flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3"
                   >
-                    <RotateCcw size={16} />
-                    <span className="text-[11px] font-bold">חזור</span>
+                    <RotateCcw size={14} className="md:w-4 md:h-4" />
+                    <span className="text-[10px] md:text-[11px] font-bold">חזור</span>
                   </button>
                 )}
              </div>
           </div>
 
-          {/* ===== CENTER SECTION: Name, Transliteration, Meaning - Centered vertically ===== */}
-          <div className="flex-1 flex flex-col items-center justify-center px-8 py-8 text-center min-h-0 relative">
-            {/* Watermark - Large faint gender icon */}
+          {/* ===== CENTER SECTION: Name, Transliteration, Meaning - Responsive typography ===== */}
+          <div className="flex-1 flex flex-col items-center justify-center px-4 md:px-8 py-4 md:py-8 text-center min-h-0 relative">
+            {/* Watermark - Large faint gender icon - Responsive size */}
             <div 
               className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
               style={{ opacity: 0.04 }}
             >
               <span 
-                className="text-dreamy-slate-400 font-bold"
-                style={{ fontSize: '180px', transform: 'translateY(-10px)' }}
+                className="text-dreamy-slate-400 font-bold text-[120px] md:text-[180px]"
+                style={{ transform: 'translateY(-10px)' }}
               >
                 {name.gender === Gender.BOY ? '♂' : name.gender === Gender.GIRL ? '♀' : '⚥'}
               </span>
             </div>
             
-            {/* Main Name - Hero Element */}
-            <h2 className="text-[56px] sm:text-[64px] font-bold text-dreamy-slate-700 font-heebo tracking-tight leading-none mb-2 relative z-10">{name.hebrew}</h2>
+            {/* Main Name - Hero Element - Responsive: text-4xl mobile, text-6xl desktop */}
+            <h2 className="text-4xl md:text-6xl font-bold text-dreamy-slate-700 font-heebo tracking-tight leading-none mb-1 md:mb-2 relative z-10">{name.hebrew}</h2>
             
-            {/* Transliteration */}
-            <p className="text-lg font-medium text-dreamy-slate-400 uppercase tracking-[0.15em] mb-6 relative z-10">{name.transliteration}</p>
+            {/* Transliteration - Responsive */}
+            <p className="text-base md:text-lg font-medium text-dreamy-slate-400 uppercase tracking-[0.12em] md:tracking-[0.15em] mb-3 md:mb-6 relative z-10">{name.transliteration}</p>
             
-            {/* Meaning - Simple text, no box */}
-            <p className="text-dreamy-slate-600 font-medium leading-relaxed text-[17px] max-w-[90%] relative z-10">{name.meaning}</p>
+            {/* Meaning - Responsive: text-sm mobile, text-base desktop */}
+            <p className="text-dreamy-slate-600 font-medium leading-relaxed text-sm md:text-base max-w-[95%] md:max-w-[90%] relative z-10">{name.meaning}</p>
           </div>
 
-          {/* ===== BOTTOM SECTION: Action Buttons (Unified - No Dividers) ===== */}
-          <div className="w-full px-6 pb-8 pt-6 shrink-0" dir="ltr">
-            <div className="flex justify-center items-center gap-10">
-              {/* Dislike Button - Soft Rose/Pink */}
+          {/* ===== BOTTOM SECTION: Action Buttons - Responsive sizing ===== */}
+          <div className="w-full px-4 md:px-6 pb-4 md:pb-8 pt-3 md:pt-6 shrink-0" dir="ltr">
+            <div className="flex justify-center items-center gap-8 md:gap-10">
+              {/* Dislike Button - Soft Rose/Pink - Responsive size */}
               <button 
                 onClick={() => handleSwipeAction(false)}
-                className="flex flex-col items-center gap-2 group active:scale-90 transition-transform"
+                className="flex flex-col items-center gap-1.5 md:gap-2 group active:scale-90 transition-transform"
               >
-                <div className="w-[72px] h-[72px] rounded-full flex items-center justify-center bg-baby-pink-100/80 border-2 border-baby-pink-200 text-baby-pink-400 group-hover:bg-baby-pink-200 group-hover:text-baby-pink-500 transition-all shadow-soft-pink">
-                  <X size={30} strokeWidth={2.5} />
+                <div className="w-14 h-14 md:w-[72px] md:h-[72px] rounded-full flex items-center justify-center bg-baby-pink-100/80 border-2 border-baby-pink-200 text-baby-pink-400 group-hover:bg-baby-pink-200 group-hover:text-baby-pink-500 transition-all shadow-soft-pink">
+                  <X size={24} strokeWidth={2.5} className="md:w-[30px] md:h-[30px]" />
                 </div>
-                <span className="text-[11px] font-bold text-dreamy-slate-400 group-hover:text-baby-pink-500">לא אהבתי</span>
+                <span className="text-[10px] md:text-[11px] font-bold text-dreamy-slate-400 group-hover:text-baby-pink-500">לא אהבתי</span>
               </button>
 
-              {/* Like Button - Soft Mint/Teal */}
+              {/* Like Button - Soft Mint/Teal - Responsive size */}
               <button 
                 onClick={() => handleSwipeAction(true)}
-                className="flex flex-col items-center gap-2 group active:scale-90 transition-transform"
+                className="flex flex-col items-center gap-1.5 md:gap-2 group active:scale-90 transition-transform"
               >
-                <div className="w-[72px] h-[72px] rounded-full flex items-center justify-center bg-gradient-to-br from-baby-mint-200 to-baby-mint-300 text-white border-2 border-baby-mint-300 group-hover:from-baby-mint-300 group-hover:to-baby-mint-400 transition-all shadow-soft-mint">
-                  <Heart size={36} fill="currentColor" />
+                <div className="w-14 h-14 md:w-[72px] md:h-[72px] rounded-full flex items-center justify-center bg-gradient-to-br from-baby-mint-200 to-baby-mint-300 text-white border-2 border-baby-mint-300 group-hover:from-baby-mint-300 group-hover:to-baby-mint-400 transition-all shadow-soft-mint">
+                  <Heart size={28} fill="currentColor" className="md:w-9 md:h-9" />
                 </div>
-                <span className="text-[11px] font-bold text-baby-mint-400">אהבתי</span>
+                <span className="text-[10px] md:text-[11px] font-bold text-baby-mint-400">אהבתי</span>
               </button>
             </div>
           </div>

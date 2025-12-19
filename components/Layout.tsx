@@ -13,20 +13,20 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, showNav, isConnected }) => {
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden font-assistant safe-top safe-bottom">
-      {/* Header - Clean Logo with Bounce Effect */}
+    <div className="flex flex-col h-[100dvh] w-full md:max-w-md mx-auto relative overflow-hidden font-assistant safe-top safe-bottom">
+      {/* Header - Large Logo as Brand Header */}
       {showNav && (
-        <header className="px-px py-3 flex items-center justify-center shrink-0 bg-transparent">
+        <header className="px-4 py-1 flex items-center justify-center shrink-0 bg-transparent">
           <img 
             src="/LOGO.png" 
             alt="NameIT" 
-            className="h-[97px] w-auto object-contain cursor-pointer transition-transform duration-300 hover:scale-110"
+            className="h-16 md:h-20 w-auto object-contain cursor-pointer transition-transform duration-300 hover:scale-105"
           />
         </header>
       )}
 
-      {/* Main Content - Transparent for background to show */}
-      <main className="flex-1 overflow-y-auto relative">
+      {/* Main Content - Flex grow to fill available space */}
+      <main className="flex-1 flex flex-col overflow-hidden relative">
         {children}
       </main>
 
