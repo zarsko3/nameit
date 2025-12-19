@@ -46,7 +46,7 @@ const NAME_STYLE_OPTIONS = [
   { value: NameStyle.UNIQUE, label: 'ייחודי', icon: Star },
 ];
 
-// Premium Tag Input
+// Premium Tag Input - Dreamy pastel style
 const PremiumTagInput: React.FC<{
   tags: string[];
   onAdd: (tag: string) => void;
@@ -75,17 +75,17 @@ const PremiumTagInput: React.FC<{
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAdd())}
           placeholder={placeholder}
-          className={`flex-1 px-4 py-3 bg-white/60 rounded-xl border border-white/40 outline-none text-right font-medium placeholder:text-gray-300 transition-all focus:bg-white focus:ring-2 ${
-            isBlacklist ? 'focus:ring-red-200' : 'focus:ring-slate-200'
+          className={`flex-1 px-4 py-3 bg-white/60 rounded-full border border-white/50 outline-none text-right font-medium text-dreamy-slate-700 placeholder:text-dreamy-slate-400/60 transition-all focus:bg-white/80 focus:ring-2 ${
+            isBlacklist ? 'focus:ring-baby-pink-200' : 'focus:ring-baby-blue-200'
           }`}
         />
         <button
           onClick={handleAdd}
           disabled={!inputValue.trim()}
-          className={`w-11 h-11 rounded-xl font-bold disabled:opacity-30 transition-all active:scale-95 flex items-center justify-center ${
+          className={`w-11 h-11 rounded-full font-bold disabled:opacity-30 transition-all active:scale-95 flex items-center justify-center ${
             isBlacklist 
-              ? 'bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg shadow-red-200/40' 
-              : 'bg-gradient-to-br from-slate-500 to-slate-600 text-white shadow-lg shadow-slate-200/40'
+              ? 'bg-gradient-to-br from-baby-pink-300 to-baby-pink-400 text-white shadow-soft-pink' 
+              : 'bg-gradient-to-br from-baby-blue-200 to-baby-blue-300 text-dreamy-slate-700 shadow-soft-blue'
           }`}
         >
           <Plus size={18} />
@@ -93,20 +93,20 @@ const PremiumTagInput: React.FC<{
       </div>
       <div className="flex flex-wrap gap-2 min-h-[36px]">
         {tags.length === 0 ? (
-          <p className="text-sm text-gray-300 italic">{emptyMessage}</p>
+          <p className="text-sm text-dreamy-slate-400 italic">{emptyMessage}</p>
         ) : (
           tags.map((tag) => (
             <span
               key={tag}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-white/70 border border-white/50 shadow-sm ${
-                isBlacklist ? 'text-red-700' : 'text-slate-700'
+                isBlacklist ? 'text-baby-pink-500' : 'text-baby-blue-500'
               }`}
             >
-              {isBlacklist ? <AlertTriangle size={12} className="text-red-400" /> : <ShieldCheck size={12} className="text-slate-400" />}
+              {isBlacklist ? <AlertTriangle size={12} className="text-baby-pink-400" /> : <ShieldCheck size={12} className="text-baby-blue-400" />}
               {tag}
               <button
                 onClick={() => onRemove(tag)}
-                className="w-5 h-5 rounded-full bg-white/60 hover:bg-red-100 hover:text-red-500 flex items-center justify-center transition-all"
+                className="w-5 h-5 rounded-full bg-white/60 hover:bg-baby-pink-100 hover:text-baby-pink-500 flex items-center justify-center transition-all"
               >
                 <X size={11} />
               </button>
@@ -118,7 +118,7 @@ const PremiumTagInput: React.FC<{
   );
 };
 
-// Premium Collapsible Section
+// Premium Collapsible Section - Dreamy pastel style
 const PremiumSection: React.FC<{
   title: string;
   subtitle: string;
@@ -135,24 +135,24 @@ const PremiumSection: React.FC<{
   >
     <button 
       onClick={onToggle}
-      className="w-full p-5 flex items-center justify-between hover:bg-white/30 transition-all press-effect"
+      className="w-full p-5 flex items-center justify-between hover:bg-white/40 transition-all press-effect"
     >
       <div className="flex items-center gap-3">
-        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center bg-gradient-to-br ${iconGradient} shadow-lg`}>
+        <div className={`w-11 h-11 rounded-full flex items-center justify-center bg-gradient-to-br ${iconGradient}`}>
           {icon}
         </div>
         <div className="text-right">
-          <p className="font-bold text-base text-gray-800 font-heebo">{title}</p>
-          <p className="text-xs text-gray-400">{subtitle}</p>
+          <p className="font-bold text-base text-dreamy-slate-700 font-heebo">{title}</p>
+          <p className="text-xs text-dreamy-slate-400">{subtitle}</p>
         </div>
       </div>
       <div className={`shrink-0 ml-2 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
-        <ChevronDown size={20} className="text-gray-400" />
+        <ChevronDown size={20} className="text-dreamy-slate-400" />
       </div>
     </button>
     
     <div className={`transition-all duration-300 ease-out overflow-hidden ${isOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}`}>
-      <div className="px-5 pb-5 pt-2 border-t border-white/30">
+      <div className="px-5 pb-5 pt-2 border-t border-white/40">
         {children}
       </div>
     </div>
@@ -205,30 +205,30 @@ const DevAdminPanel: React.FC = () => {
   };
 
   return (
-    <div className="glass-card rounded-3xl p-5 border-2 border-dashed border-orange-300/50 bg-orange-50/30 animate-fade-up" style={{ animationDelay: '0.38s' }}>
+    <div className="glass-card rounded-3xl p-5 border-2 border-dashed border-baby-yellow-200/50 animate-fade-up" style={{ animationDelay: '0.38s' }}>
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg">
-          <Terminal size={18} className="text-white" />
+        <div className="w-10 h-10 bg-gradient-to-br from-baby-yellow-100 to-baby-yellow-200 rounded-full flex items-center justify-center shadow-lg">
+          <Terminal size={18} className="text-dreamy-slate-600" />
         </div>
         <div>
-          <p className="font-bold text-orange-700 font-heebo">Dev Admin Panel</p>
-          <p className="text-[10px] text-orange-400">localhost only</p>
+          <p className="font-bold text-dreamy-slate-600 font-heebo">Dev Admin Panel</p>
+          <p className="text-[10px] text-dreamy-slate-400">localhost only</p>
         </div>
       </div>
       
       {/* Database Stats */}
-      <div className="bg-white/60 rounded-xl p-3 mb-3 flex items-center justify-between">
+      <div className="bg-white/60 rounded-full p-3 px-4 mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Database size={16} className="text-gray-400" />
-          <span className="text-sm text-gray-600">Names in Firestore:</span>
+          <Database size={16} className="text-baby-blue-400" />
+          <span className="text-sm text-dreamy-slate-600">Names in Firestore:</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-mono font-bold text-gray-800">
+          <span className="font-mono font-bold text-dreamy-slate-700">
             {firestoreCount !== null ? firestoreCount : '—'}
           </span>
           <button
             onClick={handleCheckCount}
-            className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded-lg text-gray-500 transition-all"
+            className="text-xs bg-white/60 hover:bg-white/80 px-2 py-1 rounded-full text-dreamy-slate-500 transition-all"
           >
             Refresh
           </button>
@@ -239,11 +239,11 @@ const DevAdminPanel: React.FC = () => {
       <button
         onClick={handleUploadNames}
         disabled={isUploading}
-        className="w-full py-3 bg-gradient-to-r from-orange-400 to-amber-400 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:from-orange-500 hover:to-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-orange-200/40"
+        className="w-full py-3 bg-gradient-to-r from-baby-yellow-100 to-baby-yellow-200 text-dreamy-slate-700 font-bold rounded-full flex items-center justify-center gap-2 hover:from-baby-yellow-200 hover:to-baby-yellow-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
       >
         {isUploading ? (
           <>
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-dreamy-slate-300 border-t-dreamy-slate-600 rounded-full animate-spin" />
             <span>Uploading...</span>
           </>
         ) : (
@@ -256,10 +256,10 @@ const DevAdminPanel: React.FC = () => {
       
       {/* Result */}
       {result && (
-        <div className={`mt-3 p-3 rounded-xl text-sm ${
+        <div className={`mt-3 p-3 rounded-full text-sm ${
           result.errors === 0 
-            ? 'bg-emerald-50 text-emerald-700' 
-            : 'bg-red-50 text-red-700'
+            ? 'bg-baby-mint-100 text-dreamy-slate-700' 
+            : 'bg-baby-pink-100 text-dreamy-slate-700'
         }`}>
           {result.errors === 0 ? (
             <>✅ Successfully uploaded {result.uploaded} names!</>
@@ -269,7 +269,7 @@ const DevAdminPanel: React.FC = () => {
         </div>
       )}
       
-      <p className="text-[10px] text-orange-400/70 text-center mt-3">
+      <p className="text-[10px] text-dreamy-slate-400/70 text-center mt-3">
         This panel is only visible in development mode
       </p>
     </div>
@@ -314,44 +314,44 @@ const Settings: React.FC<SettingsProps> = ({
   };
 
   return (
-    <div className="h-full flex flex-col mesh-gradient overflow-hidden" dir="rtl">
+    <div className="h-full flex flex-col overflow-hidden" dir="rtl">
       {/* Scrollable Content */}
       <div className="flex-1 scroll-hidden">
         <div className="px-5 pt-6 pb-32 space-y-4 safe-top">
           {/* Header */}
           <div className="flex items-center justify-between mb-2 animate-fade-up">
-            <h2 className="text-2xl font-bold text-gray-800 tracking-tight font-heebo">הגדרות</h2>
-            <div className="w-10 h-10 glass-card rounded-2xl flex items-center justify-center">
-              <SettingsIcon size={18} className="text-gray-400" />
+            <h2 className="text-2xl font-bold text-dreamy-slate-700 tracking-tight font-heebo">הגדרות</h2>
+            <div className="w-10 h-10 glass-card rounded-full flex items-center justify-center">
+              <SettingsIcon size={18} className="text-baby-pink-400" />
             </div>
           </div>
           
-          {/* User Profile Card - Premium */}
-          <div className="card-elevated p-5 animate-fade-up" style={{ animationDelay: '0.05s' }}>
+          {/* User Profile Card - Glassmorphism */}
+          <div className="glass-card-strong rounded-3xl p-5 animate-fade-up" style={{ animationDelay: '0.05s' }}>
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-xl shadow-emerald-200/40">
+              <div className="w-14 h-14 bg-gradient-to-br from-baby-pink-300 to-baby-lavender-200 rounded-2xl flex items-center justify-center text-dreamy-slate-700 text-xl font-bold shadow-soft-pink">
                 {profile.name?.[0]}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">משתמש</p>
-                <p className="font-bold text-xl text-gray-800 font-heebo truncate">{profile.name}</p>
+                <p className="text-[10px] font-bold text-dreamy-slate-400 uppercase tracking-wider mb-0.5">משתמש</p>
+                <p className="font-bold text-xl text-dreamy-slate-700 font-heebo truncate">{profile.name}</p>
               </div>
             </div>
             
             {/* Room Code */}
-            <div className="flex items-center justify-between p-3 bg-gray-50/80 rounded-2xl">
+            <div className="flex items-center justify-between p-3 bg-white/50 rounded-full">
               <div className="flex items-center gap-2">
-                <Link2 size={14} className="text-gray-400" />
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">קוד חדר</span>
+                <Link2 size={14} className="text-baby-blue-400" />
+                <span className="text-[10px] font-bold text-dreamy-slate-400 uppercase tracking-wider">קוד חדר</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-sm font-bold text-emerald-500">{profile.roomId}</span>
+                <span className="font-mono text-sm font-bold text-baby-blue-500">{profile.roomId}</span>
                 <div className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 ${
                   isPartnerOnline 
-                    ? 'bg-emerald-100 text-emerald-600' 
-                    : 'bg-amber-100 text-amber-600'
+                    ? 'bg-baby-mint-100 text-baby-mint-400' 
+                    : 'bg-baby-yellow-100 text-dreamy-slate-500'
                 }`}>
-                  <div className={`w-1.5 h-1.5 rounded-full ${isPartnerOnline ? 'bg-emerald-500' : 'bg-amber-500'} animate-pulse`}></div>
+                  <div className={`w-1.5 h-1.5 rounded-full ${isPartnerOnline ? 'bg-baby-mint-400' : 'bg-baby-yellow-200'} animate-pulse`}></div>
                   {isPartnerOnline ? 'מחובר' : 'ממתין'}
                 </div>
               </div>
@@ -363,22 +363,22 @@ const Settings: React.FC<SettingsProps> = ({
             title="שמות שאהבנו"
             subtitle={`${likedNames.length} שמות`}
             icon={<Heart size={20} className="text-white" />}
-            iconGradient="from-rose-400 to-pink-500 shadow-rose-200/40"
+            iconGradient="from-baby-pink-300 to-baby-pink-400 shadow-soft-pink"
             isOpen={showLikedNames}
             onToggle={() => setShowLikedNames(!showLikedNames)}
             delay={0.1}
           >
             {likedNames.length === 0 ? (
-              <p className="text-center text-gray-400 py-4 text-sm">עדיין לא סימנתם שמות</p>
+              <p className="text-center text-dreamy-slate-400 py-4 text-sm">עדיין לא סימנתם שמות</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {likedNames.map((name) => (
                   <div
                     key={name.id}
-                    className="px-3 py-1.5 bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-100 rounded-xl flex items-center gap-1.5"
+                    className="px-3 py-1.5 bg-gradient-to-r from-baby-pink-100/80 to-baby-pink-50/80 border border-baby-pink-200 rounded-full flex items-center gap-1.5"
                   >
-                    <Heart size={12} className="text-rose-400 fill-rose-400" />
-                    <span className="font-bold text-sm text-gray-700">{name.hebrew}</span>
+                    <Heart size={12} className="text-baby-pink-400 fill-baby-pink-400" />
+                    <span className="font-bold text-sm text-dreamy-slate-700">{name.hebrew}</span>
                   </div>
                 ))}
               </div>
@@ -390,7 +390,7 @@ const Settings: React.FC<SettingsProps> = ({
             title="העדפות תינוק"
             subtitle="מגדר וסגנון שמות"
             icon={<Baby size={20} className="text-white" />}
-            iconGradient="from-pink-400 to-rose-500 shadow-pink-200/40"
+            iconGradient="from-baby-lavender-200 to-baby-lavender-300 shadow-lg"
             isOpen={showPreferences}
             onToggle={() => setShowPreferences(!showPreferences)}
             delay={0.15}
@@ -398,7 +398,7 @@ const Settings: React.FC<SettingsProps> = ({
             <div className="space-y-5">
               {/* Gender Selection */}
               <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">מגדר צפוי</p>
+                <p className="text-[10px] font-bold text-dreamy-slate-400 uppercase tracking-wider mb-3">מגדר צפוי</p>
                 <div className="flex gap-2">
                   {[
                     { value: Gender.BOY, emoji: '👦', label: 'בן', color: 'blue' },
@@ -407,18 +407,18 @@ const Settings: React.FC<SettingsProps> = ({
                   ].map((option) => {
                     const isSelected = profile.expectedGender === option.value;
                     const gradients = {
-                      blue: 'from-blue-500 to-blue-600 shadow-blue-200/50',
-                      pink: 'from-pink-500 to-rose-500 shadow-pink-200/50',
-                      purple: 'from-purple-500 to-violet-500 shadow-purple-200/50',
+                      blue: 'from-baby-blue-200 to-baby-blue-300 shadow-soft-blue',
+                      pink: 'from-baby-pink-200 to-baby-pink-300 shadow-soft-pink',
+                      purple: 'from-baby-lavender-200 to-baby-lavender-300 shadow-lg',
                     };
                     return (
                       <button
                         key={option.label}
                         onClick={() => setExpectedGender(option.value)}
-                        className={`flex-1 py-3 rounded-2xl font-bold transition-all flex items-center justify-center gap-1.5 press-effect ${
+                        className={`flex-1 py-3 rounded-full font-bold transition-all flex items-center justify-center gap-1.5 press-effect ${
                           isSelected
-                            ? `bg-gradient-to-br ${gradients[option.color as keyof typeof gradients]} text-white shadow-lg`
-                            : 'bg-white/60 text-gray-600 border border-white/50 hover:bg-white/80'
+                            ? `bg-gradient-to-br ${gradients[option.color as keyof typeof gradients]} text-dreamy-slate-700`
+                            : 'bg-white/60 text-dreamy-slate-500 border border-white/50 hover:bg-white/80'
                         }`}
                       >
                         <span className="text-lg">{option.emoji}</span>
@@ -431,7 +431,7 @@ const Settings: React.FC<SettingsProps> = ({
 
               {/* Name Styles */}
               <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">סגנון שמות</p>
+                <p className="text-[10px] font-bold text-dreamy-slate-400 uppercase tracking-wider mb-3">סגנון שמות</p>
                 <div className="grid grid-cols-2 gap-2">
                   {NAME_STYLE_OPTIONS.map((option) => {
                     const Icon = option.icon;
@@ -440,13 +440,13 @@ const Settings: React.FC<SettingsProps> = ({
                       <button
                         key={option.value}
                         onClick={() => toggleNameStyle(option.value)}
-                        className={`p-3 rounded-2xl transition-all flex items-center gap-2 press-effect ${
+                        className={`p-3 rounded-full transition-all flex items-center gap-2 press-effect ${
                           isSelected
-                            ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-200/40'
-                            : 'bg-white/60 text-gray-600 border border-white/50 hover:bg-white/80'
+                            ? 'bg-gradient-to-br from-baby-mint-200 to-baby-mint-300 text-dreamy-slate-700 shadow-soft-mint'
+                            : 'bg-white/60 text-dreamy-slate-500 border border-white/50 hover:bg-white/80'
                         }`}
                       >
-                        <Icon size={16} className={isSelected ? 'text-white' : 'text-emerald-400'} />
+                        <Icon size={16} className={isSelected ? 'text-baby-mint-400' : 'text-baby-mint-300'} />
                         <span className="font-bold text-sm">{option.label}</span>
                       </button>
                     );
@@ -461,14 +461,14 @@ const Settings: React.FC<SettingsProps> = ({
             title="שמות מוגנים"
             subtitle={`${(profile.protectedNames || []).length} שמות`}
             icon={<ShieldCheck size={20} className="text-white" />}
-            iconGradient="from-slate-400 to-slate-500 shadow-slate-200/40"
+            iconGradient="from-baby-blue-200 to-baby-blue-300 shadow-soft-blue"
             isOpen={showProtected}
             onToggle={() => setShowProtected(!showProtected)}
             delay={0.2}
           >
-            <div className="bg-slate-50/80 rounded-xl p-2.5 mb-3 flex items-start gap-2">
-              <ShieldCheck size={14} className="text-slate-400 mt-0.5 shrink-0" />
-              <p className="text-[11px] text-slate-500 leading-relaxed">
+            <div className="bg-baby-blue-50/80 rounded-full p-2.5 px-4 mb-3 flex items-start gap-2">
+              <ShieldCheck size={14} className="text-baby-blue-400 mt-0.5 shrink-0" />
+              <p className="text-[11px] text-dreamy-slate-500 leading-relaxed">
                 שמות של בני משפחה שכבר "תפוסים"
               </p>
             </div>
@@ -487,14 +487,14 @@ const Settings: React.FC<SettingsProps> = ({
             title="רשימה שחורה"
             subtitle={`${(profile.blacklistedNames || []).length} שמות`}
             icon={<Trash2 size={20} className="text-white" />}
-            iconGradient="from-red-400 to-rose-500 shadow-red-200/40"
+            iconGradient="from-baby-pink-300 to-baby-pink-400 shadow-soft-pink"
             isOpen={showBlacklist}
             onToggle={() => setShowBlacklist(!showBlacklist)}
             delay={0.25}
           >
-            <div className="bg-red-50/80 border border-red-100 rounded-xl p-2.5 mb-3 flex items-start gap-2">
-              <AlertTriangle size={14} className="text-red-400 mt-0.5 shrink-0" />
-              <p className="text-[11px] text-red-600 leading-relaxed">
+            <div className="bg-baby-pink-50/80 border border-baby-pink-200 rounded-full p-2.5 px-4 mb-3 flex items-start gap-2">
+              <AlertTriangle size={14} className="text-baby-pink-400 mt-0.5 shrink-0" />
+              <p className="text-[11px] text-dreamy-slate-500 leading-relaxed">
                 שמות שמעדיפים להימנע מהם
               </p>
             </div>
@@ -513,30 +513,30 @@ const Settings: React.FC<SettingsProps> = ({
             title="מסננים נוספים"
             subtitle="שמות טרנדיים"
             icon={<TrendingUp size={20} className="text-white" />}
-            iconGradient="from-orange-400 to-amber-500 shadow-orange-200/40"
+            iconGradient="from-baby-yellow-100 to-baby-yellow-200 shadow-lg"
             isOpen={showFilters}
             onToggle={() => setShowFilters(!showFilters)}
             delay={0.3}
           >
             <div 
               onClick={toggleTrending}
-              className={`p-4 rounded-2xl cursor-pointer transition-all flex items-center justify-between press-effect ${
+              className={`p-4 rounded-full cursor-pointer transition-all flex items-center justify-between press-effect ${
                 profile.showTrendingOnly
-                  ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white shadow-lg shadow-orange-200/40'
+                  ? 'bg-gradient-to-r from-baby-yellow-100 to-baby-yellow-200 text-dreamy-slate-700 shadow-lg'
                   : 'bg-white/60 border border-white/50 hover:bg-white/80'
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                  profile.showTrendingOnly ? 'bg-white/20' : 'bg-orange-100'
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
+                  profile.showTrendingOnly ? 'bg-white/40' : 'bg-baby-yellow-100'
                 }`}>
-                  <TrendingUp size={18} className={profile.showTrendingOnly ? 'text-white' : 'text-orange-500'} />
+                  <TrendingUp size={18} className={profile.showTrendingOnly ? 'text-dreamy-slate-600' : 'text-baby-yellow-300'} />
                 </div>
                 <div className="text-right">
-                  <p className={`font-bold text-sm ${profile.showTrendingOnly ? 'text-white' : 'text-gray-800'}`}>
+                  <p className={`font-bold text-sm ${profile.showTrendingOnly ? 'text-dreamy-slate-700' : 'text-dreamy-slate-700'}`}>
                     שמות טרנדיים בלבד
                   </p>
-                  <p className={`text-[11px] ${profile.showTrendingOnly ? 'text-orange-100' : 'text-gray-400'}`}>
+                  <p className={`text-[11px] ${profile.showTrendingOnly ? 'text-dreamy-slate-500' : 'text-dreamy-slate-400'}`}>
                     הצג רק שמות פופולריים
                   </p>
                 </div>
@@ -544,7 +544,7 @@ const Settings: React.FC<SettingsProps> = ({
               <div 
                 dir="ltr"
                 className={`w-11 h-6 rounded-full p-0.5 transition-all flex items-center ${
-                  profile.showTrendingOnly ? 'bg-white/30' : 'bg-gray-200'
+                  profile.showTrendingOnly ? 'bg-white/50' : 'bg-white/40'
                 }`}
               >
                 <div className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-200 ${
@@ -557,13 +557,13 @@ const Settings: React.FC<SettingsProps> = ({
           {/* Partner Connection */}
           <div className="glass-card rounded-3xl p-5 animate-fade-up" style={{ animationDelay: '0.35s' }}>
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-200/40">
+              <div className="w-10 h-10 bg-gradient-to-br from-baby-mint-200 to-baby-mint-300 rounded-full flex items-center justify-center shadow-soft-mint">
                 <Users size={18} className="text-white" />
               </div>
-              <p className="font-bold text-gray-800 font-heebo">חיבור בן/בת זוג</p>
+              <p className="font-bold text-dreamy-slate-700 font-heebo">חיבור בן/בת זוג</p>
             </div>
-            <p className="text-sm text-gray-500 leading-relaxed">
-              שתפו את קוד החדר <span className="font-mono font-bold bg-white/60 px-2 py-0.5 rounded text-emerald-600">{profile.roomId}</span> כדי להחליק ביחד!
+            <p className="text-sm text-dreamy-slate-500 leading-relaxed">
+              שתפו את קוד החדר <span className="font-mono font-bold bg-white/60 px-2 py-0.5 rounded-full text-baby-blue-500">{profile.roomId}</span> כדי להחליק ביחד!
             </p>
           </div>
 
@@ -573,7 +573,7 @@ const Settings: React.FC<SettingsProps> = ({
           {/* Logout */}
           <button 
             onClick={onLogout}
-            className="w-full p-4 glass-card text-red-400 font-bold rounded-2xl hover:bg-red-50/50 transition-all press-effect flex items-center justify-center gap-2 animate-fade-up"
+            className="w-full p-4 glass-card text-baby-pink-500 font-bold rounded-full hover:bg-baby-pink-50/50 transition-all press-effect flex items-center justify-center gap-2 animate-fade-up"
             style={{ animationDelay: '0.4s' }}
           >
             <LogOut size={18} />
@@ -581,7 +581,7 @@ const Settings: React.FC<SettingsProps> = ({
           </button>
           
           {/* Version */}
-          <p className="text-center text-[10px] text-gray-300 pt-2 animate-fade-up" style={{ animationDelay: '0.45s' }}>
+          <p className="text-center text-[10px] text-dreamy-slate-400/60 pt-2 animate-fade-up" style={{ animationDelay: '0.45s' }}>
             NameIT v1.0.0
           </p>
         </div>

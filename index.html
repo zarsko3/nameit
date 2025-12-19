@@ -37,19 +37,77 @@
               'hebrew': ['Heebo', 'Rubik', 'Assistant', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
               'heebo': ['Heebo', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
               'rubik': ['Rubik', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-            }
+            },
+            colors: {
+              // Dreamy Baby Pastel Palette
+              'baby-pink': {
+                50: '#FFF5F7',
+                100: '#FFECF0',
+                200: '#FFD6E0',
+                300: '#FFCDD2',  // Primary
+                400: '#F8BBD9',
+                500: '#F48FB1',
+              },
+              'baby-blue': {
+                50: '#F0F9FF',
+                100: '#E3F2FD',
+                200: '#BBDEFB',  // Secondary
+                300: '#90CAF9',
+                400: '#64B5F6',
+                500: '#42A5F5',
+              },
+              'baby-yellow': {
+                50: '#FFFEF5',
+                100: '#FFF9C4',  // Accent
+                200: '#FFF59D',
+                300: '#FFF176',
+              },
+              'baby-mint': {
+                50: '#F0FFF4',
+                100: '#E8F5E9',
+                200: '#C8E6C9',
+                300: '#A5D6A7',
+                400: '#81C784',
+              },
+              'baby-lavender': {
+                50: '#F5F3FF',
+                100: '#EDE7F6',
+                200: '#D1C4E9',
+                300: '#B39DDB',
+              },
+              'dreamy-slate': {
+                400: '#78909C',
+                500: '#607D8B',
+                600: '#546E7A',
+                700: '#455A64',  // Text
+                800: '#37474F',
+              },
+            },
+            boxShadow: {
+              'soft-pink': '0 8px 30px -6px rgba(255, 205, 210, 0.5)',
+              'soft-blue': '0 8px 30px -6px rgba(187, 222, 251, 0.5)',
+              'soft-mint': '0 8px 30px -6px rgba(200, 230, 201, 0.5)',
+              'dreamy': '0 10px 40px -10px rgba(69, 90, 100, 0.15)',
+              'dreamy-lg': '0 20px 50px -15px rgba(69, 90, 100, 0.2)',
+            },
           }
         }
       }
     </script>
     <style>
       :root {
-        --mint: #E8F5E9;
-        --sky: #E3F2FD;
-        --peach: #FFF3E0;
-        --coral: #FFAB91;
-        --soft-gray: #F5F5F5;
+        /* Dreamy Baby Color Palette */
+        --baby-pink: #FFCDD2;
+        --baby-pink-light: #FFECF0;
+        --baby-blue: #BBDEFB;
+        --baby-blue-light: #E3F2FD;
+        --baby-yellow: #FFF9C4;
+        --baby-mint: #C8E6C9;
+        --baby-lavender: #D1C4E9;
         --text-main: #455A64;
+        --text-soft: #607D8B;
+        
+        /* Safe Area */
         --safe-area-top: env(safe-area-inset-top, 0px);
         --safe-area-bottom: env(safe-area-inset-bottom, 0px);
         
@@ -62,12 +120,17 @@
         font-family: var(--font-hebrew);
       }
       
+      /* Body with Dreamy Background */
       body {
         font-family: var(--font-hebrew);
-        background-color: #FFFFFF;
+        background-image: url('/B1.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
         color: var(--text-main);
         overflow-x: hidden;
-        height: 100vh;
+        min-height: 100vh;
         margin: 0;
         font-weight: 400;
         -webkit-font-smoothing: antialiased;
@@ -80,6 +143,7 @@
         font-weight: 700;
         line-height: 1.2;
         letter-spacing: -0.02em;
+        color: var(--text-main);
       }
       
       /* Body text - Use Rubik for comfortable reading */
@@ -104,7 +168,7 @@
       ::-webkit-scrollbar { width: 4px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb {
-        background: #E0E0E0;
+        background: rgba(255, 205, 210, 0.6);
         border-radius: 4px;
       }
 

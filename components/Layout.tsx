@@ -13,43 +13,45 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, showNav, isConnected }) => {
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto bg-white shadow-sm relative overflow-hidden font-assistant safe-top safe-bottom">
-      {/* Header - only show on main app screens */}
+    <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden font-assistant safe-top safe-bottom">
+      {/* Header - Fitted Glass Badge for Logo */}
       {showNav && (
-        <header className="px-6 py-4 border-b border-gray-100 bg-white flex items-center justify-center shrink-0">
-          <img 
-            src="/LOGO.png" 
-            alt="NameIT" 
-            className="h-14 w-auto object-contain"
-          />
+        <header className="px-6 py-3 flex items-center justify-center shrink-0 bg-transparent">
+          <div className="bg-white/30 backdrop-blur-md rounded-2xl px-4 py-2 border border-white/60 shadow-lg hover:scale-105 transition-transform cursor-pointer">
+            <img 
+              src="/LOGO.png" 
+              alt="NameIT" 
+              className="h-14 w-auto object-contain block"
+            />
+          </div>
         </header>
       )}
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto relative bg-white">
+      {/* Main Content - Transparent for background to show */}
+      <main className="flex-1 overflow-y-auto relative">
         {children}
       </main>
 
-      {/* Navigation */}
+      {/* Navigation - Soft rounded top corners, integrated look */}
       {showNav && (
-        <nav className="border-t border-gray-100 bg-white px-10 pt-3 pb-4 flex justify-between items-center shrink-0">
+        <nav className="glass-card rounded-t-3xl px-10 pt-4 pb-5 flex justify-between items-center shrink-0">
           <button 
             onClick={() => setActiveView('SWIPE')}
-            className={`flex flex-col items-center gap-1 transition-colors ${activeView === 'SWIPE' ? 'text-coral-400' : 'text-gray-300'}`}
+            className={`flex flex-col items-center gap-1 transition-all ${activeView === 'SWIPE' ? 'text-baby-pink-500' : 'text-dreamy-slate-400'}`}
           >
-            <Heart size={26} className={activeView === 'SWIPE' ? 'fill-emerald-400 text-emerald-400' : ''} style={activeView === 'SWIPE' ? { color: '#FFAB91', fill: '#FFAB91' } : {}} />
+            <Heart size={26} className={activeView === 'SWIPE' ? 'fill-baby-pink-400 text-baby-pink-500' : ''} />
             <span className="text-[10px] font-bold">התאמה</span>
           </button>
           <button 
             onClick={() => setActiveView('MATCHES')}
-            className={`flex flex-col items-center gap-1 transition-colors ${activeView === 'MATCHES' ? 'text-gray-600' : 'text-gray-300'}`}
+            className={`flex flex-col items-center gap-1 transition-all ${activeView === 'MATCHES' ? 'text-baby-blue-500' : 'text-dreamy-slate-400'}`}
           >
             <List size={26} />
             <span className="text-[10px] font-bold">רשימה</span>
           </button>
           <button 
             onClick={() => setActiveView('SETTINGS')}
-            className={`flex flex-col items-center gap-1 transition-colors ${activeView === 'SETTINGS' ? 'text-gray-600' : 'text-gray-300'}`}
+            className={`flex flex-col items-center gap-1 transition-all ${activeView === 'SETTINGS' ? 'text-baby-lavender-300' : 'text-dreamy-slate-400'}`}
           >
             <SettingsIcon size={26} />
             <span className="text-[10px] font-bold">הגדרות</span>

@@ -59,3 +59,4 @@ service cloud.firestore {
 - Test rules using the Firebase Console's Rules Playground
 - Monitor usage in Firebase Console → Usage and billing
 
+

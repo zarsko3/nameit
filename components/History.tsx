@@ -62,57 +62,57 @@ const History: React.FC<HistoryProps> = ({
         <section>
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <Award className="text-emerald-400" size={22} />
-              <h2 className="text-lg font-bold text-gray-700">התאמות משותפות</h2>
+              <Award className="text-baby-pink-400" size={22} />
+              <h2 className="text-lg font-bold text-dreamy-slate-700">התאמות משותפות</h2>
             </div>
-            <span className="px-3 py-1 bg-emerald-50 text-emerald-500 rounded-full text-xs font-bold">
+            <span className="px-3 py-1 bg-baby-pink-100/80 text-baby-pink-500 rounded-full text-xs font-bold">
               {matches.length} שמות
             </span>
           </div>
           
           {matchedNames.length === 0 ? (
-            <div className="p-10 text-center bg-gradient-to-br from-gray-50 to-emerald-50/30 rounded-3xl">
-              <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Award className="text-emerald-400" size={32} />
+            <div className="p-10 text-center glass-card rounded-3xl">
+              <div className="w-16 h-16 bg-baby-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Award className="text-baby-pink-400" size={32} />
               </div>
-              <p className="text-sm font-bold text-gray-500 mb-1">עדיין אין התאמות</p>
-              <p className="text-xs text-gray-400">כאן יופיעו שמות ששניכם אהבתם</p>
+              <p className="text-sm font-bold text-dreamy-slate-600 mb-1">עדיין אין התאמות</p>
+              <p className="text-xs text-dreamy-slate-400">כאן יופיעו שמות ששניכם אהבתם</p>
             </div>
           ) : (
             <div className="space-y-3">
               {matchedNames.map(name => (
                 <div 
                   key={name.id} 
-                  className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+                  className="p-4 glass-card rounded-2xl hover:bg-white/70 transition-all"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-xl 
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl 
                         ${name.gender === Gender.BOY 
-                          ? 'bg-blue-50 text-blue-400 border border-blue-100' 
+                          ? 'bg-baby-blue-100 text-baby-blue-500 border border-baby-blue-200' 
                           : name.gender === Gender.GIRL 
-                            ? 'bg-rose-50 text-rose-400 border border-rose-100' 
-                            : 'bg-purple-50 text-purple-400 border border-purple-100'
+                            ? 'bg-baby-pink-100 text-baby-pink-500 border border-baby-pink-200' 
+                            : 'bg-baby-lavender-100 text-baby-lavender-300 border border-baby-lavender-200'
                         }`}
                       >
                         {name.hebrew[0]}
                       </div>
                       <div>
-                        <h3 className="font-bold text-gray-700 text-lg">{name.hebrew}</h3>
-                        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{name.transliteration}</p>
+                        <h3 className="font-bold text-dreamy-slate-700 text-lg">{name.hebrew}</h3>
+                        <p className="text-[10px] text-dreamy-slate-400 font-medium uppercase tracking-wider">{name.transliteration}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
                       <button 
                         onClick={() => shareOnWhatsApp(name)}
-                        className="p-2.5 text-emerald-400 hover:bg-emerald-50 rounded-xl transition-colors"
+                        className="p-2.5 text-baby-mint-400 hover:bg-baby-mint-50 rounded-full transition-colors"
                         title="שתף"
                       >
                         <Share2 size={18} />
                       </button>
                       <button 
                         onClick={() => setConfirmDelete({ type: 'match', nameId: name.id, name: name.hebrew })}
-                        className="p-2.5 text-gray-300 hover:text-red-400 hover:bg-red-50 rounded-xl transition-colors"
+                        className="p-2.5 text-dreamy-slate-400 hover:text-baby-pink-500 hover:bg-baby-pink-50 rounded-full transition-colors"
                         title="הסר התאמה"
                       >
                         <Trash2 size={18} />
@@ -121,14 +121,14 @@ const History: React.FC<HistoryProps> = ({
                   </div>
                   
                   {/* Rating Stars */}
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                    <span className="text-[9px] font-bold text-gray-300 uppercase tracking-widest">דירוג</span>
+                  <div className="flex items-center justify-between pt-3 border-t border-white/50">
+                    <span className="text-[9px] font-bold text-dreamy-slate-400 uppercase tracking-widest">דירוג</span>
                     <div className="flex gap-0.5">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
                           key={star}
                           onClick={() => onRate(name.id, star)}
-                          className={`p-0.5 transition-all ${star <= (name.rating || 0) ? 'text-amber-400 scale-110' : 'text-gray-200 hover:text-amber-200'}`}
+                          className={`p-0.5 transition-all ${star <= (name.rating || 0) ? 'text-baby-yellow-300 scale-110' : 'text-white/50 hover:text-baby-yellow-200'}`}
                         >
                           <Star size={18} fill={star <= (name.rating || 0) ? 'currentColor' : 'none'} strokeWidth={2} />
                         </button>
@@ -145,14 +145,14 @@ const History: React.FC<HistoryProps> = ({
         <section>
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <Heart className="text-rose-300" size={20} />
-              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">שמות שאהבתי</h2>
+              <Heart className="text-baby-pink-300" size={20} />
+              <h2 className="text-sm font-bold text-dreamy-slate-500 uppercase tracking-wider">שמות שאהבתי</h2>
             </div>
-            <span className="text-xs text-gray-400">{likedNames.length} שמות</span>
+            <span className="text-xs text-dreamy-slate-400">{likedNames.length} שמות</span>
           </div>
           
           {likedNames.length === 0 ? (
-            <p className="text-xs text-gray-300 text-center py-6 bg-gray-50 rounded-2xl">
+            <p className="text-xs text-dreamy-slate-400 text-center py-6 glass-card rounded-full">
               אין עדיין שמות שרק את/ה אהבת
             </p>
           ) : (
@@ -160,22 +160,22 @@ const History: React.FC<HistoryProps> = ({
               {likedNames.map(name => (
                 <div 
                   key={name.id} 
-                  className="px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between group hover:bg-white hover:shadow-sm transition-all"
+                  className="px-4 py-3 rounded-full glass-card flex items-center justify-between group hover:bg-white/70 transition-all"
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-2 h-2 rounded-full ${
                       name.gender === Gender.BOY 
-                        ? 'bg-blue-300' 
+                        ? 'bg-baby-blue-300' 
                         : name.gender === Gender.GIRL 
-                          ? 'bg-rose-300' 
-                          : 'bg-purple-300'
+                          ? 'bg-baby-pink-300' 
+                          : 'bg-baby-lavender-300'
                     }`} />
-                    <span className="font-bold text-gray-600">{name.hebrew}</span>
-                    <span className="text-xs text-gray-300 uppercase">{name.transliteration}</span>
+                    <span className="font-bold text-dreamy-slate-600">{name.hebrew}</span>
+                    <span className="text-xs text-dreamy-slate-400 uppercase">{name.transliteration}</span>
                   </div>
                   <button
                     onClick={() => setConfirmDelete({ type: 'like', nameId: name.id, name: name.hebrew })}
-                    className="p-2 text-gray-300 hover:text-red-400 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    className="p-2 text-dreamy-slate-400 hover:text-baby-pink-500 hover:bg-baby-pink-50 rounded-full transition-colors opacity-0 group-hover:opacity-100"
                     title="הסר לייק"
                   >
                     <X size={16} />
@@ -187,19 +187,19 @@ const History: React.FC<HistoryProps> = ({
         </section>
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal - Dreamy style */}
       {confirmDelete && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-6">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-pop">
-            <div className="flex items-center justify-center w-16 h-16 bg-red-50 rounded-2xl mx-auto mb-4">
-              <AlertTriangle className="text-red-400" size={32} />
+        <div className="fixed inset-0 z-[100] overlay-dreamy flex items-center justify-center p-6">
+          <div className="glass-card-strong rounded-3xl p-6 max-w-sm w-full shadow-dreamy-lg animate-pop">
+            <div className="flex items-center justify-center w-16 h-16 bg-baby-pink-100 rounded-full mx-auto mb-4">
+              <AlertTriangle className="text-baby-pink-400" size={32} />
             </div>
             
-            <h3 className="text-xl font-bold text-gray-700 text-center mb-2">
+            <h3 className="text-xl font-bold text-dreamy-slate-700 text-center mb-2">
               {confirmDelete.type === 'match' ? 'הסרת התאמה' : 'הסרת לייק'}
             </h3>
             
-            <p className="text-gray-500 text-center mb-6 text-sm leading-relaxed">
+            <p className="text-dreamy-slate-500 text-center mb-6 text-sm leading-relaxed">
               {confirmDelete.type === 'match' 
                 ? `בטוח/ה שברצונך להסיר את ההתאמה לשם "${confirmDelete.name}"? פעולה זו תסיר את השם מרשימת ההתאמות של שני בני הזוג.`
                 : `בטוח/ה שברצונך להסיר את הלייק לשם "${confirmDelete.name}"? השם יחזור להופיע בהחלקות עתידיות.`
@@ -209,13 +209,13 @@ const History: React.FC<HistoryProps> = ({
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmDelete(null)}
-                className="flex-1 py-3.5 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                className="flex-1 py-3.5 glass-button text-dreamy-slate-600 rounded-full font-bold hover:bg-white/80 transition-colors"
               >
                 ביטול
               </button>
               <button
                 onClick={handleDeleteConfirm}
-                className="flex-1 py-3.5 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors"
+                className="flex-1 py-3.5 bg-gradient-to-r from-baby-pink-300 to-baby-pink-400 text-dreamy-slate-700 rounded-full font-bold shadow-soft-pink hover:shadow-lg transition-all"
               >
                 הסר
               </button>

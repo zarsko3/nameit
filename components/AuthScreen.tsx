@@ -143,7 +143,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, onDevLogin, sign
   };
 
   return (
-    <div className="h-full flex flex-col mesh-gradient" dir="rtl">
+    <div className="h-full flex flex-col" dir="rtl">
       {/* Scrollable container with hidden scrollbar */}
       <div 
         className="flex-1 overflow-y-auto overflow-x-hidden"
@@ -168,7 +168,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, onDevLogin, sign
           {/* Logo */}
           <div className="text-center animate-fade-up flex-shrink-0 mb-6">
             <div className="relative inline-block">
-              <div className="absolute inset-0 w-28 h-28 sm:w-36 sm:h-36 mx-auto bg-gradient-to-br from-pink-300/30 via-purple-300/20 to-teal-300/30 blur-2xl animate-pulse" />
+              <div className="absolute inset-0 w-28 h-28 sm:w-36 sm:h-36 mx-auto bg-gradient-to-br from-baby-pink-300/40 via-baby-lavender-200/30 to-baby-blue-200/40 blur-2xl animate-pulse" />
               <img 
                 src="/LOGO.png" 
                 alt="NameIT" 
@@ -177,41 +177,41 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, onDevLogin, sign
             </div>
           </div>
           
-          {/* Auth Card */}
+          {/* Auth Card - Glassmorphism */}
           <div className="w-full max-w-sm animate-fade-up flex-shrink-0" style={{ animationDelay: '0.1s' }}>
-            <div className="glass-card rounded-[2rem] p-5 sm:p-6 space-y-4 sm:space-y-5 shadow-2xl shadow-black/5">
-              {/* Tabs */}
-              <div className="flex gap-2 p-1.5 bg-gray-100/60 rounded-2xl">
+            <div className="glass-card rounded-[2rem] p-5 sm:p-6 space-y-4 sm:space-y-5 shadow-dreamy">
+              {/* Tabs - Pill shaped with pastel colors */}
+              <div className="flex gap-2 p-1.5 bg-white/40 rounded-full">
                 <button
                   onClick={() => { setIsLogin(false); setError(''); }}
-                  className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${
+                  className={`flex-1 py-3 rounded-full font-bold text-sm transition-all ${
                     !isLogin 
-                      ? 'bg-white text-gray-800 shadow-md' 
-                      : 'text-gray-400 hover:text-gray-600'
+                      ? 'bg-gradient-to-r from-baby-pink-300 to-baby-pink-200 text-dreamy-slate-700 shadow-soft-pink' 
+                      : 'text-dreamy-slate-400 hover:text-dreamy-slate-600'
                   }`}
                 >
                   הרשמה
                 </button>
                 <button
                   onClick={() => { setIsLogin(true); setError(''); }}
-                  className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${
+                  className={`flex-1 py-3 rounded-full font-bold text-sm transition-all ${
                     isLogin 
-                      ? 'bg-white text-gray-800 shadow-md' 
-                      : 'text-gray-400 hover:text-gray-600'
+                      ? 'bg-gradient-to-r from-baby-pink-300 to-baby-pink-200 text-dreamy-slate-700 shadow-soft-pink' 
+                      : 'text-dreamy-slate-400 hover:text-dreamy-slate-600'
                   }`}
                 >
                   התחברות
                 </button>
               </div>
 
-              {/* Google Sign In Button */}
+              {/* Google Sign In Button - Glass style, pill shaped */}
               <button
                 onClick={handleGoogleSignIn}
                 disabled={googleLoading || loading}
-                className="w-full py-3.5 sm:py-4 bg-white border-2 border-gray-100 rounded-2xl font-bold text-gray-700 flex items-center justify-center gap-3 hover:bg-gray-50 hover:border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm press-effect"
+                className="w-full py-3.5 sm:py-4 glass-button rounded-full font-bold text-dreamy-slate-700 flex items-center justify-center gap-3 hover:bg-white/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all press-effect"
               >
                 {googleLoading ? (
-                  <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-baby-pink-200 border-t-baby-pink-400 rounded-full animate-spin" />
                 ) : (
                   <>
                     <GoogleLogo />
@@ -220,11 +220,11 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, onDevLogin, sign
                 )}
               </button>
 
-              {/* Divider */}
+              {/* Divider - Softer pastel */}
               <div className="flex items-center gap-4">
-                <div className="flex-1 h-px bg-gray-200" />
-                <span className="text-sm text-gray-400 font-medium">או</span>
-                <div className="flex-1 h-px bg-gray-200" />
+                <div className="flex-1 h-px bg-white/60" />
+                <span className="text-sm text-dreamy-slate-400 font-medium">או</span>
+                <div className="flex-1 h-px bg-white/60" />
               </div>
 
               {/* Email/Password Form */}
@@ -232,17 +232,17 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, onDevLogin, sign
                 {/* Display Name (only for signup) */}
                 {!isLogin && (
                   <div className="animate-fade-in">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1 mb-1.5 block">
+                    <label className="text-[10px] font-bold text-dreamy-slate-400 uppercase tracking-wider px-1 mb-1.5 block">
                       שם תצוגה
                     </label>
                     <div className="relative">
-                      <User className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                      <User className="absolute right-4 top-1/2 -translate-y-1/2 text-baby-pink-400" size={18} />
                       <input
                         type="text"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
                         placeholder="איך קוראים לך?"
-                        className="w-full px-5 py-3.5 sm:py-4 pr-12 rounded-2xl bg-white/70 border border-gray-100 focus:bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 outline-none text-right font-medium placeholder:text-gray-300 transition-all"
+                        className="w-full px-5 py-3.5 sm:py-4 pr-12 rounded-full bg-white/60 border border-white/50 focus:bg-white/80 focus:ring-2 focus:ring-baby-pink-200 focus:border-baby-pink-300 outline-none text-right font-medium text-dreamy-slate-700 placeholder:text-dreamy-slate-400/60 transition-all"
                       />
                     </div>
                   </div>
@@ -250,60 +250,60 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, onDevLogin, sign
 
                 {/* Email */}
                 <div>
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1 mb-1.5 block">
+                  <label className="text-[10px] font-bold text-dreamy-slate-400 uppercase tracking-wider px-1 mb-1.5 block">
                     אימייל
                   </label>
                   <div className="relative">
-                    <Mail className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                    <Mail className="absolute right-4 top-1/2 -translate-y-1/2 text-baby-blue-400" size={18} />
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="your@email.com"
                       dir="ltr"
-                      className="w-full px-5 py-3.5 sm:py-4 pr-12 rounded-2xl bg-white/70 border border-gray-100 focus:bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 outline-none text-left font-medium placeholder:text-gray-300 transition-all"
+                      className="w-full px-5 py-3.5 sm:py-4 pr-12 rounded-full bg-white/60 border border-white/50 focus:bg-white/80 focus:ring-2 focus:ring-baby-blue-200 focus:border-baby-blue-300 outline-none text-left font-medium text-dreamy-slate-700 placeholder:text-dreamy-slate-400/60 transition-all"
                     />
                   </div>
                 </div>
 
                 {/* Password */}
                 <div>
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1 mb-1.5 block">
+                  <label className="text-[10px] font-bold text-dreamy-slate-400 uppercase tracking-wider px-1 mb-1.5 block">
                     סיסמה
                   </label>
                   <div className="relative">
-                    <Lock className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                    <Lock className="absolute right-4 top-1/2 -translate-y-1/2 text-baby-lavender-300" size={18} />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                       dir="ltr"
-                      className="w-full px-12 py-3.5 sm:py-4 rounded-2xl bg-white/70 border border-gray-100 focus:bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 outline-none text-left font-medium placeholder:text-gray-300 transition-all"
+                      className="w-full px-12 py-3.5 sm:py-4 rounded-full bg-white/60 border border-white/50 focus:bg-white/80 focus:ring-2 focus:ring-baby-lavender-200 focus:border-baby-lavender-300 outline-none text-left font-medium text-dreamy-slate-700 placeholder:text-dreamy-slate-400/60 transition-all"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 transition-colors"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-dreamy-slate-400 hover:text-dreamy-slate-600 transition-colors"
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
                 </div>
 
-                {/* Error Message */}
+                {/* Error Message - Soft rose */}
                 {error && (
-                  <div className="flex items-center gap-2 p-3 sm:p-3.5 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm animate-fade-in">
-                    <AlertCircle size={18} className="shrink-0" />
+                  <div className="flex items-center gap-2 p-3 sm:p-3.5 bg-baby-pink-100/80 border border-baby-pink-200 rounded-2xl text-dreamy-slate-700 text-sm animate-fade-in">
+                    <AlertCircle size={18} className="shrink-0 text-baby-pink-500" />
                     <span>{error}</span>
                   </div>
                 )}
 
-                {/* Submit Button */}
+                {/* Submit Button - Pill shaped, soft mint gradient */}
                 <button
                   type="submit"
                   disabled={loading || googleLoading || !email || !password || (!isLogin && !displayName)}
-                  className="w-full py-3.5 sm:py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl shadow-emerald-200/40 hover:shadow-emerald-200/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all press-effect"
+                  className="w-full py-3.5 sm:py-4 bg-gradient-to-r from-baby-mint-300 to-baby-mint-400 text-dreamy-slate-700 rounded-full font-bold text-lg flex items-center justify-center gap-2 shadow-soft-mint hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all press-effect"
                 >
                   {loading ? (
                     <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -318,14 +318,14 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, onDevLogin, sign
 
               {/* Dev Login Button - Only visible in development mode */}
               {isDev && (
-                <div className="pt-2 border-t border-dashed border-orange-200/50">
+                <div className="pt-2 border-t border-dashed border-baby-yellow-100/50">
                   <button
                     onClick={handleDevLogin}
                     disabled={devLoading || loading || googleLoading}
-                    className="w-full py-2.5 bg-gradient-to-r from-orange-400/20 to-amber-400/20 border border-orange-300/50 text-orange-600 rounded-xl font-medium text-sm flex items-center justify-center gap-2 hover:from-orange-400/30 hover:to-amber-400/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="w-full py-2.5 bg-gradient-to-r from-baby-yellow-100/60 to-baby-yellow-200/60 border border-baby-yellow-200/50 text-dreamy-slate-600 rounded-full font-medium text-sm flex items-center justify-center gap-2 hover:from-baby-yellow-100/80 hover:to-baby-yellow-200/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     {devLoading ? (
-                      <div className="w-4 h-4 border-2 border-orange-300 border-t-orange-600 rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-baby-yellow-200 border-t-baby-yellow-300 rounded-full animate-spin" />
                     ) : (
                       <>
                         <Terminal size={16} />
@@ -333,7 +333,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, onDevLogin, sign
                       </>
                     )}
                   </button>
-                  <p className="text-[10px] text-orange-400/70 text-center mt-1.5">
+                  <p className="text-[10px] text-dreamy-slate-400/70 text-center mt-1.5">
                     Or type: admin / admin
                   </p>
                 </div>
@@ -342,11 +342,11 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, onDevLogin, sign
           </div>
           
           {/* Bottom Toggle */}
-          <p className="text-center text-sm text-gray-400 animate-fade-up flex-shrink-0 mt-6" style={{ animationDelay: '0.2s' }}>
+          <p className="text-center text-sm text-dreamy-slate-400 animate-fade-up flex-shrink-0 mt-6" style={{ animationDelay: '0.2s' }}>
             {isLogin ? 'עדיין אין לך חשבון?' : 'כבר יש לך חשבון?'}{' '}
             <button 
               onClick={() => { setIsLogin(!isLogin); setError(''); }}
-              className="text-emerald-500 font-bold hover:underline"
+              className="text-baby-pink-500 font-bold hover:underline"
             >
               {isLogin ? 'הרשמה' : 'התחברות'}
             </button>

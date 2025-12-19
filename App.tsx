@@ -678,17 +678,25 @@ const AppContent: React.FC = () => {
   // Show splash screen (waits for both min time AND auth initialization)
   if (isSplash) {
     return (
-      <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-[200]">
+      <div 
+        className="fixed inset-0 flex flex-col items-center justify-center z-[200]"
+        style={{
+          background: 'linear-gradient(135deg, #FFF5F7 0%, #FFECF0 30%, #E3F2FD 70%, #F0FFF4 100%)',
+        }}
+      >
         <div className="animate-splash flex flex-col items-center">
-          <img 
-            src="/LOGO.png" 
-            alt="NameIT" 
-            className="w-72 h-72 object-contain"
-          />
+          <div className="relative">
+            <div className="absolute inset-0 bg-baby-pink-200/30 blur-3xl rounded-full scale-150 animate-pulse" />
+            <img 
+              src="/LOGO.png" 
+              alt="NameIT" 
+              className="relative w-72 h-72 object-contain drop-shadow-2xl"
+            />
+          </div>
           {/* Show subtle loading indicator if still checking auth */}
           {!authInitialized && (
             <div className="mt-8">
-              <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-baby-pink-200 border-t-baby-pink-400 rounded-full animate-spin" />
             </div>
           )}
         </div>
@@ -699,14 +707,19 @@ const AppContent: React.FC = () => {
   // Show loading while fetching user data (after auth is confirmed)
   if (dataLoading) {
     return (
-      <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-[200]">
+      <div 
+        className="fixed inset-0 flex flex-col items-center justify-center z-[200]"
+        style={{
+          background: 'linear-gradient(135deg, #FFF5F7 0%, #FFECF0 30%, #E3F2FD 70%, #F0FFF4 100%)',
+        }}
+      >
         <img 
           src="/LOGO.png" 
           alt="NameIT" 
-          className="w-24 h-24 object-contain mb-6 opacity-30"
+          className="w-24 h-24 object-contain mb-6 opacity-50"
         />
-        <div className="w-10 h-10 border-3 border-emerald-100 border-t-emerald-500 rounded-full animate-spin" />
-        <p className="mt-4 text-gray-400 text-sm font-medium">מתחברים...</p>
+        <div className="w-10 h-10 border-3 border-baby-pink-200 border-t-baby-pink-400 rounded-full animate-spin" />
+        <p className="mt-4 text-dreamy-slate-400 text-sm font-medium">מתחברים...</p>
       </div>
     );
   }
@@ -744,17 +757,7 @@ const AppContent: React.FC = () => {
       )}
       
       {view === 'SWIPE' && (
-        <div className="h-full flex flex-col relative animate-fade-in overflow-hidden">
-          <div className="px-8 py-2 flex justify-end z-20">
-            <button 
-              onClick={() => setShowFilters(true)}
-              className="flex items-center gap-2 text-gray-400 font-bold bg-white px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition-all active:scale-95 shadow-sm"
-            >
-              <SlidersHorizontal size={16} />
-              <span className="text-[11px] uppercase tracking-wider">סינון</span>
-            </button>
-          </div>
-
+        <div className="h-full flex flex-col relative animate-fade-in overflow-hidden pb-2">
           <div className="flex-1 flex flex-col items-center justify-center relative">
             {currentBabyName ? (
                 <SwipeCard 
@@ -766,15 +769,15 @@ const AppContent: React.FC = () => {
                   progress={currentNameIndex / Math.max(sessionNames.length, 1)}
                 />
             ) : (
-              <div className="text-center p-12 bg-gray-50 rounded-[3rem] border-none animate-pop mx-8">
-                <div className="w-20 h-20 bg-emerald-50 text-emerald-400 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <div className="text-center p-12 glass-card-strong rounded-[3rem] animate-pop mx-8">
+                <div className="w-20 h-20 bg-baby-mint-100 text-baby-mint-400 rounded-full flex items-center justify-center mx-auto mb-6">
                   <CircleCheck size={48} strokeWidth={2} />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-700 mb-2 tracking-tight">סיימנו הכל</h3>
-                <p className="text-gray-400 mb-8 max-w-[200px] mx-auto text-[16px]">אין עוד שמות להציג כרגע. בואו נבדוק את ההתאמות!</p>
+                <h3 className="text-2xl font-bold text-dreamy-slate-700 mb-2 tracking-tight">סיימנו הכל</h3>
+                <p className="text-dreamy-slate-400 mb-8 max-w-[200px] mx-auto text-[16px]">אין עוד שמות להציג כרגע. בואו נבדוק את ההתאמות!</p>
                 <button 
                   onClick={() => setView('MATCHES')}
-                  className="w-full py-5 bg-emerald-400 text-white rounded-2xl font-bold text-lg shadow-sm hover:bg-emerald-500 transition-all active:scale-95"
+                  className="w-full py-5 bg-gradient-to-r from-baby-mint-300 to-baby-mint-400 text-dreamy-slate-700 rounded-full font-bold text-lg shadow-soft-mint hover:shadow-lg transition-all active:scale-95"
                 >
                   לרשימת ההתאמות
                 </button>
@@ -783,22 +786,30 @@ const AppContent: React.FC = () => {
           </div>
 
           {showFilters && (
-            <div className="absolute inset-0 z-[60] bg-black/10 flex items-end">
-              <div className="w-full bg-white rounded-t-[3rem] p-10 animate-fade-in shadow-2xl border-t border-gray-100">
+            <div className="absolute inset-0 z-[60] overlay-dreamy flex items-end">
+              <div className="w-full glass-card-strong rounded-t-[3rem] p-10 animate-fade-in">
                 <div className="flex justify-between items-center mb-8">
-                  <h3 className="text-xl font-bold text-gray-700 tracking-tight">סינון</h3>
-                  <button onClick={() => setShowFilters(false)} className="p-2 text-gray-300 rounded-full hover:bg-gray-50 active:scale-90"><X size={24} /></button>
+                  <h3 className="text-xl font-bold text-dreamy-slate-700 tracking-tight">סינון</h3>
+                  <button onClick={() => setShowFilters(false)} className="p-2 text-dreamy-slate-400 rounded-full hover:bg-white/50 active:scale-90"><X size={24} /></button>
                 </div>
 
                 <div className="space-y-8">
                   <div>
-                    <p className="text-[11px] font-bold text-gray-300 uppercase tracking-widest mb-4">קטגוריה</p>
+                    <p className="text-[11px] font-bold text-dreamy-slate-400 uppercase tracking-widest mb-4">קטגוריה</p>
                     <div className="flex gap-3">
                       {[Gender.BOY, Gender.GIRL, Gender.UNISEX].map(g => (
                         <button
                           key={g}
                           onClick={() => toggleGenderFilter(g)}
-                          className={`flex-1 py-4 rounded-xl font-bold transition-all border ${filters.genders.includes(g) ? 'bg-emerald-50 border-emerald-100 text-emerald-500' : 'bg-white border-gray-100 text-gray-300'}`}
+                          className={`flex-1 py-4 rounded-full font-bold transition-all border ${
+                            filters.genders.includes(g) 
+                              ? g === Gender.BOY 
+                                ? 'bg-baby-blue-100 border-baby-blue-200 text-baby-blue-500' 
+                                : g === Gender.GIRL 
+                                  ? 'bg-baby-pink-100 border-baby-pink-200 text-baby-pink-500'
+                                  : 'bg-baby-lavender-100 border-baby-lavender-200 text-baby-lavender-300'
+                              : 'bg-white/60 border-white/50 text-dreamy-slate-400'
+                          }`}
                         >
                           {g === Gender.BOY ? 'בן' : g === Gender.GIRL ? 'בת' : 'יוניסקס'}
                         </button>
@@ -807,21 +818,21 @@ const AppContent: React.FC = () => {
                   </div>
 
                   <div>
-                    <p className="text-[11px] font-bold text-gray-300 uppercase tracking-widest mb-4">אות פותחת</p>
+                    <p className="text-[11px] font-bold text-dreamy-slate-400 uppercase tracking-widest mb-4">אות פותחת</p>
                     <input 
                       type="text"
                       maxLength={1}
                       placeholder="למשל: א"
                       value={filters.startingLetter}
                       onChange={(e) => setFilters(prev => ({ ...prev, startingLetter: e.target.value }))}
-                      className="w-full p-5 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-emerald-50 outline-none text-center font-bold text-3xl text-gray-700 transition-all"
+                      className="w-full p-5 bg-white/60 rounded-full border border-white/50 focus:ring-2 focus:ring-baby-pink-200 outline-none text-center font-bold text-3xl text-dreamy-slate-700 transition-all"
                     />
                   </div>
                 </div>
 
                 <button 
                   onClick={() => setShowFilters(false)}
-                  className="w-full mt-10 py-5 bg-emerald-400 text-white rounded-2xl font-bold text-lg hover:bg-emerald-500 transition-all shadow-sm active:scale-95"
+                  className="w-full mt-10 py-5 bg-gradient-to-r from-baby-pink-300 to-baby-pink-400 text-dreamy-slate-700 rounded-full font-bold text-lg shadow-soft-pink hover:shadow-lg transition-all active:scale-95"
                 >
                   שמירה
                 </button>
@@ -858,24 +869,25 @@ const AppContent: React.FC = () => {
         <div 
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 text-center safe-top safe-bottom overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%)',
+            background: 'linear-gradient(135deg, #FFF5F7 0%, #FFECF0 30%, #E3F2FD 70%, #F0FFF4 100%)',
           }}
         >
-          {/* Animated background hearts */}
+          {/* Animated background hearts - dreamy pastel */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {[...Array(12)].map((_, i) => (
               <div
                 key={i}
-                className="absolute text-emerald-200/40 animate-pulse"
+                className="absolute animate-pulse"
                 style={{
                   left: `${Math.random() * 100}%`,
                   top: `${Math.random() * 100}%`,
                   fontSize: `${20 + Math.random() * 40}px`,
                   animationDelay: `${Math.random() * 2}s`,
                   animationDuration: `${2 + Math.random() * 2}s`,
+                  opacity: 0.4,
                 }}
               >
-                💚
+                {i % 3 === 0 ? '💕' : i % 3 === 1 ? '🩷' : '💗'}
               </div>
             ))}
           </div>
@@ -884,68 +896,68 @@ const AppContent: React.FC = () => {
           <div className="relative z-10 flex flex-col items-center">
             {/* Animated hearts icon */}
             <div className="mb-6 relative">
-              <div className="absolute inset-0 bg-emerald-300/30 blur-3xl rounded-full scale-150 animate-pulse" />
-              <div className="relative p-5 bg-white rounded-[2.5rem] shadow-2xl shadow-emerald-200/50">
+              <div className="absolute inset-0 bg-baby-pink-200/40 blur-3xl rounded-full scale-150 animate-pulse" />
+              <div className="relative p-5 glass-card-strong rounded-[2.5rem] shadow-soft-pink">
                 <div className="flex items-center gap-1">
-                  <span className="text-5xl animate-bounce" style={{ animationDelay: '0ms' }}>💚</span>
-                  <span className="text-5xl animate-bounce" style={{ animationDelay: '100ms' }}>💚</span>
+                  <span className="text-5xl animate-bounce" style={{ animationDelay: '0ms' }}>💕</span>
+                  <span className="text-5xl animate-bounce" style={{ animationDelay: '100ms' }}>💕</span>
                 </div>
               </div>
             </div>
             
             {/* Match text */}
             <h2 
-              className="text-5xl font-black mb-2 text-emerald-600 leading-tight font-heebo"
+              className="text-5xl font-black mb-2 text-baby-pink-500 leading-tight font-heebo"
               style={{ 
-                textShadow: '0 4px 20px rgba(16, 185, 129, 0.3)',
+                textShadow: '0 4px 20px rgba(255, 205, 210, 0.5)',
                 animation: 'pulse 2s ease-in-out infinite'
               }}
             >
               !יש התאמה
             </h2>
-            <p className="text-lg mb-8 text-emerald-700/70 font-medium">מצאתם שם ששניכם אוהבים</p>
+            <p className="text-lg mb-8 text-dreamy-slate-500 font-medium">מצאתם שם ששניכם אוהבים</p>
             
             {/* Name card */}
             <div 
-              className="w-80 bg-white rounded-[3rem] p-8 mb-10 shadow-2xl shadow-emerald-300/30 relative overflow-hidden"
+              className="w-80 glass-card-strong rounded-[3rem] p-8 mb-10 shadow-dreamy-lg relative overflow-hidden"
               style={{
                 animation: 'pop 0.5s ease-out',
               }}
             >
               {/* Decorative gradient */}
-              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-400" />
+              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-baby-pink-300 via-baby-lavender-200 to-baby-blue-200" />
               
               {/* Sparkle decorations */}
               <div className="absolute top-4 right-4 text-2xl animate-spin" style={{ animationDuration: '3s' }}>✨</div>
               <div className="absolute bottom-4 left-4 text-2xl animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }}>✨</div>
               
               <div className="text-center py-4">
-                <h3 className="text-[72px] font-black text-gray-800 mb-3 font-heebo tracking-tight leading-none">
+                <h3 className="text-[72px] font-black text-dreamy-slate-700 mb-3 font-heebo tracking-tight leading-none">
                   {showMatchCelebration.hebrew}
                 </h3>
-                <p className="text-emerald-500 font-bold text-xl tracking-[0.3em] uppercase mb-4">
+                <p className="text-baby-pink-500 font-bold text-xl tracking-[0.3em] uppercase mb-4">
                   {showMatchCelebration.transliteration}
                 </p>
-                <div className="mx-auto w-16 h-1 bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-300 rounded-full" />
+                <div className="mx-auto w-16 h-1 bg-gradient-to-r from-baby-pink-300 via-baby-lavender-200 to-baby-blue-200 rounded-full" />
               </div>
             </div>
 
-            {/* Action buttons */}
+            {/* Action buttons - Pill shaped */}
             <div className="flex flex-col gap-3 w-full max-w-[300px]">
               <button 
                 onClick={() => {
                   setShowMatchCelebration(null);
                   setView('MATCHES');
                 }}
-                className="w-full py-5 bg-white text-emerald-600 rounded-2xl font-bold text-lg border-2 border-emerald-200 hover:bg-emerald-50 active:scale-95 transition-all shadow-lg"
+                className="w-full py-5 glass-button text-dreamy-slate-700 rounded-full font-bold text-lg border-2 border-baby-pink-200 hover:bg-baby-pink-50/50 active:scale-95 transition-all"
               >
                 צפייה ברשימת ההתאמות
               </button>
               <button 
                 onClick={() => setShowMatchCelebration(null)}
-                className="w-full py-5 bg-emerald-500 text-white rounded-2xl font-bold text-lg shadow-xl shadow-emerald-300/40 hover:bg-emerald-600 active:scale-95 transition-all"
+                className="w-full py-5 bg-gradient-to-r from-baby-pink-300 to-baby-pink-400 text-dreamy-slate-700 rounded-full font-bold text-lg shadow-soft-pink hover:shadow-lg active:scale-95 transition-all"
               >
-                ממשיכים להחליק 💚
+                ממשיכים להחליק 💕
               </button>
             </div>
           </div>
