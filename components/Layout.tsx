@@ -14,16 +14,14 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, showNav, isConnected }) => {
   return (
     <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden font-assistant safe-top safe-bottom">
-      {/* Header - Fitted Glass Badge for Logo */}
+      {/* Header - Clean Logo with Bounce Effect */}
       {showNav && (
-        <header className="px-6 py-3 flex items-center justify-center shrink-0 bg-transparent">
-          <div className="bg-white/30 backdrop-blur-md rounded-2xl px-4 py-2 border border-white/60 shadow-lg hover:scale-105 transition-transform cursor-pointer">
-            <img 
-              src="/LOGO.png" 
-              alt="NameIT" 
-              className="h-14 w-auto object-contain block"
-            />
-          </div>
+        <header className="px-px py-3 flex items-center justify-center shrink-0 bg-transparent">
+          <img 
+            src="/LOGO.png" 
+            alt="NameIT" 
+            className="h-[97px] w-auto object-contain cursor-pointer transition-transform duration-300 hover:scale-110"
+          />
         </header>
       )}
 

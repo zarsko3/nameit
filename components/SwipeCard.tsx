@@ -192,7 +192,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
   const animationStyles = getTransformStyles();
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden px-4 py-4">
+    <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden px-[55px]">
       {/* Card Stack Container */}
       <div className="relative w-[85%] max-w-xs min-h-[70vh] h-[94%]">
         
@@ -353,7 +353,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
                 onClick={() => handleSwipeAction(false)}
                 className="flex flex-col items-center gap-2 group active:scale-90 transition-transform"
               >
-                <div className="w-[64px] h-[64px] rounded-full flex items-center justify-center bg-baby-pink-100/80 border-2 border-baby-pink-200 text-baby-pink-400 group-hover:bg-baby-pink-200 group-hover:text-baby-pink-500 transition-all shadow-soft-pink">
+                <div className="w-[72px] h-[72px] rounded-full flex items-center justify-center bg-baby-pink-100/80 border-2 border-baby-pink-200 text-baby-pink-400 group-hover:bg-baby-pink-200 group-hover:text-baby-pink-500 transition-all shadow-soft-pink">
                   <X size={30} strokeWidth={2.5} />
                 </div>
                 <span className="text-[11px] font-bold text-dreamy-slate-400 group-hover:text-baby-pink-500">לא אהבתי</span>
