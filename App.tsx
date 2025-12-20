@@ -959,93 +959,88 @@ const AppContent: React.FC = () => {
       )}
 
       {showMatchCelebration && (() => {
-        // Determine background image and matching sky color based on gender
+        // Determine background image based on gender
         const backgroundImage = showMatchCelebration.gender === Gender.GIRL 
           ? '/Girl.png' 
           : '/Boy.png';
-        const skyColor = showMatchCelebration.gender === Gender.GIRL 
-          ? '#ffeef2' // Soft Pink
-          : '#e0f7fa'; // Soft Blue
         
         return (
           <div 
-            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center h-full text-center safe-top safe-bottom overflow-hidden"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 safe-top safe-bottom"
             style={{
-              backgroundColor: skyColor,
+              backgroundColor: 'rgba(0, 0, 0, 0.60)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
             }}
           >
-            {/* Background Image - Full visible, no cropping */}
-            <img
-              src={backgroundImage}
-              alt="Match celebration background"
-              className="absolute inset-0 w-full h-auto max-h-[85vh] object-contain mx-auto pointer-events-none"
+            {/* Pop-up Card */}
+            <div 
+              className="relative w-[90%] max-w-[360px] rounded-[2rem] shadow-2xl overflow-hidden"
               style={{
-                top: '50%',
-                transform: 'translateY(-50%)',
+                animation: 'pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
               }}
-            />
-            
-            {/* Content positioned relative to image */}
-            <div className="relative z-10 flex flex-col items-center justify-center h-full w-full px-6">
-              {/* Zone 1: Title (Top - Sky Area) - Positioned at ~15% from top */}
-              <div 
-                className="absolute top-[15%] left-0 right-0 px-6"
-                style={{ top: '15%' }}
-              >
-                <h2 
-                  className="text-5xl md:text-6xl font-black text-white leading-tight font-heebo"
-                  style={{ 
-                    filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))',
-                  }}
-                >
-                  יש התאמה!
-                </h2>
-              </div>
+            >
+              {/* Background Image - Inside card, maintains aspect ratio */}
+              <img
+                src={backgroundImage}
+                alt="Match celebration"
+                className="w-full h-auto object-contain pointer-events-none"
+              />
               
-              {/* Zone 2: Name (Center - Inside White Frame) - Centered vertically */}
-              <div className="flex flex-col items-center justify-center px-6">
-                {/* Baby Name - DARK color for white frame background */}
-                <h3 
-                  className="text-6xl md:text-7xl font-black mb-4 text-dreamy-slate-700 leading-none font-heebo tracking-tight"
-                  style={{ 
-                    animation: 'pop 0.5s ease-out',
-                  }}
-                >
-                  {showMatchCelebration.hebrew}
-                </h3>
-                
-                {/* Subtitle - Dark Gray */}
-                <p className="text-lg md:text-xl text-dreamy-slate-500 font-medium">
-                  שם ששניכם אהבתם!
-                </p>
-              </div>
-
-              {/* Zone 3: Buttons (Bottom - Below Animals) - Positioned at bottom */}
-              <div 
-                className="absolute bottom-0 left-0 right-0 px-6 w-full"
-                style={{ 
-                  paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))',
-                }}
-              >
-                <div className="flex flex-col gap-3 w-full max-w-[320px] mx-auto">
-                  {/* Primary: Keep Swiping - Gradient Teal/Blue */}
-                  <button 
-                    onClick={() => setShowMatchCelebration(null)}
-                    className="w-full h-12 bg-gradient-to-r from-baby-mint-400 to-baby-blue-400 text-white rounded-full font-bold text-base shadow-lg hover:shadow-xl active:scale-95 transition-all"
-                  >
-                    המשיכו לחפש
-                  </button>
-                  
-                  {/* Secondary: Go to Favorites - Outlined */}
-                  <button 
-                    onClick={() => {
-                      setShowMatchCelebration(null);
-                      setView('MATCHES');
+              {/* Content Overlay - Absolute positioned over image */}
+              <div className="absolute inset-0 flex flex-col">
+                {/* Zone 1: Title (Top - Sky Area) */}
+                <div className="absolute top-[15%] left-0 right-0 w-full text-center px-4">
+                  <h2 
+                    className="text-3xl font-bold text-white drop-shadow-md font-heebo"
+                    style={{ 
+                      filter: 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4))',
                     }}
-                    className="w-full h-12 rounded-full font-semibold text-base text-dreamy-slate-700 border-2 border-dreamy-slate-300 bg-white/80 hover:bg-white active:scale-95 transition-all"
                   >
-                    לרשימת המועדפים
-                  </button>
+                    יש התאמה!
+                  </h2>
+                </div>
+                
+                {/* Zone 2: Name & Subtitle (Center - Inside White Frame) */}
+                <div className="absolute top-[45%] left-0 right-0 w-full text-center px-4">
+                  {/* Baby Name - DARK color for white frame background */}
+                  <h3 
+                    className="text-5xl md:text-6xl font-black mb-2 text-dreamy-slate-700 leading-none font-heebo tracking-tight"
+                    style={{ 
+                      animation: 'pop 0.5s ease-out 0.2s both',
+                    }}
+                  >
+                    {showMatchCelebration.hebrew}
+                  </h3>
+                  
+                  {/* Subtitle - Dark Gray */}
+                  <p className="text-base md:text-lg text-dreamy-slate-500 font-medium">
+                    שם ששניכם אהבתם!
+                  </p>
+                </div>
+
+                {/* Zone 3: Buttons (Bottom - Below Animals) */}
+                <div className="absolute bottom-[5%] left-0 right-0 w-full px-6">
+                  <div className="flex flex-col gap-2 w-full">
+                    {/* Primary: Keep Swiping - Gradient Teal/Blue */}
+                    <button 
+                      onClick={() => setShowMatchCelebration(null)}
+                      className="w-full h-11 bg-gradient-to-r from-baby-mint-400 to-baby-blue-400 text-white rounded-full font-bold text-sm shadow-lg hover:shadow-xl active:scale-95 transition-all"
+                    >
+                      המשיכו לחפש
+                    </button>
+                    
+                    {/* Secondary: Go to Favorites - Outlined */}
+                    <button 
+                      onClick={() => {
+                        setShowMatchCelebration(null);
+                        setView('MATCHES');
+                      }}
+                      className="w-full h-11 rounded-full font-semibold text-sm text-dreamy-slate-700 border-2 border-dreamy-slate-300 bg-white/90 hover:bg-white active:scale-95 transition-all"
+                    >
+                      לרשימת המועדפים
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
