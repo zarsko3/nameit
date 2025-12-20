@@ -216,14 +216,28 @@ const AppContent: React.FC = () => {
   // TRIPLE-LAYER FILTERING: Blacklist + Protected + Already Swiped
   const calculateFilteredNames = useCallback(() => {
     const totalInDb = INITIAL_NAMES.length;
+    const userId = currentUser?.uid;
+    
+    // CRITICAL: If no user ID, return all names (don't filter by swipes)
+    if (!userId) {
+      console.warn('⚠️ calculateFilteredNames called without currentUser.uid!');
+      return INITIAL_NAMES;
+    }
     
     // Normalize protected/blacklisted names for comparison
     const protectedNames = (effectiveSettings.protectedNames).map(n => n.trim().toLowerCase());
     const blacklistedNames = (effectiveSettings.blacklistedNames).map(n => n.trim().toLowerCase());
     
-    // Get names this specific user has already swiped (liked OR disliked)
-    const mySwipes = swipes.filter(s => s.userId === currentUser?.uid);
+    // CRITICAL: Get ONLY this specific user's swipes - NOT partner's swipes!
+    // This ensures User A's swipes don't affect User B's card deck
+    const mySwipes = swipes.filter(s => s.userId === userId);
     const swipedNameIds = new Set(mySwipes.map(s => s.nameId));
+    
+    // Debug: Verify we're only using current user's swipes
+    const partnerSwipes = swipes.filter(s => s.userId !== userId);
+    if (partnerSwipes.length > 0) {
+      console.log(`   📌 Filtering: Using ${mySwipes.length} of MY swipes, ignoring ${partnerSwipes.length} partner swipes`);
+    }
     
     // Track filtering stats for debugging
     let countAfterSwipeFilter = 0;
@@ -281,16 +295,18 @@ const AppContent: React.FC = () => {
     
     // Debug logging
     console.log('\n📊 NAME POOL ANALYSIS:');
+    console.log(`   👤 Current User: ${userId.slice(0, 8)}`);
     console.log(`   Total names in DB: ${totalInDb}`);
     console.log(`   Expected gender: ${effectiveSettings.expectedGender || 'All'} → Matching genders: [${gendersToMatch.join(', ')}]`);
     console.log(`   After gender filter: ${countAfterGenderFilter}`);
     console.log(`   Protected names (${protectedNames.length}): [${protectedNames.slice(0, 5).join(', ')}${protectedNames.length > 5 ? '...' : ''}]`);
     console.log(`   Blacklisted names (${blacklistedNames.length}): [${blacklistedNames.slice(0, 5).join(', ')}${blacklistedNames.length > 5 ? '...' : ''}]`);
     console.log(`   After exclusion filter: ${countAfterExclusionFilter}`);
-    console.log(`   User's swipes (${mySwipes.length}): ${mySwipes.filter(s => s.liked).length} liked, ${mySwipes.filter(s => !s.liked).length} disliked`);
-    console.log(`   After removing already-swiped: ${countAfterSwipeFilter}`);
+    console.log(`   MY swipes only (${mySwipes.length}): ${mySwipes.filter(s => s.liked).length} liked, ${mySwipes.filter(s => !s.liked).length} disliked`);
+    console.log(`   Partner swipes (IGNORED): ${partnerSwipes.length}`);
+    console.log(`   After removing MY already-swiped: ${countAfterSwipeFilter}`);
     console.log(`   After style/length/trending filters: ${countAfterStyleFilter}`);
-    console.log(`   ✅ FINAL POOL FOR USER ${currentUser?.uid?.slice(0, 8) || 'unknown'}: ${finalFiltered.length} names\n`);
+    console.log(`   ✅ FINAL POOL: ${finalFiltered.length} names\n`);
     
     return finalFiltered;
   }, [filters, effectiveSettings, swipes, currentUser?.uid]);
@@ -300,6 +316,10 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     // Wait for all required data before initializing
     if (view === 'SWIPE' && profile?.roomId && currentUser?.uid && swipesLoaded) {
+      // IMPORTANT: Double-check user-specific swipe count
+      const mySwipeCount = swipes.filter(s => s.userId === currentUser.uid).length;
+      const partnerSwipeCount = swipes.length - mySwipeCount;
+      
       // Check if we need to (re)initialize:
       // 1. Session not yet initialized
       // 2. Session was initialized for a different user (edge case: user switch)
@@ -309,14 +329,27 @@ const AppContent: React.FC = () => {
                         sessionNames.length === 0;
       
       if (needsInit) {
+        console.log(`\n🔄 SESSION INIT TRIGGERED for user ${currentUser.uid.slice(0, 8)}`);
+        console.log(`   Room: ${profile.roomId}`);
+        console.log(`   Total swipes in room: ${swipes.length}`);
+        console.log(`   MY swipes: ${mySwipeCount}`);
+        console.log(`   Partner's swipes: ${partnerSwipeCount}`);
+        
         // Calculate filtered names with CURRENT user's swipes only
         const newNames = calculateFilteredNames();
+        
+        console.log(`   ✅ Session will have ${newNames.length} names available`);
+        
+        // Safety check: if newNames is suspiciously low, log a warning
+        if (newNames.length === 0 && mySwipeCount < 50) {
+          console.warn(`   ⚠️ WARNING: 0 names available but user only swiped ${mySwipeCount} times!`);
+          console.warn(`   This might indicate partner's swipes are incorrectly filtering the pool.`);
+        }
+        
         setSessionNames(newNames);
         setCurrentNameIndex(0);
         sessionInitialized.current = true;
         swipesLoadedForUser.current = currentUser.uid;
-        console.log(`📋 Session initialized for user ${currentUser.uid.slice(0, 8)} with ${newNames.length} names`);
-        console.log(`   (Total room swipes: ${swipes.length}, My swipes: ${swipes.filter(s => s.userId === currentUser.uid).length})`);
       }
     }
   }, [view, profile?.roomId, currentUser?.uid, swipes, swipesLoaded, calculateFilteredNames]);
