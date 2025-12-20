@@ -535,11 +535,15 @@ const AppContent: React.FC = () => {
   };
 
   const triggerConfetti = () => {
+    // Pastel confetti colors matching baby theme
     confetti({
-      particleCount: 150,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#A7F3D0', '#BAE6FD', '#FED7AA', '#FDE68A']
+      particleCount: 200,
+      spread: 80,
+      origin: { y: 0.5 },
+      colors: ['#C8E6C9', '#BBDEFB', '#FFF9C4', '#D1C4E9', '#FFCDD2', '#E1BEE7'],
+      startVelocity: 30,
+      gravity: 0.8,
+      ticks: 200
     });
   };
 
@@ -956,97 +960,92 @@ const AppContent: React.FC = () => {
 
       {showMatchCelebration && (
         <div 
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 text-center safe-top safe-bottom overflow-hidden"
+          className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-6 text-center safe-top safe-bottom overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, #FFF5F7 0%, #FFECF0 30%, #E3F2FD 70%, #F0FFF4 100%)',
+            background: 'rgba(255, 255, 255, 0.90)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
           }}
         >
-          {/* Animated background hearts - dreamy pastel */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(12)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute animate-pulse"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  fontSize: `${20 + Math.random() * 40}px`,
-                  animationDelay: `${Math.random() * 2}s`,
-                  animationDuration: `${2 + Math.random() * 2}s`,
-                  opacity: 0.4,
-                }}
-              >
-                {i % 3 === 0 ? '💕' : i % 3 === 1 ? '🩷' : '💗'}
-              </div>
-            ))}
-          </div>
-
           {/* Main content */}
-          <div className="relative z-10 flex flex-col items-center">
-            {/* Animated hearts icon */}
+          <div className="relative z-10 flex flex-col items-center max-w-md w-full px-4">
+            {/* Celebration Icon - Baby-themed */}
             <div className="mb-6 relative">
-              <div className="absolute inset-0 bg-baby-pink-200/40 blur-3xl rounded-full scale-150 animate-pulse" />
-              <div className="relative p-5 glass-card-strong rounded-[2.5rem] shadow-soft-pink">
-                <div className="flex items-center gap-1">
-                  <span className="text-5xl animate-bounce" style={{ animationDelay: '0ms' }}>💕</span>
-                  <span className="text-5xl animate-bounce" style={{ animationDelay: '100ms' }}>💕</span>
-                </div>
+              <div className="absolute inset-0 bg-baby-mint-200/30 blur-3xl rounded-full scale-150 animate-pulse" />
+              <div className="relative p-6 glass-card-strong rounded-[2.5rem] shadow-dreamy-lg">
+                <div className="text-6xl animate-bounce">🎉</div>
               </div>
             </div>
             
-            {/* Match text */}
+            {/* Match text - Soft colors */}
             <h2 
-              className="text-5xl font-black mb-2 text-baby-pink-500 leading-tight font-heebo"
+              className="text-5xl font-black mb-3 text-dreamy-slate-700 leading-tight font-heebo"
               style={{ 
-                textShadow: '0 4px 20px rgba(255, 205, 210, 0.5)',
-                animation: 'pulse 2s ease-in-out infinite'
+                textShadow: '0 2px 10px rgba(69, 90, 100, 0.1)',
               }}
             >
-              !יש התאמה
+              יש התאמה!
             </h2>
             <p className="text-lg mb-8 text-dreamy-slate-500 font-medium">מצאתם שם ששניכם אוהבים</p>
             
-            {/* Name card */}
+            {/* Name card - Glass style */}
             <div 
-              className="w-80 glass-card-strong rounded-[3rem] p-8 mb-10 shadow-dreamy-lg relative overflow-hidden"
+              className="w-full max-w-sm glass-card rounded-[2.5rem] p-8 mb-8 shadow-dreamy-lg relative overflow-hidden"
               style={{
                 animation: 'pop 0.5s ease-out',
+                background: 'rgba(255, 255, 255, 0.60)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255, 255, 255, 0.5)',
               }}
             >
-              {/* Decorative gradient */}
-              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-baby-pink-300 via-baby-lavender-200 to-baby-blue-200" />
+              {/* Subtle decorative gradient */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-baby-mint-200 via-baby-blue-200 to-baby-lavender-200" />
               
-              {/* Sparkle decorations */}
-              <div className="absolute top-4 right-4 text-2xl animate-spin" style={{ animationDuration: '3s' }}>✨</div>
-              <div className="absolute bottom-4 left-4 text-2xl animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }}>✨</div>
+              {/* Subtle sparkle decorations */}
+              <div className="absolute top-3 right-3 text-xl opacity-60 animate-spin" style={{ animationDuration: '3s' }}>✨</div>
+              <div className="absolute bottom-3 left-3 text-xl opacity-60 animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }}>✨</div>
               
               <div className="text-center py-4">
-                <h3 className="text-[72px] font-black text-dreamy-slate-700 mb-3 font-heebo tracking-tight leading-none">
+                <h3 className="text-[64px] font-black text-dreamy-slate-700 mb-3 font-heebo tracking-tight leading-none">
                   {showMatchCelebration.hebrew}
                 </h3>
-                <p className="text-baby-pink-500 font-bold text-xl tracking-[0.3em] uppercase mb-4">
+                <p className="text-baby-blue-500 font-bold text-lg tracking-[0.2em] uppercase mb-3">
                   {showMatchCelebration.transliteration}
                 </p>
-                <div className="mx-auto w-16 h-1 bg-gradient-to-r from-baby-pink-300 via-baby-lavender-200 to-baby-blue-200 rounded-full" />
+                {showMatchCelebration.meaning && (
+                  <p className="text-sm text-dreamy-slate-400 mb-3">
+                    {showMatchCelebration.meaning}
+                  </p>
+                )}
+                <div className="mx-auto w-12 h-0.5 bg-gradient-to-r from-baby-mint-200 via-baby-blue-200 to-baby-lavender-200 rounded-full" />
               </div>
             </div>
 
-            {/* Action buttons - Pill shaped */}
-            <div className="flex flex-col gap-3 w-full max-w-[300px]">
+            {/* Action buttons - Premium glass style */}
+            <div className="flex flex-col gap-3 w-full max-w-[320px]">
+              {/* Primary: Keep Swiping - Mint to Blue gradient */}
+              <button 
+                onClick={() => setShowMatchCelebration(null)}
+                className="w-full py-5 bg-gradient-to-r from-baby-mint-300 to-baby-blue-300 text-dreamy-slate-700 rounded-full font-bold text-lg shadow-soft-mint hover:shadow-lg active:scale-95 transition-all"
+              >
+                המשיכו לחפש
+              </button>
+              
+              {/* Secondary: Go to Favorites - Glass button */}
               <button 
                 onClick={() => {
                   setShowMatchCelebration(null);
                   setView('MATCHES');
                 }}
-                className="w-full py-5 glass-button text-dreamy-slate-700 rounded-full font-bold text-lg border-2 border-baby-pink-200 hover:bg-baby-pink-50/50 active:scale-95 transition-all"
+                className="w-full py-5 glass-button text-dreamy-slate-700 rounded-full font-bold text-lg border-2 border-white/50 hover:bg-white/60 active:scale-95 transition-all"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.60)',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
+                }}
               >
-                צפייה ברשימת ההתאמות
-              </button>
-              <button 
-                onClick={() => setShowMatchCelebration(null)}
-                className="w-full py-5 bg-gradient-to-r from-baby-pink-300 to-baby-pink-400 text-dreamy-slate-700 rounded-full font-bold text-lg shadow-soft-pink hover:shadow-lg active:scale-95 transition-all"
-              >
-                ממשיכים להחליק 💕
+                לרשימת המועדפים
               </button>
             </div>
           </div>
