@@ -549,38 +549,41 @@ const AppContent: React.FC = () => {
 
   // Match celebration confetti - Pastel colors, cannon effect
   const triggerMatchConfetti = () => {
-    // Pastel colors: Teal, Soft Pink, Baby Blue, Gold
-    const pastelColors = ['#80CBC4', '#FFCDD2', '#BBDEFB', '#FFD54F'];
+    // Vibrant pastel colors: Teal, Pink, Gold, Blue
+    const pastelColors = ['#2DD4BF', '#F472B6', '#FBBF24', '#60A5FA'];
     
-    // Cannon/spread effect from sides
+    // Cannon/spread effect from sides - Higher z-index to render above modal
     confetti({
-      particleCount: 100,
+      particleCount: 150,
       angle: 60,
-      spread: 55,
-      origin: { x: 0 },
+      spread: 100,
+      origin: { x: 0, y: 0.6 },
       colors: pastelColors,
       startVelocity: 45,
       gravity: 0.8,
+      zIndex: 10001,
     });
     
     confetti({
-      particleCount: 100,
+      particleCount: 150,
       angle: 120,
-      spread: 55,
-      origin: { x: 1 },
+      spread: 100,
+      origin: { x: 1, y: 0.6 },
       colors: pastelColors,
       startVelocity: 45,
       gravity: 0.8,
+      zIndex: 10001,
     });
     
-    // Center burst
+    // Center burst - Higher z-index to render above modal
     confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { x: 0.5, y: 0.5 },
+      particleCount: 150,
+      spread: 100,
+      origin: { x: 0.5, y: 0.6 },
       colors: pastelColors,
       startVelocity: 30,
       gravity: 0.6,
+      zIndex: 10001,
     });
   };
 
