@@ -22,7 +22,8 @@ import {
   Settings as SettingsIcon,
   Database,
   Upload,
-  Terminal
+  Terminal,
+  Leaf
 } from 'lucide-react';
 import { uploadExistingNames, countNamesInFirestore, syncNamesToFirestore } from '../services/migrationService';
 
@@ -46,6 +47,7 @@ const NAME_STYLE_OPTIONS = [
   { value: NameStyle.CLASSIC, label: 'קלאסי', icon: Crown },
   { value: NameStyle.INTERNATIONAL, label: 'בינלאומי', icon: Globe },
   { value: NameStyle.UNIQUE, label: 'ייחודי', icon: Star },
+  { value: NameStyle.NATURE, label: 'טבע', icon: Leaf },
 ];
 
 // Premium Tag Input - Dreamy pastel style

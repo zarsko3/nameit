@@ -10,7 +10,8 @@ export enum NameStyle {
   MODERN = 'MODERN',           // מודרני
   CLASSIC = 'CLASSIC',         // קלאסי/מסורתי
   INTERNATIONAL = 'INTERNATIONAL', // בינלאומי
-  UNIQUE = 'UNIQUE'            // ייחודי/נדיר
+  UNIQUE = 'UNIQUE',           // ייחודי/נדיר
+  NATURE = 'NATURE'            // טבע (עצים, פרחים, בעלי חיים)
 }
 
 export interface BabyName {
