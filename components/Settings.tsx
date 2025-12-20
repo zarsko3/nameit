@@ -30,6 +30,12 @@ import { uploadExistingNames, countNamesInFirestore, syncNamesToFirestore } from
 // Check if we're in development mode
 const isDev = import.meta.env.DEV;
 
+// Admin user IDs - only these users can see the Sync Names button
+const ADMIN_IDS: string[] = [
+  // TODO: Add your user ID here after checking console log
+  // 'your-user-id-here'
+];
+
 interface SettingsProps {
   profile: UserProfile | null;
   isPartnerOnline: boolean;
@@ -357,6 +363,14 @@ const Settings: React.FC<SettingsProps> = ({
   const [syncResult, setSyncResult] = useState<{ uploaded: number; skipped?: number } | null>(null);
 
   if (!profile) return null;
+
+  // Log current user ID for admin setup (remove after adding to ADMIN_IDS)
+  if (currentUserId) {
+    console.log('🔑 Current User ID (copy this to ADMIN_IDS):', currentUserId);
+  }
+
+  // Check if current user is admin
+  const isAdmin = currentUserId ? ADMIN_IDS.includes(currentUserId) : false;
 
   // Count only current user's swipes
   const mySwipeCount = currentUserId 
@@ -687,50 +701,52 @@ const Settings: React.FC<SettingsProps> = ({
             </p>
           </div>
 
-          {/* Sync Names Button - Always visible */}
-          <div className="glass-card rounded-3xl p-5 animate-fade-up" style={{ animationDelay: '0.36s' }}>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-baby-blue-200 to-baby-blue-300 rounded-full flex items-center justify-center shadow-soft-blue">
-                <Database size={18} className="text-white" />
+          {/* Sync Names Button - Admin only */}
+          {isAdmin && (
+            <div className="glass-card rounded-3xl p-5 animate-fade-up" style={{ animationDelay: '0.36s' }}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-baby-blue-200 to-baby-blue-300 rounded-full flex items-center justify-center shadow-soft-blue">
+                  <Database size={18} className="text-white" />
+                </div>
+                <div>
+                  <p className="font-bold text-dreamy-slate-700 font-heebo">סנכרון שמות (מנהל)</p>
+                  <p className="text-[10px] text-dreamy-slate-400">העלה שמות חסרים למסד הנתונים</p>
+                </div>
               </div>
-              <div>
-                <p className="font-bold text-dreamy-slate-700 font-heebo">סנכרון שמות</p>
-                <p className="text-[10px] text-dreamy-slate-400">העלה שמות חסרים למסד הנתונים</p>
-              </div>
-            </div>
-            
-            <button
-              onClick={handleSyncNames}
-              disabled={isSyncing}
-              className="w-full py-3 bg-gradient-to-r from-baby-blue-200 to-baby-blue-300 text-white font-bold rounded-full flex items-center justify-center gap-2 hover:from-baby-blue-300 hover:to-baby-blue-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-soft-blue"
-            >
-              {isSyncing ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>מסנכרן...</span>
-                </>
-              ) : (
-                <>
-                  <Database size={18} />
-                  <span>סנכרן שמות למסד הנתונים</span>
-                </>
-              )}
-            </button>
-            
-            {syncResult && (
-              <div className={`mt-3 p-3 rounded-full text-sm text-center ${
-                syncResult.uploaded > 0
-                  ? 'bg-baby-mint-100 text-dreamy-slate-700' 
-                  : 'bg-baby-blue-50 text-dreamy-slate-600'
-              }`}>
-                {syncResult.uploaded > 0 ? (
-                  <>✅ הועלו {syncResult.uploaded} שמות חדשים</>
+              
+              <button
+                onClick={handleSyncNames}
+                disabled={isSyncing}
+                className="w-full py-3 bg-gradient-to-r from-baby-blue-200 to-baby-blue-300 text-white font-bold rounded-full flex items-center justify-center gap-2 hover:from-baby-blue-300 hover:to-baby-blue-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-soft-blue"
+              >
+                {isSyncing ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>מסנכרן...</span>
+                  </>
                 ) : (
-                  <>✅ כל השמות כבר קיימים {syncResult.skipped && `(${syncResult.skipped} שמות)`}</>
+                  <>
+                    <Database size={18} />
+                    <span>סנכרן שמות למסד הנתונים</span>
+                  </>
                 )}
-              </div>
-            )}
-          </div>
+              </button>
+              
+              {syncResult && (
+                <div className={`mt-3 p-3 rounded-full text-sm text-center ${
+                  syncResult.uploaded > 0
+                    ? 'bg-baby-mint-100 text-dreamy-slate-700'
+                    : 'bg-baby-blue-50 text-dreamy-slate-600'
+                }`}>
+                  {syncResult.uploaded > 0 ? (
+                    <>✅ הועלו {syncResult.uploaded} שמות חדשים</>
+                  ) : (
+                    <>✅ כל השמות כבר קיימים {syncResult.skipped && `(${syncResult.skipped} שמות)`}</>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Dev Admin Panel - Only visible in development */}
           {isDev && <DevAdminPanel />}
