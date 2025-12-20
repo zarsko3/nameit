@@ -100,7 +100,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
       setSwipeDir(liked ? 'right' : 'left');
       setTimeout(() => {
         onSwipe(liked);
-      }, 300);
+      }, 200); // Reduced from 300ms to 200ms for faster interaction
     } else {
       // Below threshold - reset position with spring animation
       setDragOffset({ x: 0, y: 0 });
@@ -150,10 +150,10 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
   const handleSwipeAction = (liked: boolean) => {
     if (swipeDir) return; // Prevent multiple clicks
     setSwipeDir(liked ? 'right' : 'left');
-    // Subtle delay to allow the animation to play out
+    // Reduced delay for faster interaction - just enough for card to clear center
     setTimeout(() => {
       onSwipe(liked);
-    }, 300);
+    }, 200); // Reduced from 300ms to 200ms for faster interaction
   };
 
   // Dynamic animation styles - supports both button clicks and drag gestures
@@ -161,7 +161,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
     // If card is being swiped away via button or completed gesture
     if (swipeDir) {
       return {
-        transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)', // Reduced from 0.35s to 0.2s for faster exit
         transform: swipeDir === 'left' 
           ? 'translateX(-150%) rotate(-25deg)' 
           : 'translateX(150%) rotate(25deg)',
@@ -182,7 +182,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
     
     // Default resting state
     return {
-      transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)', // Spring-back animation
+      transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)', // Reduced from 0.4s to 0.3s for snappier spring-back
       transform: 'translateX(0) translateY(0) rotate(0)',
       opacity: 1,
       cursor: 'grab',
@@ -487,3 +487,5 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
 };
 
 export default SwipeCard;
+
+
