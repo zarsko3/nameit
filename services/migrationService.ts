@@ -176,4 +176,135 @@ export const clearAllNames = async (): Promise<boolean> => {
   }
 };
 
+/**
+ * Sync names from INITIAL_NAMES to Firestore
+ * Only uploads names that don't already exist (by ID or Hebrew name)
+ * Returns count of newly uploaded names
+ */
+export const syncNamesToFirestore = async (): Promise<{
+  success: boolean;
+  uploaded: number;
+  skipped: number;
+  errors: string[];
+}> => {
+  console.log('\n🔄 SYNC: Checking for missing names in Firestore...');
+  console.log(`📊 Total names in constants: ${INITIAL_NAMES.length}`);
+  
+  const errors: string[] = [];
+  let uploadedCount = 0;
+  let skippedCount = 0;
+  
+  try {
+    // Fetch all existing names from Firestore
+    const namesRef = collection(db, NAMES_COLLECTION);
+    const snapshot = await getDocs(namesRef);
+    
+    // Create sets for fast lookup
+    const existingIds = new Set<string>();
+    const existingHebrew = new Set<string>();
+    
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.id) existingIds.add(data.id);
+      if (data.hebrew) existingHebrew.add(data.hebrew.trim().toLowerCase());
+    });
+    
+    console.log(`📋 Found ${snapshot.size} existing names in Firestore`);
+    console.log(`   Checking ${INITIAL_NAMES.length} names from constants...`);
+    
+    // Find missing names
+    const missingNames = INITIAL_NAMES.filter(name => {
+      const hasId = existingIds.has(name.id);
+      const hasHebrew = existingHebrew.has(name.hebrew.trim().toLowerCase());
+      return !hasId && !hasHebrew;
+    });
+    
+    console.log(`✨ Found ${missingNames.length} missing names to upload`);
+    
+    if (missingNames.length === 0) {
+      console.log('✅ All names already exist in Firestore!');
+      return {
+        success: true,
+        uploaded: 0,
+        skipped: INITIAL_NAMES.length,
+        errors: []
+      };
+    }
+    
+    // Upload missing names in batches
+    const BATCH_SIZE = 450;
+    const totalBatches = Math.ceil(missingNames.length / BATCH_SIZE);
+    
+    for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+      const batch = writeBatch(db);
+      const start = batchIndex * BATCH_SIZE;
+      const end = Math.min(start + BATCH_SIZE, missingNames.length);
+      const batchNames = missingNames.slice(start, end);
+      
+      console.log(`\n📦 Uploading batch ${batchIndex + 1}/${totalBatches} (${start + 1}-${end} of ${missingNames.length})...`);
+      
+      for (const name of batchNames) {
+        try {
+          const docId = generateDocId(name);
+          const docRef = doc(db, NAMES_COLLECTION, docId);
+          
+          const nameDoc = {
+            id: name.id,
+            hebrew: name.hebrew.trim(),
+            transliteration: name.transliteration.trim(),
+            meaning: name.meaning.trim(),
+            gender: name.gender,
+            style: name.style || [],
+            isTrending: name.isTrending || false,
+            popularity: name.popularity || 0,
+            createdAt: new Date().toISOString(),
+            source: 'sync_v1'
+          };
+          
+          batch.set(docRef, nameDoc);
+          uploadedCount++;
+          
+        } catch (nameError: any) {
+          const errorMsg = `Error preparing "${name.hebrew}": ${nameError.message}`;
+          console.error(`❌ ${errorMsg}`);
+          errors.push(errorMsg);
+          skippedCount++;
+        }
+      }
+      
+      await batch.commit();
+      console.log(`✅ Batch ${batchIndex + 1} committed!`);
+    }
+    
+    skippedCount = INITIAL_NAMES.length - uploadedCount;
+    
+    console.log('\n' + '='.repeat(50));
+    console.log('🎉 SYNC COMPLETE!');
+    console.log(`✅ Uploaded: ${uploadedCount} new names`);
+    console.log(`⏭️ Skipped: ${skippedCount} names (already exist)`);
+    if (errors.length > 0) {
+      console.log(`❌ Errors: ${errors.length}`);
+      errors.forEach(e => console.log(`   - ${e}`));
+    }
+    console.log('='.repeat(50) + '\n');
+    
+    return {
+      success: errors.length === 0,
+      uploaded: uploadedCount,
+      skipped: skippedCount,
+      errors
+    };
+    
+  } catch (error: any) {
+    console.error('❌ SYNC FAILED:', error);
+    return {
+      success: false,
+      uploaded: uploadedCount,
+      skipped: skippedCount,
+      errors: [...errors, error.message]
+    };
+  }
+};
+
+
 

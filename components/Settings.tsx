@@ -24,7 +24,7 @@ import {
   Upload,
   Terminal
 } from 'lucide-react';
-import { uploadExistingNames, countNamesInFirestore } from '../services/migrationService';
+import { uploadExistingNames, countNamesInFirestore, syncNamesToFirestore } from '../services/migrationService';
 
 // Check if we're in development mode
 const isDev = import.meta.env.DEV;
@@ -164,7 +164,8 @@ const PremiumSection: React.FC<{
 // Dev Admin Panel - Only shows in development mode
 const DevAdminPanel: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
-  const [result, setResult] = useState<{ uploaded: number; errors: number } | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [result, setResult] = useState<{ uploaded: number; errors: number; skipped?: number } | null>(null);
   const [firestoreCount, setFirestoreCount] = useState<number | null>(null);
 
   const handleCheckCount = async () => {
@@ -206,6 +207,40 @@ const DevAdminPanel: React.FC = () => {
     }
   };
 
+  const handleSyncNames = async () => {
+    if (isSyncing) return;
+    
+    setIsSyncing(true);
+    setResult(null);
+    
+    try {
+      const syncResult = await syncNamesToFirestore();
+      setResult({
+        uploaded: syncResult.uploaded,
+        skipped: syncResult.skipped,
+        errors: syncResult.errors.length
+      });
+      
+      // Show alert
+      if (syncResult.uploaded > 0) {
+        alert(`✅ הועלו ${syncResult.uploaded} שמות חדשים למסד הנתונים!`);
+      } else {
+        alert('✅ כל השמות כבר קיימים במסד הנתונים.');
+      }
+      
+      // Refresh count
+      const count = await countNamesInFirestore();
+      setFirestoreCount(count);
+      
+    } catch (error) {
+      console.error('Sync failed:', error);
+      setResult({ uploaded: 0, errors: 1 });
+      alert('❌ שגיאה בסנכרון. בדקו את הקונסול.');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   return (
     <div className="glass-card rounded-3xl p-5 border-2 border-dashed border-baby-yellow-200/50 animate-fade-up" style={{ animationDelay: '0.38s' }}>
       <div className="flex items-center gap-3 mb-4">
@@ -237,21 +272,40 @@ const DevAdminPanel: React.FC = () => {
         </div>
       </div>
       
-      {/* Upload Button */}
+      {/* Sync Names Button - Only uploads missing names */}
+      <button
+        onClick={handleSyncNames}
+        disabled={isSyncing || isUploading}
+        className="w-full py-3 bg-gradient-to-r from-baby-blue-200 to-baby-blue-300 text-white font-bold rounded-full flex items-center justify-center gap-2 hover:from-baby-blue-300 hover:to-baby-blue-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-soft-blue mb-2"
+      >
+        {isSyncing ? (
+          <>
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span>מסנכרן...</span>
+          </>
+        ) : (
+          <>
+            <Database size={18} />
+            <span>סנכרן שמות למסד הנתונים</span>
+          </>
+        )}
+      </button>
+
+      {/* Upload Button - Overwrites all */}
       <button
         onClick={handleUploadNames}
-        disabled={isUploading}
+        disabled={isUploading || isSyncing}
         className="w-full py-3 bg-gradient-to-r from-baby-yellow-100 to-baby-yellow-200 text-dreamy-slate-700 font-bold rounded-full flex items-center justify-center gap-2 hover:from-baby-yellow-200 hover:to-baby-yellow-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
       >
         {isUploading ? (
           <>
             <div className="w-5 h-5 border-2 border-dreamy-slate-300 border-t-dreamy-slate-600 rounded-full animate-spin" />
-            <span>Uploading...</span>
+            <span>מעלה...</span>
           </>
         ) : (
           <>
             <Upload size={18} />
-            <span>Upload 306 Names to Firestore</span>
+            <span>העלה כל השמות (דורס קיימים)</span>
           </>
         )}
       </button>
@@ -264,9 +318,12 @@ const DevAdminPanel: React.FC = () => {
             : 'bg-baby-pink-100 text-dreamy-slate-700'
         }`}>
           {result.errors === 0 ? (
-            <>✅ Successfully uploaded {result.uploaded} names!</>
+            <>
+              ✅ הועלו {result.uploaded} שמות
+              {result.skipped !== undefined && result.skipped > 0 && ` (${result.skipped} כבר קיימים)`}
+            </>
           ) : (
-            <>❌ Upload failed with {result.errors} errors. Check console.</>
+            <>❌ שגיאה עם {result.errors} שמות. בדקו את הקונסול.</>
           )}
         </div>
       )}
@@ -294,6 +351,8 @@ const Settings: React.FC<SettingsProps> = ({
   const [showBlacklist, setShowBlacklist] = useState(false);
   const [showLikedNames, setShowLikedNames] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ uploaded: number; skipped?: number } | null>(null);
 
   if (!profile) return null;
 
@@ -322,6 +381,32 @@ const Settings: React.FC<SettingsProps> = ({
       alert('שגיאה באיפוס ההתקדמות. נסו שוב.');
     } finally {
       setIsResetting(false);
+    }
+  };
+
+  const handleSyncNames = async () => {
+    if (isSyncing) return;
+    
+    setIsSyncing(true);
+    setSyncResult(null);
+    
+    try {
+      const result = await syncNamesToFirestore();
+      setSyncResult({
+        uploaded: result.uploaded,
+        skipped: result.skipped
+      });
+      
+      if (result.uploaded > 0) {
+        alert(`✅ הועלו ${result.uploaded} שמות חדשים למסד הנתונים!`);
+      } else {
+        alert('✅ כל השמות כבר קיימים במסד הנתונים.');
+      }
+    } catch (error) {
+      console.error('Sync failed:', error);
+      alert('❌ שגיאה בסנכרון. בדקו את הקונסול.');
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -598,6 +683,51 @@ const Settings: React.FC<SettingsProps> = ({
             <p className="text-sm text-dreamy-slate-500 leading-relaxed">
               שתפו את קוד החדר <span className="font-mono font-bold bg-white/60 px-2 py-0.5 rounded-full text-baby-blue-500">{profile.roomId}</span> כדי להחליק ביחד!
             </p>
+          </div>
+
+          {/* Sync Names Button - Always visible */}
+          <div className="glass-card rounded-3xl p-5 animate-fade-up" style={{ animationDelay: '0.36s' }}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-baby-blue-200 to-baby-blue-300 rounded-full flex items-center justify-center shadow-soft-blue">
+                <Database size={18} className="text-white" />
+              </div>
+              <div>
+                <p className="font-bold text-dreamy-slate-700 font-heebo">סנכרון שמות</p>
+                <p className="text-[10px] text-dreamy-slate-400">העלה שמות חסרים למסד הנתונים</p>
+              </div>
+            </div>
+            
+            <button
+              onClick={handleSyncNames}
+              disabled={isSyncing}
+              className="w-full py-3 bg-gradient-to-r from-baby-blue-200 to-baby-blue-300 text-white font-bold rounded-full flex items-center justify-center gap-2 hover:from-baby-blue-300 hover:to-baby-blue-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-soft-blue"
+            >
+              {isSyncing ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>מסנכרן...</span>
+                </>
+              ) : (
+                <>
+                  <Database size={18} />
+                  <span>סנכרן שמות למסד הנתונים</span>
+                </>
+              )}
+            </button>
+            
+            {syncResult && (
+              <div className={`mt-3 p-3 rounded-full text-sm text-center ${
+                syncResult.uploaded > 0
+                  ? 'bg-baby-mint-100 text-dreamy-slate-700' 
+                  : 'bg-baby-blue-50 text-dreamy-slate-600'
+              }`}>
+                {syncResult.uploaded > 0 ? (
+                  <>✅ הועלו {syncResult.uploaded} שמות חדשים</>
+                ) : (
+                  <>✅ כל השמות כבר קיימים {syncResult.skipped && `(${syncResult.skipped} שמות)`}</>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Dev Admin Panel - Only visible in development */}

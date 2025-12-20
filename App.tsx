@@ -276,7 +276,13 @@ const AppContent: React.FC = () => {
     countAfterExclusionFilter = exclusionFiltered.length;
     
     // STEP 3: Remove names this user has already swiped
-    const swipeFiltered = exclusionFiltered.filter(name => !swipedNameIds.has(name.id));
+    // CRITICAL: Use explicit check to ensure ONLY current user's swipes are excluded
+    // This is the exact logic requested: !swipes.some(s => s.nameId === name.id && s.userId === currentUserId)
+    const swipeFiltered = exclusionFiltered.filter(name => {
+      // Explicit check: has current user swiped this name?
+      const userSwipedThis = swipes.some(s => s.nameId === name.id && s.userId === userId);
+      return !userSwipedThis; // Only include if current user has NOT swiped it
+    });
     countAfterSwipeFilter = swipeFiltered.length;
     
     // STEP 4: Apply optional filters (length, letter, style, trending)
