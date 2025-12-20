@@ -357,7 +357,6 @@ const Settings: React.FC<SettingsProps> = ({
   const [showFilters, setShowFilters] = useState(false);
   const [showProtected, setShowProtected] = useState(false);
   const [showBlacklist, setShowBlacklist] = useState(false);
-  const [showLikedNames, setShowLikedNames] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<{ uploaded: number; skipped?: number } | null>(null);
@@ -426,11 +425,6 @@ const Settings: React.FC<SettingsProps> = ({
     }
   };
 
-  const likedNames = swipes
-    .filter(s => s.liked && s.roomId === profile.roomId)
-    .map(s => names.find(n => n.id === s.nameId))
-    .filter((n): n is BabyName => n !== undefined);
-
   const toggleNameStyle = (style: NameStyle) => {
     const currentStyles = profile.nameStyles || [];
     const newStyles = currentStyles.includes(style)
@@ -491,33 +485,6 @@ const Settings: React.FC<SettingsProps> = ({
               </div>
             </div>
           </div>
-
-          {/* Liked Names */}
-          <PremiumSection
-            title="שמות שאהבנו"
-            subtitle={`${likedNames.length} שמות`}
-            icon={<Heart size={20} className="text-white" />}
-            iconGradient="from-baby-pink-300 to-baby-pink-400 shadow-soft-pink"
-            isOpen={showLikedNames}
-            onToggle={() => setShowLikedNames(!showLikedNames)}
-            delay={0.1}
-          >
-            {likedNames.length === 0 ? (
-              <p className="text-center text-dreamy-slate-400 py-4 text-sm">עדיין לא סימנתם שמות</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {likedNames.map((name) => (
-                  <div
-                    key={name.id}
-                    className="px-3 py-1.5 bg-gradient-to-r from-baby-pink-100/80 to-baby-pink-50/80 border border-baby-pink-200 rounded-full flex items-center gap-1.5"
-                  >
-                    <Heart size={12} className="text-baby-pink-400 fill-baby-pink-400" />
-                    <span className="font-bold text-sm text-dreamy-slate-700">{name.hebrew}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </PremiumSection>
 
           {/* Baby Preferences */}
           <PremiumSection
