@@ -585,6 +585,23 @@ const AppContent: React.FC = () => {
       gravity: 0.6,
       zIndex: 99999, // Maximum z-index to ensure confetti is on top of all layers
     });
+    
+    // Force all confetti canvas elements to have maximum z-index
+    // This ensures they render above the modal backdrop
+    requestAnimationFrame(() => {
+      const allCanvases = document.querySelectorAll('canvas');
+      allCanvases.forEach((canvas) => {
+        const htmlCanvas = canvas as HTMLCanvasElement;
+        // Check if this is a confetti canvas (usually has specific dimensions)
+        if (htmlCanvas.width > 0 && htmlCanvas.height > 0) {
+          htmlCanvas.style.position = 'fixed';
+          htmlCanvas.style.zIndex = '99999';
+          htmlCanvas.style.pointerEvents = 'none';
+          htmlCanvas.style.top = '0';
+          htmlCanvas.style.left = '0';
+        }
+      });
+    });
   };
 
   // Trigger confetti when match modal opens
