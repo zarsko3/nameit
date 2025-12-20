@@ -987,7 +987,7 @@ const AppContent: React.FC = () => {
             </div>
             
             {/* Zone 2: Name (Center - Inside White Frame) */}
-            <div className="flex-grow flex flex-col items-center justify-center px-6">
+            <div className="flex-grow flex flex-col items-center justify-center px-6 w-full">
               {/* Baby Name - DARK color for white frame background */}
               <h3 
                 className="text-6xl md:text-7xl font-black mb-4 text-dreamy-slate-700 leading-none font-heebo tracking-tight"
