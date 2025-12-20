@@ -354,7 +354,6 @@ const Settings: React.FC<SettingsProps> = ({
   currentUserId
 }) => {
   const [showPreferences, setShowPreferences] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   const [showProtected, setShowProtected] = useState(false);
   const [showBlacklist, setShowBlacklist] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
@@ -486,17 +485,17 @@ const Settings: React.FC<SettingsProps> = ({
             </div>
           </div>
 
-          {/* Baby Preferences */}
+          {/* Preferences */}
           <PremiumSection
-            title="העדפות תינוק"
-            subtitle="מגדר וסגנון שמות"
+            title="העדפות"
+            subtitle="מגדר, סגנון וטרנדים"
             icon={<Baby size={20} className="text-white" />}
             iconGradient="from-baby-lavender-200 to-baby-lavender-300 shadow-lg"
             isOpen={showPreferences}
             onToggle={() => setShowPreferences(!showPreferences)}
             delay={0.15}
           >
-            <div className="space-y-5">
+            <div className="space-y-6">
               {/* Gender Selection */}
               <div>
                 <p className="text-[10px] font-bold text-dreamy-slate-400 uppercase tracking-wider mb-3">מגדר צפוי</p>
@@ -530,10 +529,10 @@ const Settings: React.FC<SettingsProps> = ({
                 </div>
               </div>
 
-              {/* Name Styles */}
+              {/* Name Styles - Chip/Tag Layout */}
               <div>
-                <p className="text-[10px] font-bold text-dreamy-slate-400 uppercase tracking-wider mb-3">סגנון שמות</p>
-                <div className="grid grid-cols-2 gap-2">
+                <p className="text-[10px] font-bold text-dreamy-slate-400 uppercase tracking-wider mb-3">סגנון שם</p>
+                <div className="flex flex-wrap gap-2">
                   {NAME_STYLE_OPTIONS.map((option) => {
                     const Icon = option.icon;
                     const isSelected = (profile.nameStyles || []).includes(option.value);
@@ -541,17 +540,61 @@ const Settings: React.FC<SettingsProps> = ({
                       <button
                         key={option.value}
                         onClick={() => toggleNameStyle(option.value)}
-                        className={`p-3 rounded-full transition-all flex items-center gap-2 press-effect ${
+                        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full font-bold text-sm transition-all press-effect ${
                           isSelected
-                            ? 'bg-gradient-to-br from-baby-mint-200 to-baby-mint-300 text-dreamy-slate-700 shadow-soft-mint'
-                            : 'bg-white/60 text-dreamy-slate-500 border border-white/50 hover:bg-white/80'
+                            ? 'bg-gradient-to-br from-baby-mint-200 to-baby-mint-300 text-dreamy-slate-700 shadow-soft-mint border-2 border-baby-mint-300'
+                            : 'bg-white/60 text-dreamy-slate-500 border-2 border-white/50 hover:bg-white/80 hover:border-white/70'
                         }`}
                       >
-                        <Icon size={16} className={isSelected ? 'text-baby-mint-400' : 'text-baby-mint-300'} />
-                        <span className="font-bold text-sm">{option.label}</span>
+                        <Icon size={16} className={isSelected ? 'text-baby-mint-500' : 'text-dreamy-slate-400'} />
+                        <span>{option.label}</span>
                       </button>
                     );
                   })}
+                </div>
+                {profile.nameStyles && profile.nameStyles.length > 0 && (
+                  <p className="text-xs text-dreamy-slate-400 mt-2 text-right">
+                    נבחרו {profile.nameStyles.length} סגנונות
+                  </p>
+                )}
+              </div>
+
+              {/* Trending Toggle */}
+              <div>
+                <p className="text-[10px] font-bold text-dreamy-slate-400 uppercase tracking-wider mb-3">טרנדים</p>
+                <div
+                  onClick={toggleTrending}
+                  className={`p-4 rounded-full cursor-pointer transition-all flex items-center justify-between press-effect ${
+                    profile.showTrendingOnly
+                      ? 'bg-gradient-to-r from-baby-yellow-100 to-baby-yellow-200 text-dreamy-slate-700 shadow-lg border-2 border-baby-yellow-200'
+                      : 'bg-white/60 border-2 border-white/50 hover:bg-white/80'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
+                      profile.showTrendingOnly ? 'bg-white/40' : 'bg-baby-yellow-100'
+                    }`}>
+                      <TrendingUp size={18} className={profile.showTrendingOnly ? 'text-dreamy-slate-600' : 'text-baby-yellow-300'} />
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-sm text-dreamy-slate-700">
+                        רק שמות טרנדיים
+                      </p>
+                      <p className="text-[11px] text-dreamy-slate-400">
+                        הצג רק שמות פופולריים
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    dir="ltr"
+                    className={`w-11 h-6 rounded-full p-0.5 transition-all flex items-center ${
+                      profile.showTrendingOnly ? 'bg-white/50' : 'bg-white/40'
+                    }`}
+                  >
+                    <div className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                      profile.showTrendingOnly ? 'translate-x-5' : 'translate-x-0'
+                    }`}></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -607,52 +650,6 @@ const Settings: React.FC<SettingsProps> = ({
               emptyMessage="אין שמות ברשימה"
               variant="blacklist"
             />
-          </PremiumSection>
-
-          {/* Trending Filter */}
-          <PremiumSection
-            title="מסננים נוספים"
-            subtitle="שמות טרנדיים"
-            icon={<TrendingUp size={20} className="text-white" />}
-            iconGradient="from-baby-yellow-100 to-baby-yellow-200 shadow-lg"
-            isOpen={showFilters}
-            onToggle={() => setShowFilters(!showFilters)}
-            delay={0.3}
-          >
-            <div 
-              onClick={toggleTrending}
-              className={`p-4 rounded-full cursor-pointer transition-all flex items-center justify-between press-effect ${
-                profile.showTrendingOnly
-                  ? 'bg-gradient-to-r from-baby-yellow-100 to-baby-yellow-200 text-dreamy-slate-700 shadow-lg'
-                  : 'bg-white/60 border border-white/50 hover:bg-white/80'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
-                  profile.showTrendingOnly ? 'bg-white/40' : 'bg-baby-yellow-100'
-                }`}>
-                  <TrendingUp size={18} className={profile.showTrendingOnly ? 'text-dreamy-slate-600' : 'text-baby-yellow-300'} />
-                </div>
-                <div className="text-right">
-                  <p className={`font-bold text-sm ${profile.showTrendingOnly ? 'text-dreamy-slate-700' : 'text-dreamy-slate-700'}`}>
-                    שמות טרנדיים בלבד
-                  </p>
-                  <p className={`text-[11px] ${profile.showTrendingOnly ? 'text-dreamy-slate-500' : 'text-dreamy-slate-400'}`}>
-                    הצג רק שמות פופולריים
-                  </p>
-                </div>
-              </div>
-              <div 
-                dir="ltr"
-                className={`w-11 h-6 rounded-full p-0.5 transition-all flex items-center ${
-                  profile.showTrendingOnly ? 'bg-white/50' : 'bg-white/40'
-                }`}
-              >
-                <div className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-200 ${
-                  profile.showTrendingOnly ? 'translate-x-5' : 'translate-x-0'
-                }`}></div>
-              </div>
-            </div>
           </PremiumSection>
 
           {/* Partner Connection */}
