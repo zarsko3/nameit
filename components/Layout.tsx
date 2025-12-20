@@ -13,27 +13,30 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, showNav, isConnected }) => {
   return (
-    <div className="flex flex-col h-[100dvh] w-full md:max-w-md mx-auto relative overflow-hidden font-assistant safe-top">
-      {/* Header - Large Logo as Brand Header */}
-      {showNav && (
-        <header className="px-4 py-1 flex items-center justify-center shrink-0 bg-transparent">
-          <img 
-            src="/LOGO.png" 
-            alt="NameIT" 
-            className="h-16 md:h-20 w-auto object-contain cursor-pointer transition-transform duration-300 hover:scale-105"
-          />
-        </header>
-      )}
+    <>
+      {/* Main App Container */}
+      <div className={`flex flex-col h-[100dvh] w-full md:max-w-md mx-auto relative overflow-hidden font-assistant safe-top ${showNav ? 'pb-24' : ''}`}>
+        {/* Header - Large Logo as Brand Header */}
+        {showNav && (
+          <header className="px-4 py-1 flex items-center justify-center shrink-0 bg-transparent">
+            <img 
+              src="/LOGO.png" 
+              alt="NameIT" 
+              className="h-16 md:h-20 w-auto object-contain cursor-pointer transition-transform duration-300 hover:scale-105"
+            />
+          </header>
+        )}
 
-      {/* Main Content - Flex grow to fill available space */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
-        {children}
-      </main>
+        {/* Main Content - Flex grow to fill available space */}
+        <main className="flex-1 flex flex-col overflow-hidden relative">
+          {children}
+        </main>
+      </div>
 
-      {/* Navigation - Frosted glass pane extending to bottom edge */}
+      {/* Fixed Bottom Navigation - OUTSIDE the scrollable container */}
       {showNav && (
         <nav 
-          className="rounded-t-3xl px-10 pt-3 flex justify-between items-center shrink-0 border-t border-white/50"
+          className="fixed bottom-0 left-0 right-0 z-[100] rounded-t-3xl px-10 pt-3 flex justify-center items-center border-t border-white/50 md:max-w-md md:mx-auto md:left-1/2 md:-translate-x-1/2"
           style={{
             background: 'rgba(255, 255, 255, 0.70)',
             backdropFilter: 'blur(24px) saturate(150%)',
@@ -42,30 +45,32 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, sh
             boxShadow: '0 -4px 30px rgba(69, 90, 100, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
           }}
         >
-          <button 
-            onClick={() => setActiveView('SWIPE')}
-            className={`flex flex-col items-center gap-1 transition-all ${activeView === 'SWIPE' ? 'text-baby-pink-500' : 'text-dreamy-slate-400'}`}
-          >
-            <Heart size={24} className={activeView === 'SWIPE' ? 'fill-baby-pink-400 text-baby-pink-500' : ''} />
-            <span className="text-[10px] font-bold">התאמה</span>
-          </button>
-          <button 
-            onClick={() => setActiveView('MATCHES')}
-            className={`flex flex-col items-center gap-1 transition-all ${activeView === 'MATCHES' ? 'text-baby-blue-500' : 'text-dreamy-slate-400'}`}
-          >
-            <List size={24} />
-            <span className="text-[10px] font-bold">רשימה</span>
-          </button>
-          <button 
-            onClick={() => setActiveView('SETTINGS')}
-            className={`flex flex-col items-center gap-1 transition-all ${activeView === 'SETTINGS' ? 'text-baby-lavender-300' : 'text-dreamy-slate-400'}`}
-          >
-            <SettingsIcon size={24} />
-            <span className="text-[10px] font-bold">הגדרות</span>
-          </button>
+          <div className="flex justify-between items-center w-full max-w-sm">
+            <button 
+              onClick={() => setActiveView('SWIPE')}
+              className={`flex flex-col items-center gap-1 transition-all ${activeView === 'SWIPE' ? 'text-baby-pink-500' : 'text-dreamy-slate-400'}`}
+            >
+              <Heart size={24} className={activeView === 'SWIPE' ? 'fill-baby-pink-400 text-baby-pink-500' : ''} />
+              <span className="text-[10px] font-bold">התאמה</span>
+            </button>
+            <button 
+              onClick={() => setActiveView('MATCHES')}
+              className={`flex flex-col items-center gap-1 transition-all ${activeView === 'MATCHES' ? 'text-baby-blue-500' : 'text-dreamy-slate-400'}`}
+            >
+              <List size={24} />
+              <span className="text-[10px] font-bold">רשימה</span>
+            </button>
+            <button 
+              onClick={() => setActiveView('SETTINGS')}
+              className={`flex flex-col items-center gap-1 transition-all ${activeView === 'SETTINGS' ? 'text-baby-lavender-300' : 'text-dreamy-slate-400'}`}
+            >
+              <SettingsIcon size={24} />
+              <span className="text-[10px] font-bold">הגדרות</span>
+            </button>
+          </div>
         </nav>
       )}
-    </div>
+    </>
   );
 };
 
