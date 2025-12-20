@@ -13,7 +13,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, showNav, isConnected }) => {
   return (
-    <div className="flex flex-col h-[100dvh] w-full md:max-w-md mx-auto relative overflow-hidden font-assistant safe-top safe-bottom">
+    <div className="flex flex-col h-[100dvh] w-full md:max-w-md mx-auto relative overflow-hidden font-assistant safe-top">
       {/* Header - Large Logo as Brand Header */}
       {showNav && (
         <header className="px-4 py-1 flex items-center justify-center shrink-0 bg-transparent">
@@ -30,28 +30,37 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, sh
         {children}
       </main>
 
-      {/* Navigation - Soft rounded top corners, integrated look */}
+      {/* Navigation - Frosted glass pane extending to bottom edge */}
       {showNav && (
-        <nav className="glass-card rounded-t-3xl px-10 pt-4 pb-5 flex justify-between items-center shrink-0">
+        <nav 
+          className="rounded-t-3xl px-10 pt-3 flex justify-between items-center shrink-0 border-t border-white/50"
+          style={{
+            background: 'rgba(255, 255, 255, 0.70)',
+            backdropFilter: 'blur(24px) saturate(150%)',
+            WebkitBackdropFilter: 'blur(24px) saturate(150%)',
+            paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
+            boxShadow: '0 -4px 30px rgba(69, 90, 100, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
+          }}
+        >
           <button 
             onClick={() => setActiveView('SWIPE')}
             className={`flex flex-col items-center gap-1 transition-all ${activeView === 'SWIPE' ? 'text-baby-pink-500' : 'text-dreamy-slate-400'}`}
           >
-            <Heart size={26} className={activeView === 'SWIPE' ? 'fill-baby-pink-400 text-baby-pink-500' : ''} />
+            <Heart size={24} className={activeView === 'SWIPE' ? 'fill-baby-pink-400 text-baby-pink-500' : ''} />
             <span className="text-[10px] font-bold">התאמה</span>
           </button>
           <button 
             onClick={() => setActiveView('MATCHES')}
             className={`flex flex-col items-center gap-1 transition-all ${activeView === 'MATCHES' ? 'text-baby-blue-500' : 'text-dreamy-slate-400'}`}
           >
-            <List size={26} />
+            <List size={24} />
             <span className="text-[10px] font-bold">רשימה</span>
           </button>
           <button 
             onClick={() => setActiveView('SETTINGS')}
             className={`flex flex-col items-center gap-1 transition-all ${activeView === 'SETTINGS' ? 'text-baby-lavender-300' : 'text-dreamy-slate-400'}`}
           >
-            <SettingsIcon size={26} />
+            <SettingsIcon size={24} />
             <span className="text-[10px] font-bold">הגדרות</span>
           </button>
         </nav>
