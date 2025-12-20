@@ -966,7 +966,7 @@ const AppContent: React.FC = () => {
         
         return (
           <div 
-            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center p-6 text-center safe-top safe-bottom overflow-hidden"
+            className="fixed inset-0 z-[9999] flex flex-col h-full text-center safe-top safe-bottom overflow-hidden"
             style={{
               backgroundImage: `url(${backgroundImage})`,
               backgroundSize: 'cover',
@@ -974,71 +974,54 @@ const AppContent: React.FC = () => {
               backgroundRepeat: 'no-repeat',
             }}
           >
-            {/* Subtle overlay for better text readability */}
-            <div className="absolute inset-0 bg-black/10" />
-            
-            {/* Main content - Centered */}
-            <div className="relative z-10 flex flex-col items-center justify-center h-full w-full max-w-md px-4">
-              {/* Title */}
+            {/* Zone 1: Title (Top - Sky Area) */}
+            <div className="flex-shrink-0 pt-20 px-6">
               <h2 
-                className="text-6xl md:text-7xl font-black mb-4 text-white leading-tight font-heebo"
+                className="text-5xl md:text-6xl font-black text-white leading-tight font-heebo drop-shadow-lg"
                 style={{ 
-                  textShadow: '0 4px 20px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)',
+                  filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))',
                 }}
               >
                 יש התאמה!
               </h2>
-              
-              {/* Baby Name - Massive display */}
+            </div>
+            
+            {/* Zone 2: Name (Center - Inside White Frame) */}
+            <div className="flex-grow flex flex-col items-center justify-center px-6">
+              {/* Baby Name - DARK color for white frame background */}
               <h3 
-                className="text-7xl md:text-8xl font-black mb-6 text-white leading-none font-heebo tracking-tight"
+                className="text-6xl md:text-7xl font-black mb-4 text-dreamy-slate-700 leading-none font-heebo tracking-tight"
                 style={{ 
-                  textShadow: '0 4px 20px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)',
                   animation: 'pop 0.5s ease-out',
                 }}
               >
                 {showMatchCelebration.hebrew}
               </h3>
               
-              {/* Subtitle */}
-              <p 
-                className="text-xl md:text-2xl mb-12 text-white font-medium"
-                style={{ 
-                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.3)',
-                }}
-              >
+              {/* Subtitle - Dark Gray */}
+              <p className="text-lg md:text-xl text-dreamy-slate-500 font-medium">
                 שם ששניכם אהבתם!
               </p>
+            </div>
 
-              {/* Action buttons - Glass style */}
-              <div className="flex flex-col gap-4 w-full max-w-[320px]">
-                {/* Primary: Keep Swiping */}
+            {/* Zone 3: Buttons (Bottom - Below Animals) */}
+            <div className="flex-shrink-0 mt-auto mb-10 px-6 pb-safe w-full">
+              <div className="flex flex-col gap-4 w-full max-w-[320px] mx-auto">
+                {/* Primary: Keep Swiping - Gradient Teal/Blue */}
                 <button 
                   onClick={() => setShowMatchCelebration(null)}
-                  className="w-full py-5 rounded-full font-bold text-lg text-white border-2 border-white/60 hover:bg-white/20 active:scale-95 transition-all backdrop-blur-sm"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.30)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-                  }}
+                  className="w-full py-5 bg-gradient-to-r from-baby-mint-400 to-baby-blue-400 text-white rounded-full font-bold text-lg shadow-lg hover:shadow-xl active:scale-95 transition-all"
                 >
                   המשיכו לחפש
                 </button>
                 
-                {/* Secondary: Go to Favorites */}
+                {/* Secondary: Go to Favorites - Outlined */}
                 <button 
                   onClick={() => {
                     setShowMatchCelebration(null);
                     setView('MATCHES');
                   }}
-                  className="w-full py-5 rounded-full font-semibold text-lg text-white border-2 border-white/60 hover:bg-white/20 active:scale-95 transition-all backdrop-blur-sm"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.25)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-                  }}
+                  className="w-full py-4 rounded-full font-semibold text-lg text-dreamy-slate-700 border-2 border-dreamy-slate-300 bg-white/80 hover:bg-white active:scale-95 transition-all"
                 >
                   לרשימת המועדפים
                 </button>
