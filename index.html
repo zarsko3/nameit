@@ -22,10 +22,10 @@
     
     <title>NameIT - בחירת שמות לתינוקות</title>
     
-    <!-- Google Fonts - Modern Hebrew Fonts -->
+    <!-- Google Fonts - Rubik (Modern Baby Chic Font) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS with Custom Font Configuration -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -34,8 +34,8 @@
         theme: {
           extend: {
             fontFamily: {
-              'hebrew': ['Heebo', 'Rubik', 'Assistant', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-              'heebo': ['Heebo', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+              'sans': ['Rubik', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'], // Default font - Rubik
+              'hebrew': ['Rubik', 'Assistant', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
               'rubik': ['Rubik', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
             },
             colors: {
@@ -111,18 +111,18 @@
         --safe-area-top: env(safe-area-inset-top, 0px);
         --safe-area-bottom: env(safe-area-inset-bottom, 0px);
         
-        /* Modern Hebrew Font Stack with Fallbacks */
-        --font-hebrew: 'Heebo', 'Rubik', 'Assistant', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        /* Modern Hebrew Font Stack - Rubik as Primary */
+        --font-hebrew: 'Rubik', 'Assistant', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       }
       
-      /* Global Typography - Apply Modern Hebrew Fonts Everywhere */
+      /* Global Typography - Apply Rubik Everywhere */
       * {
         font-family: var(--font-hebrew);
       }
       
       /* Body with Dreamy Background */
       body {
-        font-family: var(--font-hebrew);
+        font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         background-image: url('/B1.png');
         background-size: cover;
         background-position: center;
@@ -137,26 +137,27 @@
         -moz-osx-font-smoothing: grayscale;
       }
       
-      /* Headings - Use Heebo for better readability */
+      /* Headings - Use Rubik Bold for modern, friendly look */
       h1, h2, h3, h4, h5, h6 {
-        font-family: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         font-weight: 700;
         line-height: 1.2;
         letter-spacing: -0.02em;
         color: var(--text-main);
       }
       
-      /* Body text - Use Rubik for comfortable reading */
+      /* Body text - Rubik for comfortable reading */
       p, span, div, button, input, textarea, select, label {
-        font-family: 'Rubik', 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       }
       
       /* Utility Classes */
-      .font-heebo { 
-        font-family: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      .font-rubik { 
+        font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       }
       
-      .font-rubik { 
+      /* Legacy class - now uses Rubik */
+      .font-heebo { 
         font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       }
       

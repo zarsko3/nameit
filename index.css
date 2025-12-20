@@ -1,15 +1,8 @@
 /* NameIT - Dreamy Baby Design System */
 
 /* ===== FONT LOADING ===== */
-@font-face {
-  font-family: 'Heebo';
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Rubik';
-  font-display: swap;
-}
+/* Rubik is loaded via Google Fonts in index.html */
+/* Using Rubik as the primary font for modern, baby-chic aesthetic */
 
 /* ===== CSS VARIABLES - DREAMY BABY DESIGN TOKENS ===== */
 :root {
@@ -88,6 +81,7 @@ html, body {
 }
 
 body {
+  font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   letter-spacing: var(--letter-spacing-normal);
@@ -563,7 +557,7 @@ button, .interactive {
   line-height: 1.65;
   font-size: 1rem;
   color: #374151;
-  font-family: 'Rubik', 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .insights-header {
@@ -571,7 +565,7 @@ button, .interactive {
   font-size: 1.25rem;
   font-weight: 700;
   color: #111827;
-  font-family: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .insights-bullet {
@@ -580,7 +574,7 @@ button, .interactive {
   font-weight: 500;
   color: #1F2937;
   padding-right: 1rem;
-  font-family: 'Rubik', 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* ===== MODAL & OVERLAY STYLES ===== */
