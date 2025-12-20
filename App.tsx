@@ -552,7 +552,7 @@ const AppContent: React.FC = () => {
     // Vibrant pastel colors: Teal, Pink, Gold, Blue
     const pastelColors = ['#2DD4BF', '#F472B6', '#FBBF24', '#60A5FA'];
     
-    // Cannon/spread effect from sides - Higher z-index to render above modal
+    // Cannon/spread effect from sides - Extreme z-index to render above everything
     confetti({
       particleCount: 150,
       angle: 60,
@@ -561,7 +561,7 @@ const AppContent: React.FC = () => {
       colors: pastelColors,
       startVelocity: 45,
       gravity: 0.8,
-      zIndex: 10001,
+      zIndex: 99999, // Maximum z-index to ensure confetti is on top of all layers
     });
     
     confetti({
@@ -572,10 +572,10 @@ const AppContent: React.FC = () => {
       colors: pastelColors,
       startVelocity: 45,
       gravity: 0.8,
-      zIndex: 10001,
+      zIndex: 99999, // Maximum z-index to ensure confetti is on top of all layers
     });
     
-    // Center burst - Higher z-index to render above modal
+    // Center burst - Extreme z-index to render above everything
     confetti({
       particleCount: 150,
       spread: 100,
@@ -583,7 +583,7 @@ const AppContent: React.FC = () => {
       colors: pastelColors,
       startVelocity: 30,
       gravity: 0.6,
-      zIndex: 10001,
+      zIndex: 99999, // Maximum z-index to ensure confetti is on top of all layers
     });
   };
 
