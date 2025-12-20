@@ -34,8 +34,10 @@ interface SettingsProps {
   isPartnerOnline: boolean;
   onUpdateProfile: (updates: Partial<UserProfile>) => void;
   onLogout: () => void;
+  onResetProgress: () => Promise<void>;
   swipes: SwipeRecord[];
   names: BabyName[];
+  currentUserId: string | undefined;
 }
 
 // Name style options
@@ -281,16 +283,47 @@ const Settings: React.FC<SettingsProps> = ({
   isPartnerOnline, 
   onUpdateProfile, 
   onLogout,
+  onResetProgress,
   swipes,
-  names
+  names,
+  currentUserId
 }) => {
   const [showPreferences, setShowPreferences] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showProtected, setShowProtected] = useState(false);
   const [showBlacklist, setShowBlacklist] = useState(false);
   const [showLikedNames, setShowLikedNames] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   if (!profile) return null;
+
+  // Count only current user's swipes
+  const mySwipeCount = currentUserId 
+    ? swipes.filter(s => s.userId === currentUserId).length 
+    : 0;
+
+  const handleResetProgress = async () => {
+    const confirmed = window.confirm(
+      `⚠️ אפס את ההתקדמות שלי\n\n` +
+      `פעולה זו תמחק את כל ${mySwipeCount} ההחלקות שלך ותאפשר לך להתחיל מחדש.\n\n` +
+      `ההחלקות של בן/בת הזוג לא יימחקו.\n\n` +
+      `להמשיך?`
+    );
+    
+    if (!confirmed) return;
+    
+    setIsResetting(true);
+    try {
+      await onResetProgress();
+      // Force reload to reset all state
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to reset progress:', error);
+      alert('שגיאה באיפוס ההתקדמות. נסו שוב.');
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   const likedNames = swipes
     .filter(s => s.liked && s.roomId === profile.roomId)
@@ -570,11 +603,49 @@ const Settings: React.FC<SettingsProps> = ({
           {/* Dev Admin Panel - Only visible in development */}
           {isDev && <DevAdminPanel />}
 
+          {/* Danger Zone - Reset Progress */}
+          <div className="glass-card rounded-3xl p-5 border border-baby-pink-200/50 animate-fade-up" style={{ animationDelay: '0.38s' }}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-baby-pink-200 to-baby-pink-300 rounded-full flex items-center justify-center shadow-soft-pink">
+                <AlertTriangle size={18} className="text-white" />
+              </div>
+              <div>
+                <p className="font-bold text-dreamy-slate-700 font-heebo">אזור סכנה</p>
+                <p className="text-[10px] text-dreamy-slate-400">פעולות שלא ניתן לבטל</p>
+              </div>
+            </div>
+            
+            <div className="bg-baby-pink-50/80 rounded-2xl p-3 mb-3">
+              <p className="text-xs text-dreamy-slate-500 leading-relaxed">
+                איפוס ההתקדמות ימחק את כל ההחלקות שלך ({mySwipeCount} החלקות) ויאפשר לך להתחיל מחדש. 
+                ההחלקות של בן/בת הזוג לא יימחקו.
+              </p>
+            </div>
+            
+            <button 
+              onClick={handleResetProgress}
+              disabled={isResetting || mySwipeCount === 0}
+              className="w-full p-3 bg-gradient-to-r from-baby-pink-300 to-baby-pink-400 text-white font-bold rounded-full hover:from-baby-pink-400 hover:to-baby-pink-500 transition-all press-effect flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-soft-pink"
+            >
+              {isResetting ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>מאפס...</span>
+                </>
+              ) : (
+                <>
+                  <Trash2 size={16} />
+                  <span>אפס את ההתקדמות שלי</span>
+                </>
+              )}
+            </button>
+          </div>
+
           {/* Logout */}
           <button 
             onClick={onLogout}
             className="w-full p-4 glass-card text-baby-pink-500 font-bold rounded-full hover:bg-baby-pink-50/50 transition-all press-effect flex items-center justify-center gap-2 animate-fade-up"
-            style={{ animationDelay: '0.4s' }}
+            style={{ animationDelay: '0.42s' }}
           >
             <LogOut size={18} />
             <span>יציאה מהחשבון</span>

@@ -21,6 +21,7 @@ import {
   subscribeToUserProfile,
   saveSwipe,
   deleteSwipe,
+  deleteAllUserSwipes,
   subscribeToRoomSwipes,
   saveMatch,
   deleteMatch,
@@ -729,6 +730,28 @@ const AppContent: React.FC = () => {
     setView('AUTH');
   };
 
+  // Reset Progress handler - deletes all swipes for current user
+  const handleResetProgress = async () => {
+    if (!currentUser || !profile?.roomId) {
+      throw new Error('No user or room');
+    }
+    
+    console.log(`🔄 Resetting progress for user ${currentUser.uid}...`);
+    
+    // Delete all swipes for this user
+    const deletedCount = await deleteAllUserSwipes(profile.roomId, currentUser.uid);
+    
+    // Also clear the user's dislikedNames array
+    await saveUserProfile(currentUser.uid, { dislikedNames: [] });
+    
+    console.log(`✅ Reset complete! Deleted ${deletedCount} swipes.`);
+    
+    // Reset session state
+    sessionInitialized.current = false;
+    swipesLoadedForUser.current = null;
+    setSwipesLoaded(false);
+  };
+
   // Show splash screen (waits for both min time AND auth initialization)
   if (isSplash) {
     return (
@@ -909,13 +932,15 @@ const AppContent: React.FC = () => {
       )}
 
       {view === 'SETTINGS' && (
-        <Settings 
+        <Settings
           profile={profile}
           isPartnerOnline={isPartnerOnline}
           onUpdateProfile={handleUpdateProfile}
           onLogout={handleLogout}
+          onResetProgress={handleResetProgress}
           swipes={swipes}
           names={INITIAL_NAMES}
+          currentUserId={currentUser?.uid}
         />
       )}
 

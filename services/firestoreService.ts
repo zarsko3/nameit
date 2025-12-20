@@ -143,6 +143,29 @@ export const deleteSwipe = async (roomId: string, userId: string, nameId: string
 };
 
 /**
+ * Delete ALL swipes for a specific user in a room (Reset Progress)
+ * This allows users to start fresh without affecting partner's swipes
+ */
+export const deleteAllUserSwipes = async (roomId: string, userId: string): Promise<number> => {
+  console.log(`🗑️ Deleting ALL swipes for user ${userId} in room ${roomId}...`);
+  
+  const swipesRef = collection(db, SWIPES_COLLECTION);
+  const q = query(
+    swipesRef,
+    where('roomId', '==', roomId),
+    where('userId', '==', userId)
+  );
+  
+  const snapshot = await getDocs(q);
+  const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+  
+  await Promise.all(deletePromises);
+  
+  console.log(`✅ Deleted ${snapshot.size} swipes for user ${userId}`);
+  return snapshot.size;
+};
+
+/**
  * Check if a name has been liked by other users in the room
  * Returns array of user IDs who liked this name
  */
