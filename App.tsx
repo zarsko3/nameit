@@ -958,99 +958,95 @@ const AppContent: React.FC = () => {
         />
       )}
 
-      {showMatchCelebration && (
-        <div 
-          className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-6 text-center safe-top safe-bottom overflow-hidden"
-          style={{
-            background: 'rgba(255, 255, 255, 0.90)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-          }}
-        >
-          {/* Main content */}
-          <div className="relative z-10 flex flex-col items-center max-w-md w-full px-4">
-            {/* Celebration Icon - Baby-themed */}
-            <div className="mb-6 relative">
-              <div className="absolute inset-0 bg-baby-mint-200/30 blur-3xl rounded-full scale-150 animate-pulse" />
-              <div className="relative p-6 glass-card-strong rounded-[2.5rem] shadow-dreamy-lg">
-                <div className="text-6xl animate-bounce">🎉</div>
-              </div>
-            </div>
+      {showMatchCelebration && (() => {
+        // Determine background image based on gender
+        const backgroundImage = showMatchCelebration.gender === Gender.GIRL 
+          ? '/Girl.png' 
+          : '/Boy.png';
+        
+        return (
+          <div 
+            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center p-6 text-center safe-top safe-bottom overflow-hidden"
+            style={{
+              backgroundImage: `url(${backgroundImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          >
+            {/* Subtle overlay for better text readability */}
+            <div className="absolute inset-0 bg-black/10" />
             
-            {/* Match text - Soft colors */}
-            <h2 
-              className="text-5xl font-black mb-3 text-dreamy-slate-700 leading-tight font-heebo"
-              style={{ 
-                textShadow: '0 2px 10px rgba(69, 90, 100, 0.1)',
-              }}
-            >
-              יש התאמה!
-            </h2>
-            <p className="text-lg mb-8 text-dreamy-slate-500 font-medium">מצאתם שם ששניכם אוהבים</p>
-            
-            {/* Name card - Glass style */}
-            <div 
-              className="w-full max-w-sm glass-card rounded-[2.5rem] p-8 mb-8 shadow-dreamy-lg relative overflow-hidden"
-              style={{
-                animation: 'pop 0.5s ease-out',
-                background: 'rgba(255, 255, 255, 0.60)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                border: '1px solid rgba(255, 255, 255, 0.5)',
-              }}
-            >
-              {/* Subtle decorative gradient */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-baby-mint-200 via-baby-blue-200 to-baby-lavender-200" />
+            {/* Main content - Centered */}
+            <div className="relative z-10 flex flex-col items-center justify-center h-full w-full max-w-md px-4">
+              {/* Title */}
+              <h2 
+                className="text-6xl md:text-7xl font-black mb-4 text-white leading-tight font-heebo"
+                style={{ 
+                  textShadow: '0 4px 20px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)',
+                }}
+              >
+                יש התאמה!
+              </h2>
               
-              {/* Subtle sparkle decorations */}
-              <div className="absolute top-3 right-3 text-xl opacity-60 animate-spin" style={{ animationDuration: '3s' }}>✨</div>
-              <div className="absolute bottom-3 left-3 text-xl opacity-60 animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }}>✨</div>
+              {/* Baby Name - Massive display */}
+              <h3 
+                className="text-7xl md:text-8xl font-black mb-6 text-white leading-none font-heebo tracking-tight"
+                style={{ 
+                  textShadow: '0 4px 20px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)',
+                  animation: 'pop 0.5s ease-out',
+                }}
+              >
+                {showMatchCelebration.hebrew}
+              </h3>
               
-              <div className="text-center py-4">
-                <h3 className="text-[64px] font-black text-dreamy-slate-700 mb-3 font-heebo tracking-tight leading-none">
-                  {showMatchCelebration.hebrew}
-                </h3>
-                <p className="text-baby-blue-500 font-bold text-lg tracking-[0.2em] uppercase mb-3">
-                  {showMatchCelebration.transliteration}
-                </p>
-                {showMatchCelebration.meaning && (
-                  <p className="text-sm text-dreamy-slate-400 mb-3">
-                    {showMatchCelebration.meaning}
-                  </p>
-                )}
-                <div className="mx-auto w-12 h-0.5 bg-gradient-to-r from-baby-mint-200 via-baby-blue-200 to-baby-lavender-200 rounded-full" />
-              </div>
-            </div>
+              {/* Subtitle */}
+              <p 
+                className="text-xl md:text-2xl mb-12 text-white font-medium"
+                style={{ 
+                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.3)',
+                }}
+              >
+                שם ששניכם אהבתם!
+              </p>
 
-            {/* Action buttons - Premium glass style */}
-            <div className="flex flex-col gap-3 w-full max-w-[320px]">
-              {/* Primary: Keep Swiping - Mint to Blue gradient */}
-              <button 
-                onClick={() => setShowMatchCelebration(null)}
-                className="w-full py-5 bg-gradient-to-r from-baby-mint-300 to-baby-blue-300 text-dreamy-slate-700 rounded-full font-bold text-lg shadow-soft-mint hover:shadow-lg active:scale-95 transition-all"
-              >
-                המשיכו לחפש
-              </button>
-              
-              {/* Secondary: Go to Favorites - Glass button */}
-              <button 
-                onClick={() => {
-                  setShowMatchCelebration(null);
-                  setView('MATCHES');
-                }}
-                className="w-full py-5 glass-button text-dreamy-slate-700 rounded-full font-bold text-lg border-2 border-white/50 hover:bg-white/60 active:scale-95 transition-all"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.60)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                }}
-              >
-                לרשימת המועדפים
-              </button>
+              {/* Action buttons - Glass style */}
+              <div className="flex flex-col gap-4 w-full max-w-[320px]">
+                {/* Primary: Keep Swiping */}
+                <button 
+                  onClick={() => setShowMatchCelebration(null)}
+                  className="w-full py-5 rounded-full font-bold text-lg text-white border-2 border-white/60 hover:bg-white/20 active:scale-95 transition-all backdrop-blur-sm"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.30)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                  }}
+                >
+                  המשיכו לחפש
+                </button>
+                
+                {/* Secondary: Go to Favorites */}
+                <button 
+                  onClick={() => {
+                    setShowMatchCelebration(null);
+                    setView('MATCHES');
+                  }}
+                  className="w-full py-5 rounded-full font-semibold text-lg text-white border-2 border-white/60 hover:bg-white/20 active:scale-95 transition-all backdrop-blur-sm"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.25)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                  }}
+                >
+                  לרשימת המועדפים
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       <InstallPrompt isLoggedIn={profile !== null} />
       
