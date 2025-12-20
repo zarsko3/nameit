@@ -1033,11 +1033,12 @@ const AppContent: React.FC = () => {
         
         return (
           <div 
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 safe-top safe-bottom"
+            className="fixed inset-0 flex items-center justify-center p-4 safe-top safe-bottom"
             style={{
               backgroundColor: 'rgba(0, 0, 0, 0.60)',
               backdropFilter: 'blur(8px)',
               WebkitBackdropFilter: 'blur(8px)',
+              zIndex: 9998, // Lower than confetti (99999) to ensure confetti renders on top
             }}
           >
             {/* Pop-up Card */}
