@@ -49,11 +49,13 @@ const AppContent: React.FC = () => {
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
   const [isPartnerOnline, setIsPartnerOnline] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
+  const [swipesLoaded, setSwipesLoaded] = useState(false); // Flag: swipes subscription has returned data at least once
 
   // Session-stable name list to prevent jumping during swipes
   const [sessionNames, setSessionNames] = useState<BabyName[]>([]);
   const [currentNameIndex, setCurrentNameIndex] = useState(0);
   const sessionInitialized = useRef(false);
+  const swipesLoadedForUser = useRef<string | null>(null); // Track which user's swipes were loaded
 
   const [filters, setFilters] = useState<FilterConfig>({
     genders: [Gender.BOY, Gender.GIRL, Gender.UNISEX],
@@ -139,6 +141,7 @@ const AppContent: React.FC = () => {
 
     const unsubSwipes = subscribeToRoomSwipes(profile.roomId, (roomSwipes) => {
       setSwipes(roomSwipes);
+      setSwipesLoaded(true); // Mark that swipes have been loaded from Firestore
     });
 
     const unsubMatches = subscribeToRoomMatches(profile.roomId, (roomMatches) => {
@@ -293,25 +296,43 @@ const AppContent: React.FC = () => {
   }, [filters, effectiveSettings, swipes, currentUser?.uid]);
 
   // Initialize session names when entering SWIPE view or when settings change significantly
+  // CRITICAL: Must wait for swipes to be loaded and ensure user-specific filtering
   useEffect(() => {
-    if (view === 'SWIPE' && profile?.roomId) {
-      // Only initialize once per session, or when coming back from settings
-      if (!sessionInitialized.current || sessionNames.length === 0) {
+    // Wait for all required data before initializing
+    if (view === 'SWIPE' && profile?.roomId && currentUser?.uid && swipesLoaded) {
+      // Check if we need to (re)initialize:
+      // 1. Session not yet initialized
+      // 2. Session was initialized for a different user (edge case: user switch)
+      // 3. Session names are empty but we have valid data
+      const needsInit = !sessionInitialized.current || 
+                        swipesLoadedForUser.current !== currentUser.uid ||
+                        sessionNames.length === 0;
+      
+      if (needsInit) {
+        // Calculate filtered names with CURRENT user's swipes only
         const newNames = calculateFilteredNames();
         setSessionNames(newNames);
         setCurrentNameIndex(0);
         sessionInitialized.current = true;
-        console.log('📋 Session initialized with', newNames.length, 'names');
+        swipesLoadedForUser.current = currentUser.uid;
+        console.log(`📋 Session initialized for user ${currentUser.uid.slice(0, 8)} with ${newNames.length} names`);
+        console.log(`   (Total room swipes: ${swipes.length}, My swipes: ${swipes.filter(s => s.userId === currentUser.uid).length})`);
       }
     }
-  }, [view, profile?.roomId]);
+  }, [view, profile?.roomId, currentUser?.uid, swipes, swipesLoaded, calculateFilteredNames]);
 
   // Reset session when leaving SWIPE view
   useEffect(() => {
     if (view !== 'SWIPE') {
       sessionInitialized.current = false;
+      swipesLoadedForUser.current = null;
     }
   }, [view]);
+
+  // Reset swipesLoaded when room changes (new subscription will load fresh data)
+  useEffect(() => {
+    setSwipesLoaded(false);
+  }, [profile?.roomId]);
 
   // Re-initialize when room settings change (partner updated filters)
   useEffect(() => {
