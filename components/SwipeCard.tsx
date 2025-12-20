@@ -335,8 +335,8 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
               </span>
             </div>
             
-            {/* Main Name - Hero Element - Responsive: text-4xl mobile, text-6xl desktop */}
-            <h2 className="text-4xl md:text-6xl font-bold text-dreamy-slate-700 font-heebo tracking-tight leading-none mb-1 md:mb-2 relative z-10">{name.hebrew}</h2>
+            {/* Main Name - Hero Element - Responsive: slightly smaller for Varela Round's wider nature */}
+            <h2 className="text-3xl md:text-5xl font-bold text-dreamy-slate-700 tracking-tight leading-none mb-1 md:mb-2 relative z-10">{name.hebrew}</h2>
             
             {/* Transliteration - Responsive */}
             <p className="text-base md:text-lg font-medium text-dreamy-slate-400 uppercase tracking-[0.12em] md:tracking-[0.15em] mb-3 md:mb-6 relative z-10">{name.transliteration}</p>
@@ -487,5 +487,6 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ name, onSwipe, onUndo, canUndo, p
 };
 
 export default SwipeCard;
+
 
 

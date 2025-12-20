@@ -1073,7 +1073,7 @@ const AppContent: React.FC = () => {
                 <div className="absolute top-[45%] left-0 right-0 w-full text-center px-4">
                   {/* Baby Name - DARK color for white frame background */}
                   <h3 
-                    className="text-5xl md:text-6xl font-black mb-2 text-dreamy-slate-700 leading-none font-heebo tracking-tight"
+                    className="text-4xl md:text-5xl font-bold mb-2 text-dreamy-slate-700 leading-none tracking-tight"
                     style={{ 
                       animation: 'pop 0.5s ease-out 0.2s both',
                     }}

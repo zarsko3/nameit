@@ -22,10 +22,10 @@
     
     <title>NameIT - בחירת שמות לתינוקות</title>
     
-    <!-- Google Fonts - Rubik (Modern Baby Chic Font) -->
+    <!-- Google Fonts - Varela Round (Playful Baby Theme Font) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS with Custom Font Configuration -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -34,9 +34,9 @@
         theme: {
           extend: {
             fontFamily: {
-              'sans': ['Rubik', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'], // Default font - Rubik
-              'hebrew': ['Rubik', 'Assistant', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-              'rubik': ['Rubik', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+              'sans': ['"Varela Round"', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'], // Default font - Varela Round
+              'hebrew': ['"Varela Round"', 'Assistant', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+              'varela': ['"Varela Round"', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
             },
             colors: {
               // Dreamy Baby Pastel Palette
@@ -111,18 +111,18 @@
         --safe-area-top: env(safe-area-inset-top, 0px);
         --safe-area-bottom: env(safe-area-inset-bottom, 0px);
         
-        /* Modern Hebrew Font Stack - Rubik as Primary */
-        --font-hebrew: 'Rubik', 'Assistant', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        /* Modern Hebrew Font Stack - Varela Round as Primary */
+        --font-hebrew: 'Varela Round', 'Assistant', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       }
       
-      /* Global Typography - Apply Rubik Everywhere */
+      /* Global Typography - Apply Varela Round Everywhere */
       * {
         font-family: var(--font-hebrew);
       }
       
       /* Body with Dreamy Background */
       body {
-        font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: 'Varela Round', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         background-image: url('/B1.png');
         background-size: cover;
         background-position: center;
@@ -137,28 +137,32 @@
         -moz-osx-font-smoothing: grayscale;
       }
       
-      /* Headings - Use Rubik Bold for modern, friendly look */
+      /* Headings - Use Varela Round (browser faux-bold for weight) */
       h1, h2, h3, h4, h5, h6 {
-        font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        font-weight: 700;
+        font-family: 'Varela Round', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-weight: 400; /* Varela Round only has Regular, browser will faux-bold when needed */
         line-height: 1.2;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.01em; /* Slightly tighter for the wider font */
         color: var(--text-main);
       }
       
-      /* Body text - Rubik for comfortable reading */
+      /* Body text - Varela Round for playful, soft reading */
       p, span, div, button, input, textarea, select, label {
-        font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: 'Varela Round', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       }
       
       /* Utility Classes */
-      .font-rubik { 
-        font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      .font-varela { 
+        font-family: 'Varela Round', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       }
       
-      /* Legacy class - now uses Rubik */
+      /* Legacy classes - now use Varela Round */
       .font-heebo { 
-        font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: 'Varela Round', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      
+      .font-rubik { 
+        font-family: 'Varela Round', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       }
       
       .font-hebrew {
