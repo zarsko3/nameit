@@ -547,6 +547,53 @@ const AppContent: React.FC = () => {
     });
   };
 
+  // Match celebration confetti - Pastel colors, cannon effect
+  const triggerMatchConfetti = () => {
+    // Pastel colors: Teal, Soft Pink, Baby Blue, Gold
+    const pastelColors = ['#80CBC4', '#FFCDD2', '#BBDEFB', '#FFD54F'];
+    
+    // Cannon/spread effect from sides
+    confetti({
+      particleCount: 100,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0 },
+      colors: pastelColors,
+      startVelocity: 45,
+      gravity: 0.8,
+    });
+    
+    confetti({
+      particleCount: 100,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1 },
+      colors: pastelColors,
+      startVelocity: 45,
+      gravity: 0.8,
+    });
+    
+    // Center burst
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { x: 0.5, y: 0.5 },
+      colors: pastelColors,
+      startVelocity: 30,
+      gravity: 0.6,
+    });
+  };
+
+  // Trigger confetti when match modal opens
+  useEffect(() => {
+    if (showMatchCelebration) {
+      // Small delay to sync with card pop animation
+      setTimeout(() => {
+        triggerMatchConfetti();
+      }, 300);
+    }
+  }, [showMatchCelebration]);
+
   const handleSwipe = async (liked: boolean) => {
     if (!profile || !currentUser) return;
     const currentName = sessionNames[currentNameIndex];
@@ -977,7 +1024,7 @@ const AppContent: React.FC = () => {
             <div 
               className="relative w-[90%] max-w-[360px] rounded-[2rem] shadow-2xl overflow-hidden"
               style={{
-                animation: 'pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                animation: 'pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), float 4s ease-in-out infinite 0.5s',
               }}
             >
               {/* Background Image - Inside card, maintains aspect ratio */}
