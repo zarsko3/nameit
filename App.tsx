@@ -8,7 +8,7 @@ import History from './components/History';
 import InstallPrompt from './components/InstallPrompt';
 import NotificationPrompt from './components/NotificationPrompt';
 import Settings from './components/Settings';
-import { BabyName, AppView, UserProfile, SwipeRecord, Match, Gender, FilterConfig, RoomSettings } from './types';
+import { BabyName, AppView, UserProfile, SwipeRecord, Match, Gender, FilterConfig, RoomSettings, NameStyle } from './types';
 import { INITIAL_NAMES } from './constants';
 import { Sparkles, SlidersHorizontal, X, CircleCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -33,6 +33,10 @@ import {
   getRoomSettings,
   subscribeToRoomSettings
 } from './services/firestoreService';
+
+// Check if we're in development mode
+// @ts-ignore - Vite provides import.meta.env.DEV
+const isDev = import.meta.env.DEV;
 
 const AppContent: React.FC = () => {
   const { currentUser, loading: authLoading, initialized: authInitialized, signUp, login, loginWithGoogle, logout } = useAuth();
@@ -1056,6 +1060,30 @@ const AppContent: React.FC = () => {
         show={showNotificationPrompt && view === 'SWIPE'}
         onClose={() => setShowNotificationPrompt(false)}
       />
+
+      {/* Debug: Simulate Match Button - Development Only */}
+      {isDev && (
+        <button
+          onClick={() => {
+            const dummyName: BabyName = {
+              id: 'debug-1',
+              hebrew: 'ארי',
+              transliteration: 'Ari',
+              meaning: 'אריה, סמל לגבורה וכוח',
+              gender: Gender.BOY,
+              style: [NameStyle.MODERN],
+              isTrending: true
+            };
+            setShowMatchCelebration(dummyName);
+            triggerConfetti();
+            console.log('🧪 DEBUG: Simulated match for', dummyName.hebrew);
+          }}
+          className="fixed bottom-4 left-4 z-[200] px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95"
+          title="Test Match Modal (Dev Only)"
+        >
+          🧪 Test Match
+        </button>
+      )}
     </Layout>
   );
 };
