@@ -1027,16 +1027,47 @@ const AppContent: React.FC = () => {
       )}
 
       {showMatchCelebration && (() => {
-        // Determine background image based on gender
-        const backgroundImage = showMatchCelebration.gender === Gender.GIRL 
-          ? '/Girl.png' 
-          : '/Boy.png';
+        // Determine background image based on matchedName.gender and user preferences
+        const matchedName = showMatchCelebration;
+        let matchImage: string;
+        let backgroundColor: string;
+
+        // Case A: Boy Name -> Use Boy.png
+        if (matchedName.gender === Gender.BOY) {
+          matchImage = '/Boy.png';
+          backgroundColor = 'rgba(59, 130, 246, 0.15)'; // Blue-ish tint
+        }
+        // Case B: Girl Name -> Use Girl.png
+        else if (matchedName.gender === Gender.GIRL) {
+          matchImage = '/Girl.png';
+          backgroundColor = 'rgba(244, 114, 182, 0.15)'; // Pink-ish tint
+        }
+        // Case C: Unisex Name -> Check user preferences
+        else if (matchedName.gender === Gender.UNISEX) {
+          // Check if user is specifically filtering for Boys
+          const isFilteringForBoys = effectiveSettings.expectedGender === Gender.BOY ||
+            (filters.genders.length === 1 && filters.genders[0] === Gender.BOY);
+          
+          if (isFilteringForBoys) {
+            matchImage = '/Boy.png';
+            backgroundColor = 'rgba(59, 130, 246, 0.15)'; // Blue-ish tint
+          } else {
+            // Default to Girl.png for Girls, All, or No Preference
+            matchImage = '/Girl.png';
+            backgroundColor = 'rgba(244, 114, 182, 0.15)'; // Pink-ish tint
+          }
+        }
+        // Fallback (shouldn't happen, but just in case)
+        else {
+          matchImage = '/Girl.png';
+          backgroundColor = 'rgba(244, 114, 182, 0.15)'; // Pink-ish tint
+        }
         
         return (
           <div 
             className="fixed inset-0 flex items-center justify-center p-4 safe-top safe-bottom"
             style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.60)',
+              backgroundColor: backgroundColor,
               backdropFilter: 'blur(8px)',
               WebkitBackdropFilter: 'blur(8px)',
               zIndex: 9998, // Lower than confetti (99999) to ensure confetti renders on top
@@ -1047,11 +1078,12 @@ const AppContent: React.FC = () => {
               className="relative w-[90%] max-w-[360px] rounded-[2rem] shadow-2xl overflow-hidden"
               style={{
                 animation: 'pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), float 4s ease-in-out infinite 0.5s',
+                backgroundColor: backgroundColor, // Match background color to prevent white bars on tall screens
               }}
             >
               {/* Background Image - Inside card, maintains aspect ratio */}
               <img
-                src={backgroundImage}
+                src={matchImage}
                 alt="Match celebration"
                 className="w-full h-auto object-contain pointer-events-none"
               />
