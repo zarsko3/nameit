@@ -915,8 +915,9 @@ const AppContent: React.FC = () => {
       )}
       
       {view === 'SWIPE' && (
-        <div className="h-full flex flex-col relative animate-fade-in overflow-hidden pb-2">
-          <div className="flex-1 flex flex-col items-center justify-center relative">
+        <div className="h-full w-full flex flex-col relative animate-fade-in overflow-hidden overscroll-none" style={{ overscrollBehavior: 'none', touchAction: 'none' }}>
+          {/* Card Container - Perfectly centered, takes all available space */}
+          <div className="flex-1 flex flex-col items-center justify-center relative w-full touch-action-none" style={{ touchAction: 'none' }}>
             {currentBabyName ? (
                 <SwipeCard 
                   key={currentBabyName.id}

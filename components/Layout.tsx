@@ -14,8 +14,8 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, showNav, isConnected }) => {
   return (
     <>
-      {/* Main App Container */}
-      <div className={`flex flex-col h-[100dvh] w-full md:max-w-md mx-auto relative overflow-hidden font-assistant safe-top ${showNav ? 'pb-24' : ''}`}>
+      {/* Main App Container - Locked viewport, no scroll */}
+      <div className={`flex flex-col h-[100dvh] w-full md:max-w-md mx-auto relative overflow-hidden overscroll-none font-assistant safe-top ${showNav ? 'pb-24' : ''}`} style={{ overscrollBehavior: 'none' }}>
         {/* Header - Large Logo as Brand Header */}
         {showNav && (
           <header className="px-4 py-1 flex items-center justify-center shrink-0 bg-transparent">
@@ -27,8 +27,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, sh
           </header>
         )}
 
-        {/* Main Content - Flex grow to fill available space */}
-        <main className="flex-1 flex flex-col overflow-hidden relative">
+        {/* Main Content - Flex grow to fill available space, no scroll */}
+        <main className="flex-1 flex flex-col overflow-hidden overscroll-none relative" style={{ overscrollBehavior: 'none', touchAction: 'none' }}>
           {children}
         </main>
       </div>

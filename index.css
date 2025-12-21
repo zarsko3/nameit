@@ -78,6 +78,7 @@
 html, body {
   overflow-x: hidden;
   overscroll-behavior: none;
+  overscroll-behavior-y: none; /* Prevent bounce scrolling */
 }
 
 body {
