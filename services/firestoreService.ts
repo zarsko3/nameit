@@ -13,13 +13,14 @@ import {
   serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { UserProfile, SwipeRecord, Match, RoomSettings } from '../types';
+import { UserProfile, SwipeRecord, Match, RoomSettings, BabyName, Gender } from '../types';
 
 // Collection names
 const USERS_COLLECTION = 'users';
 const SWIPES_COLLECTION = 'swipes';
 const MATCHES_COLLECTION = 'matches';
 const ROOMS_COLLECTION = 'rooms';
+const NAMES_COLLECTION = 'names';
 
 // ============ USER PROFILE OPERATIONS ============
 
@@ -388,5 +389,129 @@ export const subscribeToRoomSettings = (
       callback(null);
     }
   });
+};
+
+// ============ NAME OPERATIONS ============
+
+/**
+ * Find or create a name in the names collection
+ * Returns the name ID (either existing or newly created)
+ */
+export const findOrCreateName = async (
+  hebrew: string,
+  gender: Gender
+): Promise<string> => {
+  console.log('🔍 Finding or creating name:', { hebrew, gender });
+  
+  // Normalize Hebrew name for comparison
+  const normalizedHebrew = hebrew.trim().toLowerCase();
+  
+  // Query for existing name by Hebrew and gender
+  const namesRef = collection(db, NAMES_COLLECTION);
+  const q = query(
+    namesRef,
+    where('hebrew', '==', hebrew.trim()) // Exact match (case-sensitive for Hebrew)
+  );
+  
+  const querySnapshot = await getDocs(q);
+  
+  // Check if name exists with same gender
+  let existingName: { id: string; [key: string]: any } | null = null;
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    if (data.gender === gender) {
+      existingName = { id: doc.id, ...data };
+    }
+  });
+  
+  if (existingName) {
+    console.log('✅ Found existing name:', existingName.id);
+    // Return the name ID
+    return existingName.id;
+  }
+  
+  // Name doesn't exist - create it
+  console.log('🆕 Creating new name in Firestore...');
+  
+  // Generate transliteration (simple: use Hebrew as fallback, or generate from Hebrew)
+  // For now, we'll use a simple transliteration or the Hebrew itself
+  const transliteration = hebrew.trim(); // Can be improved with transliteration logic
+  const docId = `${transliteration.toLowerCase().replace(/[^a-z0-9]/g, '')}_${gender.toLowerCase()}`;
+  
+  const nameRef = doc(db, NAMES_COLLECTION, docId);
+  
+  const nameDoc: Partial<BabyName> = {
+    id: docId,
+    hebrew: hebrew.trim(),
+    transliteration: transliteration,
+    meaning: '', // User can add meaning later if needed
+    gender: gender,
+    style: [],
+    isTrending: false,
+    popularity: 0,
+    // Metadata
+    source: 'user_added',
+    createdAt: new Date().toISOString()
+  };
+  
+  await setDoc(nameRef, nameDoc);
+  console.log('✅ New name created:', docId);
+  
+  return docId;
+};
+
+/**
+ * Update room document with priorityNameId for partner sync
+ */
+export const updateRoomPriorityName = async (
+  roomId: string,
+  nameId: string,
+  userId: string
+): Promise<void> => {
+  console.log('📡 Updating room priority name:', { roomId, nameId });
+  
+  const roomRef = doc(db, ROOMS_COLLECTION, roomId);
+  
+  await updateDoc(roomRef, {
+    priorityNameId: {
+      id: nameId,
+      timestamp: Date.now()
+    },
+    updatedAt: serverTimestamp(),
+    updatedBy: userId
+  });
+  
+  console.log('✅ Room priority name updated!');
+};
+
+/**
+ * Get a name by ID from Firestore
+ */
+export const getNameById = async (nameId: string): Promise<BabyName | null> => {
+  try {
+    // First try to find in NAMES_COLLECTION
+    const nameRef = doc(db, NAMES_COLLECTION, nameId);
+    const nameSnap = await getDoc(nameRef);
+    
+    if (nameSnap.exists()) {
+      const data = nameSnap.data();
+      return {
+        id: nameId,
+        hebrew: data.hebrew,
+        transliteration: data.transliteration || data.hebrew,
+        meaning: data.meaning || '',
+        gender: data.gender,
+        style: data.style || [],
+        isTrending: data.isTrending || false,
+        popularity: data.popularity || 0
+      } as BabyName;
+    }
+    
+    // If not found, return null (caller should handle)
+    return null;
+  } catch (error) {
+    console.error('❌ Error fetching name:', error);
+    return null;
+  }
 };
 

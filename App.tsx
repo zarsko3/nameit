@@ -31,7 +31,10 @@ import {
   subscribeToPartnerConnection,
   saveRoomSettings,
   getRoomSettings,
-  subscribeToRoomSettings
+  subscribeToRoomSettings,
+  findOrCreateName,
+  updateRoomPriorityName,
+  getNameById
 } from './services/firestoreService';
 
 // Check if we're in development mode
@@ -55,6 +58,8 @@ const AppContent: React.FC = () => {
   const [isPartnerOnline, setIsPartnerOnline] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
   const [swipesLoaded, setSwipesLoaded] = useState(false); // Flag: swipes subscription has returned data at least once
+  const [partnerSuggestedName, setPartnerSuggestedName] = useState<string | null>(null); // Toast notification
+  const previousPriorityNameRef = useRef<string | null>(null); // Track previous priorityNameId to detect changes
 
   // Session-stable name list to prevent jumping during swipes
   const [sessionNames, setSessionNames] = useState<BabyName[]>([]);
@@ -396,6 +401,86 @@ const AppContent: React.FC = () => {
       console.log('🔄 Session updated due to room settings change');
     }
   }, [roomSettings?.protectedNames, roomSettings?.blacklistedNames, roomSettings?.expectedGender]);
+
+  // Watch for partner-suggested names (priorityNameId) - Real-time sync
+  useEffect(() => {
+    if (!roomSettings?.priorityNameId || !currentUser || !profile) return;
+    
+    const priorityName = roomSettings.priorityNameId;
+    const currentPriorityId = priorityName.id;
+    
+    // Check if this is a new priority (different from previous)
+    if (previousPriorityNameRef.current === currentPriorityId) {
+      return; // Already processed
+    }
+    
+    // Check if timestamp is recent (last 10 seconds)
+    const timeDiff = Date.now() - priorityName.timestamp;
+    if (timeDiff > 10000) {
+      console.log('⏭️ Priority name is too old, ignoring');
+      previousPriorityNameRef.current = currentPriorityId;
+      return;
+    }
+    
+    // Check if partner suggested this (not current user)
+    if (roomSettings.updatedBy === currentUser.uid) {
+      console.log('✅ Priority name was set by me, skipping');
+      previousPriorityNameRef.current = currentPriorityId;
+      return;
+    }
+    
+    // Check if user has already swiped this name
+    const hasSwiped = swipes.some(s => s.nameId === currentPriorityId && s.userId === currentUser.uid);
+    if (hasSwiped) {
+      console.log('⏭️ Already swiped this name, ignoring');
+      previousPriorityNameRef.current = currentPriorityId;
+      return;
+    }
+    
+    console.log('🎯 Partner suggested a name! Fetching and injecting...', currentPriorityId);
+    previousPriorityNameRef.current = currentPriorityId;
+    
+    // Helper function to inject name into card deck
+    const injectPriorityName = (name: BabyName) => {
+      setSessionNames((prevNames) => {
+        // Check if name is already in sessionNames
+        const existingIndex = prevNames.findIndex(n => n.id === name.id);
+        if (existingIndex >= 0) {
+          // Name already exists, just move to front
+          return [name, ...prevNames.filter(n => n.id !== name.id)];
+        } else {
+          // Name is new, unshift to index 0
+          return [name, ...prevNames];
+        }
+      });
+      setCurrentNameIndex(0);
+      
+      // Show toast notification
+      setPartnerSuggestedName(name.hebrew);
+      setTimeout(() => {
+        setPartnerSuggestedName(null);
+      }, 4000); // Hide after 4 seconds
+      
+      console.log('✅ Priority name injected at index 0:', name.hebrew);
+    };
+    
+    // Fetch the name from Firestore
+    getNameById(currentPriorityId).then((name) => {
+      if (!name) {
+        console.warn('⚠️ Could not find name with ID:', currentPriorityId);
+        // Try to find in INITIAL_NAMES as fallback
+        const fallbackName = INITIAL_NAMES.find(n => n.id === currentPriorityId);
+        if (fallbackName) {
+          injectPriorityName(fallbackName);
+        }
+        return;
+      }
+      
+      injectPriorityName(name);
+    }).catch((error) => {
+      console.error('❌ Error fetching priority name:', error);
+    });
+  }, [roomSettings?.priorityNameId, roomSettings?.updatedBy, currentUser, profile, swipes]);
 
   // Handle pending match notification from partner (real-time)
   useEffect(() => {
@@ -795,6 +880,37 @@ const AppContent: React.FC = () => {
     setMatches(prev => prev.map(m => m.nameId === nameId ? { ...m, rating } : m));
   };
 
+  // Add name manually (from History screen)
+  const handleAddName = async (hebrew: string, gender: Gender) => {
+    if (!profile || !currentUser) {
+      throw new Error('User not authenticated');
+    }
+
+    try {
+      // Step A: Find or create the name in Firestore
+      const nameId = await findOrCreateName(hebrew, gender);
+      console.log('✅ Name found/created:', nameId);
+
+      // Step B: Create a positive swipe (Like) for the current user
+      const swipe: SwipeRecord = {
+        nameId,
+        liked: true,
+        userId: currentUser.uid,
+        roomId: profile.roomId,
+        timestamp: Date.now()
+      };
+      await saveSwipe(swipe);
+      console.log('✅ Swipe created for added name');
+
+      // Step C: Update room document with priorityNameId for partner sync
+      await updateRoomPriorityName(profile.roomId, nameId, currentUser.uid);
+      console.log('✅ Room priority name updated - partner will see it soon!');
+    } catch (error) {
+      console.error('❌ Failed to add name:', error);
+      throw error;
+    }
+  };
+
   const toggleGenderFilter = (gender: Gender) => {
     setFilters(prev => ({
       ...prev,
@@ -1010,6 +1126,7 @@ const AppContent: React.FC = () => {
           onRate={handleRate}
           onRemoveLike={handleRemoveLike}
           onRemoveMatch={handleRemoveMatch}
+          onAddName={handleAddName}
         />
       )}
 
@@ -1156,6 +1273,23 @@ const AppContent: React.FC = () => {
         show={showNotificationPrompt && view === 'SWIPE'}
         onClose={() => setShowNotificationPrompt(false)}
       />
+
+      {/* Partner Suggested Name Toast */}
+      {partnerSuggestedName && (
+        <div 
+          className="fixed top-20 left-1/2 -translate-x-1/2 z-[10000] animate-pop"
+          style={{
+            animation: 'pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}
+        >
+          <div className="bg-gradient-to-r from-baby-pink-300 to-baby-blue-300 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2">
+            <Sparkles size={18} className="text-white" />
+            <span className="font-bold text-sm">
+              השותף/ה הציע/ה שם: <span className="font-extrabold">{partnerSuggestedName}</span>
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Debug: Simulate Match Button - Development Only */}
       {isDev && (

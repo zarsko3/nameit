@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { BabyName, SwipeRecord, Match, Gender } from '../types';
-import { Heart, Star, Share2, Award, Trash2, X, AlertTriangle } from 'lucide-react';
+import { Heart, Star, Share2, Award, Trash2, X, AlertTriangle, Plus } from 'lucide-react';
+import AddNameModal from './AddNameModal';
 
 interface HistoryProps {
   names: BabyName[];
@@ -11,6 +12,7 @@ interface HistoryProps {
   onRate: (nameId: string, rating: number) => void;
   onRemoveLike: (nameId: string) => void;
   onRemoveMatch: (nameId: string) => void;
+  onAddName?: (hebrew: string, gender: Gender) => Promise<void>;
 }
 
 const History: React.FC<HistoryProps> = ({ 
@@ -20,9 +22,11 @@ const History: React.FC<HistoryProps> = ({
   currentUserId,
   onRate, 
   onRemoveLike,
-  onRemoveMatch 
+  onRemoveMatch,
+  onAddName
 }) => {
   const [confirmDelete, setConfirmDelete] = useState<{ type: 'like' | 'match', nameId: string, name: string } | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
   
   const sortedMatches = [...matches].sort((a, b) => (b.rating || 0) - (a.rating || 0));
   const matchedNames = sortedMatches.map(m => ({
@@ -58,6 +62,19 @@ const History: React.FC<HistoryProps> = ({
       style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
     >
       <div className="p-6 space-y-8 pb-10">
+        {/* Add Name Button - Floating Action Button */}
+        {onAddName && (
+          <div className="flex justify-center mb-4">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-baby-pink-300 to-baby-blue-300 text-white rounded-full font-bold shadow-lg hover:shadow-xl transition-all active:scale-95"
+            >
+              <Plus size={20} />
+              <span>הוסף שם</span>
+            </button>
+          </div>
+        )}
+
         {/* Matches Section */}
         <section>
           <div className="flex justify-center mb-6">
@@ -224,6 +241,15 @@ const History: React.FC<HistoryProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Add Name Modal */}
+      {onAddName && (
+        <AddNameModal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          onAdd={onAddName}
+        />
       )}
     </div>
   );
