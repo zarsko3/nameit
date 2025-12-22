@@ -131,11 +131,11 @@ const AppContent: React.FC = () => {
       console.log('📋 Profile loaded from AuthContext, routing to appropriate view');
       setProfile(authUserProfile);
       
+      // Skip onboarding - go straight to swipe if room exists, otherwise room setup
       if (!authUserProfile.roomId) {
         setView('ROOM_SETUP');
-      } else if (!authUserProfile.hasCompletedOnboarding) {
-        setView('ONBOARDING_FLOW');
       } else {
+        // User has room - go directly to swipe screen (onboarding removed)
         setView('SWIPE');
       }
     } else {
@@ -168,22 +168,8 @@ const AppContent: React.FC = () => {
     return () => unsubscribe();
   }, [currentUser]);
 
-  // Watch for onboarding completion status and update view accordingly
-  useEffect(() => {
-    if (!profile || !currentUser) return;
-    
-    // If user has completed onboarding but we're still on onboarding flow, navigate to swipe
-    if (profile.hasCompletedOnboarding && view === 'ONBOARDING_FLOW') {
-      console.log('✅ Onboarding completed - navigating to swipe screen');
-      setView('SWIPE');
-    }
-    
-    // If user hasn't completed onboarding but has a room, ensure they see onboarding
-    if (!profile.hasCompletedOnboarding && profile.roomId && view === 'SWIPE') {
-      console.log('📋 Onboarding not completed - navigating to onboarding flow');
-      setView('ONBOARDING_FLOW');
-    }
-  }, [profile?.hasCompletedOnboarding, profile?.roomId, currentUser, view]);
+  // Onboarding flow removed - this effect is no longer needed
+  // Preferences are now only accessible via Settings menu
 
   // Subscribe to room data (swipes, matches, partner, AND shared settings)
   useEffect(() => {
@@ -628,28 +614,29 @@ const AppContent: React.FC = () => {
     const existingProfile = await getUserProfile(uid);
     if (existingProfile) {
       setProfile(existingProfile);
+      // Skip onboarding - go straight to swipe if room exists, otherwise room setup
       if (!existingProfile.roomId) {
         setView('ROOM_SETUP');
-      } else if (!existingProfile.hasCompletedOnboarding) {
-        setView('ONBOARDING_FLOW');
       } else {
+        // User has room - go directly to swipe screen (onboarding removed)
         setView('SWIPE');
       }
     } else {
-      // New user - create initial profile
+      // New user - create initial profile with default preferences
+      // Set default preferences: show all genders, all styles, skip onboarding
       const newProfile: UserProfile = {
         id: uid,
         name: displayName,
         roomId: '',
         isPartnerConnected: false,
         genderPreference: [Gender.BOY, Gender.GIRL, Gender.UNISEX],
-        expectedGender: null,
-        nameStyles: [],
+        expectedGender: null, // Show all genders by default
+        nameStyles: [NameStyle.MODERN, NameStyle.CLASSIC, NameStyle.INTERNATIONAL, NameStyle.UNIQUE, NameStyle.NATURE], // All styles by default
         showTrendingOnly: false,
         protectedNames: [],
         blacklistedNames: [],
-        dislikedNames: [], // Track permanently disliked names
-        hasCompletedOnboarding: false
+        dislikedNames: [],
+        hasCompletedOnboarding: true // Skip onboarding - go straight to swipe
       };
       await saveUserProfile(uid, newProfile);
       setProfile(newProfile);
@@ -678,8 +665,8 @@ const AppContent: React.FC = () => {
         roomId: roomId, // Pre-configured test room
         isPartnerConnected: false,
         genderPreference: [Gender.BOY, Gender.GIRL, Gender.UNISEX],
-        expectedGender: null,
-        nameStyles: [],
+        expectedGender: null, // Show all genders by default
+        nameStyles: [NameStyle.MODERN, NameStyle.CLASSIC, NameStyle.INTERNATIONAL, NameStyle.UNIQUE, NameStyle.NATURE], // All styles by default
         showTrendingOnly: false,
         protectedNames: [],
         blacklistedNames: [],
@@ -701,7 +688,8 @@ const AppContent: React.FC = () => {
     const updatedProfile = { ...profile, roomId };
     await saveUserProfile(currentUser.uid, { roomId });
     setProfile(updatedProfile);
-    setView('ONBOARDING_FLOW');
+    // Go directly to swipe screen - onboarding is skipped
+    setView('SWIPE');
   };
 
   // Onboarding flow complete handler
