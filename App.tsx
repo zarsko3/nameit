@@ -1153,7 +1153,7 @@ const AppContent: React.FC = () => {
 
       {view === 'MATCHES' && (
         <History 
-          names={INITIAL_NAMES} 
+          names={[...INITIAL_NAMES, ...customNames]} 
           swipes={swipes} 
           matches={matches}
           currentUserId={currentUser?.uid}
