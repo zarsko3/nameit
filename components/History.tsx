@@ -57,11 +57,23 @@ const History: React.FC<HistoryProps> = ({
   };
 
   return (
-    <div 
-      className="h-full overflow-y-auto"
-      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-    >
-      <div className="p-6 space-y-8 pb-10">
+    <div className="h-full w-full flex flex-col">
+      {/* Scrollable Content Area */}
+      <div 
+        className="flex-1 overflow-y-auto overscroll-none"
+        style={{ 
+          scrollbarWidth: 'none', 
+          msOverflowStyle: 'none',
+          overscrollBehavior: 'none',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        <style>{`
+          .history-scroll::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
+        <div className="p-6 space-y-8 pb-24 history-scroll">
         {/* Add Name Button - Floating Action Button */}
         {onAddName && (
           <div className="flex justify-center mb-4">
@@ -204,6 +216,7 @@ const History: React.FC<HistoryProps> = ({
             </div>
           )}
         </section>
+        </div>
       </div>
 
       {/* Delete Confirmation Modal - Dreamy style */}

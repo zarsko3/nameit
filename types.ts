@@ -66,7 +66,8 @@ export interface RoomSettings {
   protectedNames: string[];
   blacklistedNames: string[];
   dislikedNames: string[];        // Synced disliked name IDs from both partners
-  priorityNameId?: { id: string; timestamp: number }; // Partner-suggested name for real-time sync
+  priorityNameId?: { id: string; timestamp: number }; // Partner-suggested name for real-time sync (legacy)
+  priorityAction?: { nameId: string; timestamp: number; addedBy: string }; // Partner-suggested name for real-time sync
   updatedAt?: any; // Firestore timestamp
   updatedBy?: string; // User ID who last updated
 }

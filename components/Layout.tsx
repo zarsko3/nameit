@@ -27,8 +27,9 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, sh
           </header>
         )}
 
-        {/* Main Content - Flex grow to fill available space, no scroll */}
-        <main className="flex-1 flex flex-col overflow-hidden overscroll-none relative" style={{ overscrollBehavior: 'none', touchAction: 'none' }}>
+        {/* Main Content - Flex grow to fill available space, no scroll on container */}
+        {/* Children (History/Settings) handle their own scrolling internally */}
+        <main className="flex-1 flex flex-col overflow-hidden overscroll-none relative" style={{ overscrollBehavior: 'none' }}>
           {children}
         </main>
       </div>

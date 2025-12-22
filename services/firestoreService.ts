@@ -403,14 +403,14 @@ export const findOrCreateName = async (
 ): Promise<string> => {
   console.log('🔍 Finding or creating name:', { hebrew, gender });
   
-  // Normalize Hebrew name for comparison
-  const normalizedHebrew = hebrew.trim().toLowerCase();
+  // Capitalize the Hebrew name (first letter uppercase, rest as-is for Hebrew)
+  const capitalizedHebrew = hebrew.trim().charAt(0).toUpperCase() + hebrew.trim().slice(1);
   
-  // Query for existing name by Hebrew and gender
+  // Query for existing name by Hebrew (using capitalized version) and gender
   const namesRef = collection(db, NAMES_COLLECTION);
   const q = query(
     namesRef,
-    where('hebrew', '==', hebrew.trim()) // Exact match (case-sensitive for Hebrew)
+    where('hebrew', '==', capitalizedHebrew) // Exact match with capitalized version
   );
   
   const querySnapshot = await getDocs(q);
@@ -435,14 +435,14 @@ export const findOrCreateName = async (
   
   // Generate transliteration (simple: use Hebrew as fallback, or generate from Hebrew)
   // For now, we'll use a simple transliteration or the Hebrew itself
-  const transliteration = hebrew.trim(); // Can be improved with transliteration logic
+  const transliteration = capitalizedHebrew; // Can be improved with transliteration logic
   const docId = `${transliteration.toLowerCase().replace(/[^a-z0-9]/g, '')}_${gender.toLowerCase()}`;
   
   const nameRef = doc(db, NAMES_COLLECTION, docId);
   
   const nameDoc: Partial<BabyName> = {
     id: docId,
-    hebrew: hebrew.trim(),
+    hebrew: capitalizedHebrew,
     transliteration: transliteration,
     meaning: '', // User can add meaning later if needed
     gender: gender,
@@ -450,8 +450,8 @@ export const findOrCreateName = async (
     isTrending: false,
     popularity: 0,
     // Metadata
-    source: 'user_added',
-    createdAt: new Date().toISOString()
+    source: 'custom_user',
+    createdAt: serverTimestamp()
   };
   
   await setDoc(nameRef, nameDoc);

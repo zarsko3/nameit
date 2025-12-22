@@ -41,6 +41,12 @@ import {
 // @ts-ignore - Vite provides import.meta.env.DEV
 const isDev = import.meta.env.DEV;
 
+// ============ DESIGN MODE: Force Onboarding Flow ============
+// Set to true to force the app to show OnboardingFlow immediately for styling
+// TODO: Set to false when done designing
+const DESIGN_MODE_ONBOARDING = true;
+// ============================================================
+
 const AppContent: React.FC = () => {
   const { currentUser, loading: authLoading, initialized: authInitialized, signUp, login, loginWithGoogle, logout } = useAuth();
   
@@ -59,7 +65,8 @@ const AppContent: React.FC = () => {
   const [dataLoading, setDataLoading] = useState(false);
   const [swipesLoaded, setSwipesLoaded] = useState(false); // Flag: swipes subscription has returned data at least once
   const [partnerSuggestedName, setPartnerSuggestedName] = useState<string | null>(null); // Toast notification
-  const previousPriorityNameRef = useRef<string | null>(null); // Track previous priorityNameId to detect changes
+  const previousPriorityNameRef = useRef<string | null>(null); // Track previous priorityNameId to detect changes (legacy)
+  const previousPriorityActionRef = useRef<string | null>(null); // Track previous priorityAction to detect changes
 
   // Session-stable name list to prevent jumping during swipes
   const [sessionNames, setSessionNames] = useState<BabyName[]>([]);
@@ -85,7 +92,12 @@ const AppContent: React.FC = () => {
   }, []);
 
   // Splash is complete when BOTH min time passed AND auth is initialized
+  // Skip splash in design mode
   useEffect(() => {
+    if (DESIGN_MODE_ONBOARDING) {
+      setIsSplash(false);
+      return;
+    }
     if (splashMinTimeComplete && authInitialized) {
       setIsSplash(false);
     }
@@ -93,6 +105,29 @@ const AppContent: React.FC = () => {
 
   // Handle auth state changes - only runs after auth is initialized
   useEffect(() => {
+    // DESIGN MODE: Force OnboardingFlow view for styling
+    if (DESIGN_MODE_ONBOARDING) {
+      console.log('🎨 DESIGN MODE: Forcing OnboardingFlow view');
+      // Create a dummy profile for design mode
+      const dummyProfile: UserProfile = {
+        id: 'design-mode',
+        name: 'Design Mode',
+        roomId: 'design-room',
+        isPartnerConnected: false,
+        genderPreference: [Gender.BOY, Gender.GIRL, Gender.UNISEX],
+        expectedGender: null,
+        nameStyles: [],
+        showTrendingOnly: false,
+        protectedNames: [],
+        blacklistedNames: [],
+        dislikedNames: [],
+        hasCompletedOnboarding: false
+      };
+      setProfile(dummyProfile);
+      setView('ONBOARDING_FLOW');
+      return;
+    }
+    
     // Wait for auth to be fully initialized before making routing decisions
     if (!authInitialized || authLoading) return;
     
@@ -144,6 +179,23 @@ const AppContent: React.FC = () => {
 
     return () => unsubscribe();
   }, [currentUser]);
+
+  // Watch for onboarding completion status and update view accordingly
+  useEffect(() => {
+    if (!profile || !currentUser) return;
+    
+    // If user has completed onboarding but we're still on onboarding flow, navigate to swipe
+    if (profile.hasCompletedOnboarding && view === 'ONBOARDING_FLOW') {
+      console.log('✅ Onboarding completed - navigating to swipe screen');
+      setView('SWIPE');
+    }
+    
+    // If user hasn't completed onboarding but has a room, ensure they see onboarding
+    if (!profile.hasCompletedOnboarding && profile.roomId && view === 'SWIPE') {
+      console.log('📋 Onboarding not completed - navigating to onboarding flow');
+      setView('ONBOARDING_FLOW');
+    }
+  }, [profile?.hasCompletedOnboarding, profile?.roomId, currentUser, view]);
 
   // Subscribe to room data (swipes, matches, partner, AND shared settings)
   useEffect(() => {
@@ -402,7 +454,87 @@ const AppContent: React.FC = () => {
     }
   }, [roomSettings?.protectedNames, roomSettings?.blacklistedNames, roomSettings?.expectedGender]);
 
-  // Watch for partner-suggested names (priorityNameId) - Real-time sync
+  // Watch for partner-suggested names (priorityAction) - Real-time sync
+  useEffect(() => {
+    if (!roomSettings?.priorityAction || !currentUser || !profile) return;
+    
+    const priorityAction = roomSettings.priorityAction;
+    const currentPriorityId = priorityAction.nameId;
+    
+    // Check if this is a new priority (different from previous)
+    if (previousPriorityActionRef.current === currentPriorityId) {
+      return; // Already processed
+    }
+    
+    // Check if timestamp is recent (last 5 seconds)
+    const timeDiff = Date.now() - priorityAction.timestamp;
+    if (timeDiff > 5000) {
+      console.log('⏭️ Priority action is too old, ignoring');
+      previousPriorityActionRef.current = currentPriorityId;
+      return;
+    }
+    
+    // Check if partner suggested this (not current user)
+    if (priorityAction.addedBy === currentUser.uid) {
+      console.log('✅ Priority action was set by me, skipping');
+      previousPriorityActionRef.current = currentPriorityId;
+      return;
+    }
+    
+    // Check if user has already swiped this name
+    const hasSwiped = swipes.some(s => s.nameId === currentPriorityId && s.userId === currentUser.uid);
+    if (hasSwiped) {
+      console.log('⏭️ Already swiped this name, ignoring');
+      previousPriorityActionRef.current = currentPriorityId;
+      return;
+    }
+    
+    console.log('🎯 Partner suggested a name! Fetching and injecting...', currentPriorityId);
+    previousPriorityActionRef.current = currentPriorityId;
+    
+    // Helper function to inject name into card deck
+    const injectPriorityName = (name: BabyName) => {
+      setSessionNames((prevNames) => {
+        // Check if name is already in sessionNames
+        const existingIndex = prevNames.findIndex(n => n.id === name.id);
+        if (existingIndex >= 0) {
+          // Name already exists, just move to front
+          return [name, ...prevNames.filter(n => n.id !== name.id)];
+        } else {
+          // Name is new, unshift to index 0
+          return [name, ...prevNames];
+        }
+      });
+      setCurrentNameIndex(0);
+      
+      // Show toast notification
+      setPartnerSuggestedName(name.hebrew);
+      setTimeout(() => {
+        setPartnerSuggestedName(null);
+      }, 4000); // Hide after 4 seconds
+      
+      console.log('✅ Priority name injected at index 0:', name.hebrew);
+    };
+    
+    // Fetch the name from Firestore
+    getNameById(currentPriorityId).then((name) => {
+      if (!name) {
+        console.warn('⚠️ Could not find name with ID:', currentPriorityId);
+        // Try to find in INITIAL_NAMES as fallback
+        const fallbackName = INITIAL_NAMES.find(n => n.id === currentPriorityId);
+        if (fallbackName) {
+          injectPriorityName(fallbackName);
+        }
+        return;
+      }
+      
+      injectPriorityName(name);
+    }).catch((error) => {
+      console.error('❌ Error fetching priority name:', error);
+    });
+  }, [roomSettings?.priorityAction, currentUser, profile, swipes]);
+
+  // Legacy: Watch for partner-suggested names (priorityNameId) - Real-time sync (backward compatibility)
   useEffect(() => {
     if (!roomSettings?.priorityNameId || !currentUser || !profile) return;
     
@@ -437,7 +569,7 @@ const AppContent: React.FC = () => {
       return;
     }
     
-    console.log('🎯 Partner suggested a name! Fetching and injecting...', currentPriorityId);
+    console.log('🎯 Partner suggested a name (legacy)! Fetching and injecting...', currentPriorityId);
     previousPriorityNameRef.current = currentPriorityId;
     
     // Helper function to inject name into card deck
@@ -585,8 +717,18 @@ const AppContent: React.FC = () => {
   };
 
   // Onboarding flow complete handler
-  const handleOnboardingFlowComplete = () => {
+  const handleOnboardingFlowComplete = async () => {
+    if (!currentUser || !profile) return;
+    
+    // Explicitly save hasCompletedOnboarding to Firestore
+    await saveUserProfile(currentUser.uid, { hasCompletedOnboarding: true });
+    
+    // Update local profile state
+    setProfile({ ...profile, hasCompletedOnboarding: true });
+    
+    // Navigate to swipe screen
     setView('SWIPE');
+    
     // Show notification prompt after a short delay
     setTimeout(() => {
       setShowNotificationPrompt(true);
@@ -1274,18 +1416,27 @@ const AppContent: React.FC = () => {
         onClose={() => setShowNotificationPrompt(false)}
       />
 
-      {/* Partner Suggested Name Toast */}
+      {/* Partner Suggested Name Toast - Positioned above navigation */}
       {partnerSuggestedName && (
         <div 
-          className="fixed top-20 left-1/2 -translate-x-1/2 z-[10000] animate-pop"
+          className="fixed left-1/2 -translate-x-1/2 z-[110] animate-pop"
           style={{
+            bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px) + 0.5rem)',
             animation: 'pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
         >
-          <div className="bg-gradient-to-r from-baby-pink-300 to-baby-blue-300 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2">
-            <Sparkles size={18} className="text-white" />
-            <span className="font-bold text-sm">
-              השותף/ה הציע/ה שם: <span className="font-extrabold">{partnerSuggestedName}</span>
+          <div 
+            className="bg-white/90 backdrop-blur-md px-6 py-3 rounded-full shadow-xl border border-white/50 flex items-center gap-2"
+            style={{
+              backdropFilter: 'blur(24px) saturate(150%)',
+              WebkitBackdropFilter: 'blur(24px) saturate(150%)',
+            }}
+          >
+            <div className="w-8 h-8 bg-gradient-to-br from-baby-pink-200 to-baby-blue-200 rounded-full flex items-center justify-center">
+              <Sparkles size={16} className="text-white" />
+            </div>
+            <span className="font-bold text-sm text-dreamy-slate-700">
+              השותף/ה הציע/ה שם: <span className="font-extrabold text-baby-pink-600">{partnerSuggestedName}</span>
             </span>
           </div>
         </div>

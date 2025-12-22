@@ -441,10 +441,23 @@ const Settings: React.FC<SettingsProps> = ({
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden" dir="rtl">
+    <div className="h-full w-full flex flex-col" dir="rtl">
       {/* Scrollable Content */}
-      <div className="flex-1 scroll-hidden">
-        <div className="px-5 pt-6 pb-32 space-y-4 safe-top">
+      <div 
+        className="flex-1 overflow-y-auto overscroll-none"
+        style={{ 
+          scrollbarWidth: 'none', 
+          msOverflowStyle: 'none',
+          overscrollBehavior: 'none',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        <style>{`
+          div::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
+        <div className="px-5 pt-6 pb-24 space-y-4 safe-top">
           {/* Header */}
           <div className="flex items-center justify-between mb-2 animate-fade-up">
             <h2 className="text-2xl font-bold text-dreamy-slate-700 tracking-tight font-heebo">הגדרות</h2>
