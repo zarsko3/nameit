@@ -41,6 +41,12 @@ import {
 // @ts-ignore - Vite provides import.meta.env.DEV
 const isDev = import.meta.env.DEV;
 
+// ============ DESIGN MODE: Force Onboarding Flow ============
+// Set to true to force the app to show OnboardingFlow immediately for styling
+// TODO: Set to false when done designing
+const DESIGN_MODE_ONBOARDING = true;
+// ============================================================
+
 const AppContent: React.FC = () => {
   const { currentUser, loading: authLoading, initialized: authInitialized, signUp, login, loginWithGoogle, logout } = useAuth();
   
@@ -85,7 +91,12 @@ const AppContent: React.FC = () => {
   }, []);
 
   // Splash is complete when BOTH min time passed AND auth is initialized
+  // Skip splash in design mode
   useEffect(() => {
+    if (DESIGN_MODE_ONBOARDING) {
+      setIsSplash(false);
+      return;
+    }
     if (splashMinTimeComplete && authInitialized) {
       setIsSplash(false);
     }
@@ -93,6 +104,29 @@ const AppContent: React.FC = () => {
 
   // Handle auth state changes - only runs after auth is initialized
   useEffect(() => {
+    // DESIGN MODE: Force OnboardingFlow view for styling
+    if (DESIGN_MODE_ONBOARDING) {
+      console.log('🎨 DESIGN MODE: Forcing OnboardingFlow view');
+      // Create a dummy profile for design mode
+      const dummyProfile: UserProfile = {
+        id: 'design-mode',
+        name: 'Design Mode',
+        roomId: 'design-room',
+        isPartnerConnected: false,
+        genderPreference: [Gender.BOY, Gender.GIRL, Gender.UNISEX],
+        expectedGender: null,
+        nameStyles: [],
+        showTrendingOnly: false,
+        protectedNames: [],
+        blacklistedNames: [],
+        dislikedNames: [],
+        hasCompletedOnboarding: false
+      };
+      setProfile(dummyProfile);
+      setView('ONBOARDING_FLOW');
+      return;
+    }
+    
     // Wait for auth to be fully initialized before making routing decisions
     if (!authInitialized || authLoading) return;
     
@@ -1274,18 +1308,27 @@ const AppContent: React.FC = () => {
         onClose={() => setShowNotificationPrompt(false)}
       />
 
-      {/* Partner Suggested Name Toast */}
+      {/* Partner Suggested Name Toast - Positioned above navigation */}
       {partnerSuggestedName && (
         <div 
-          className="fixed top-20 left-1/2 -translate-x-1/2 z-[10000] animate-pop"
+          className="fixed left-1/2 -translate-x-1/2 z-[110] animate-pop"
           style={{
+            bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px) + 0.5rem)',
             animation: 'pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
         >
-          <div className="bg-gradient-to-r from-baby-pink-300 to-baby-blue-300 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2">
-            <Sparkles size={18} className="text-white" />
-            <span className="font-bold text-sm">
-              השותף/ה הציע/ה שם: <span className="font-extrabold">{partnerSuggestedName}</span>
+          <div 
+            className="bg-white/90 backdrop-blur-md px-6 py-3 rounded-full shadow-xl border border-white/50 flex items-center gap-2"
+            style={{
+              backdropFilter: 'blur(24px) saturate(150%)',
+              WebkitBackdropFilter: 'blur(24px) saturate(150%)',
+            }}
+          >
+            <div className="w-8 h-8 bg-gradient-to-br from-baby-pink-200 to-baby-blue-200 rounded-full flex items-center justify-center">
+              <Sparkles size={16} className="text-white" />
+            </div>
+            <span className="font-bold text-sm text-dreamy-slate-700">
+              השותף/ה הציע/ה שם: <span className="font-extrabold text-baby-pink-600">{partnerSuggestedName}</span>
             </span>
           </div>
         </div>

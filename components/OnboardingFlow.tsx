@@ -14,7 +14,10 @@ import {
   Check,
   Baby,
   Palette,
-  ListX
+  ListX,
+  Mars,
+  Venus,
+  Gift
 } from 'lucide-react';
 
 interface OnboardingFlowProps {
@@ -111,6 +114,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
   // Local state for preferences
   const [selectedGender, setSelectedGender] = useState<Gender | null>(profile.expectedGender);
+  const [hasSelectedGender, setHasSelectedGender] = useState(false); // Track if user has made a selection
   const [selectedStyles, setSelectedStyles] = useState<NameStyle[]>(profile.nameStyles || []);
   const [protectedNames, setProtectedNames] = useState<string[]>(profile.protectedNames || []);
   const [blacklistedNames, setBlacklistedNames] = useState<string[]>(profile.blacklistedNames || []);
@@ -226,54 +230,126 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           {currentStep === 1 && (
             <div className="flex-1 flex flex-col justify-between">
               {/* Header */}
-              <div className="text-center mb-6">
-                <div className="w-20 h-20 mx-auto mb-5 rounded-3xl bg-gradient-to-br from-pink-100 via-rose-50 to-orange-50 flex items-center justify-center shadow-lg shadow-pink-100/50">
-                  <Baby size={36} className="text-pink-500" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800 font-heebo mb-2">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-dreamy-slate-700 font-heebo mb-2">
                   מה המגדר הצפוי?
                 </h2>
-                <p className="text-gray-400 text-sm max-w-[240px] mx-auto">
+                <p className="text-dreamy-slate-500 text-sm max-w-[280px] mx-auto">
                   בחרו כדי שנציג לכם שמות מתאימים
                 </p>
               </div>
 
-              {/* Options - Centered */}
-              <div className="flex-1 flex flex-col justify-center space-y-3 max-w-sm mx-auto w-full">
-                {[
-                  { value: Gender.BOY, emoji: '👦', label: 'בן', desc: 'נציג שמות לבנים', color: 'blue' },
-                  { value: Gender.GIRL, emoji: '👧', label: 'בת', desc: 'נציג שמות לבנות', color: 'pink' },
-                  { value: null, emoji: '✨', label: 'עדיין לא יודעים', desc: 'נציג את כל השמות', color: 'purple' },
-                ].map((option, index) => {
-                  const isSelected = selectedGender === option.value;
-                  const colorClasses = {
-                    blue: isSelected ? 'from-blue-500 to-blue-600 shadow-blue-200/60' : 'hover:border-blue-200',
-                    pink: isSelected ? 'from-pink-500 to-rose-500 shadow-pink-200/60' : 'hover:border-pink-200',
-                    purple: isSelected ? 'from-purple-500 to-violet-500 shadow-purple-200/60' : 'hover:border-purple-200',
-                  }[option.color];
+              {/* Gender Selection Cards - Grid Layout */}
+              <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full px-4">
+                <div className="grid grid-cols-2 gap-4 w-full">
+                  {/* Boy Card - Square */}
+                  {(() => {
+                    const isSelected = selectedGender === Gender.BOY;
+                    return (
+                      <button
+                        onClick={() => {
+                          setSelectedGender(Gender.BOY);
+                          setHasSelectedGender(true);
+                        }}
+                        className={`
+                          aspect-square rounded-2xl transition-all duration-300
+                          flex flex-col items-center justify-center gap-3
+                          press-effect animate-fade-up
+                          ${isSelected 
+                            ? 'ring-4 ring-blue-200 bg-blue-50/80 shadow-lg shadow-blue-200/20' 
+                            : 'bg-white/60 backdrop-blur-md border border-white/50 shadow-sm hover:shadow-md hover:bg-white/80'
+                          }
+                        `}
+                        style={{ animationDelay: '0s' }}
+                      >
+                        <div className={`
+                          w-12 h-12 flex items-center justify-center
+                          ${isSelected ? 'text-blue-500' : 'text-dreamy-slate-400'}
+                        `}>
+                          <Mars size={48} strokeWidth={1.5} />
+                        </div>
+                        <span className={`
+                          text-lg font-bold font-heebo
+                          ${isSelected ? 'text-blue-600' : 'text-dreamy-slate-700'}
+                        `}>
+                          בן
+                        </span>
+                      </button>
+                    );
+                  })()}
 
-                  return (
-                    <button
-                      key={option.label}
-                      onClick={() => setSelectedGender(option.value)}
-                      className={`w-full p-5 rounded-3xl font-bold transition-all flex items-center gap-4 press-effect animate-fade-up ${
-                        isSelected
-                          ? `bg-gradient-to-br ${colorClasses} text-white shadow-xl`
-                          : `glass-card ${colorClasses}`
-                      }`}
-                      style={{ animationDelay: `${index * 0.1}s` }}
-                    >
-                      <span className="text-3xl">{option.emoji}</span>
-                      <div className="text-right flex-1">
-                        <span className="text-lg block">{option.label}</span>
-                        <p className={`text-sm ${isSelected ? 'text-white/80' : 'text-gray-400'}`}>
-                          {option.desc}
-                        </p>
-                      </div>
-                      {isSelected && <Check size={24} />}
-                    </button>
-                  );
-                })}
+                  {/* Girl Card - Square */}
+                  {(() => {
+                    const isSelected = selectedGender === Gender.GIRL;
+                    return (
+                      <button
+                        onClick={() => {
+                          setSelectedGender(Gender.GIRL);
+                          setHasSelectedGender(true);
+                        }}
+                        className={`
+                          aspect-square rounded-2xl transition-all duration-300
+                          flex flex-col items-center justify-center gap-3
+                          press-effect animate-fade-up
+                          ${isSelected 
+                            ? 'ring-4 ring-pink-200 bg-pink-50/80 shadow-lg shadow-pink-200/20' 
+                            : 'bg-white/60 backdrop-blur-md border border-white/50 shadow-sm hover:shadow-md hover:bg-white/80'
+                          }
+                        `}
+                        style={{ animationDelay: '0.1s' }}
+                      >
+                        <div className={`
+                          w-12 h-12 flex items-center justify-center
+                          ${isSelected ? 'text-pink-500' : 'text-dreamy-slate-400'}
+                        `}>
+                          <Venus size={48} strokeWidth={1.5} />
+                        </div>
+                        <span className={`
+                          text-lg font-bold font-heebo
+                          ${isSelected ? 'text-pink-600' : 'text-dreamy-slate-700'}
+                        `}>
+                          בת
+                        </span>
+                      </button>
+                    );
+                  })()}
+
+                  {/* Surprise Card - Full Width */}
+                  {(() => {
+                    const isSelected = selectedGender === null;
+                    return (
+                      <button
+                        onClick={() => {
+                          setSelectedGender(null);
+                          setHasSelectedGender(true);
+                        }}
+                        className={`
+                          col-span-2 rounded-2xl transition-all duration-300
+                          flex items-center justify-center gap-4 py-5
+                          press-effect animate-fade-up
+                          ${isSelected 
+                            ? 'ring-4 ring-yellow-200 bg-yellow-50/80 shadow-lg shadow-yellow-200/20' 
+                            : 'bg-white/60 backdrop-blur-md border border-white/50 shadow-sm hover:shadow-md hover:bg-white/80'
+                          }
+                        `}
+                        style={{ animationDelay: '0.2s' }}
+                      >
+                        <div className={`
+                          w-12 h-12 flex items-center justify-center
+                          ${isSelected ? 'text-yellow-500' : 'text-dreamy-slate-400'}
+                        `}>
+                          <Gift size={48} strokeWidth={1.5} />
+                        </div>
+                        <span className={`
+                          text-lg font-bold font-heebo
+                          ${isSelected ? 'text-yellow-600' : 'text-dreamy-slate-700'}
+                        `}>
+                          הפתעה
+                        </span>
+                      </button>
+                    );
+                  })()}
+                </div>
               </div>
 
               {/* Spacer */}
@@ -407,30 +483,47 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       {/* Fixed Bottom Navigation - Glassmorphism */}
       <div className="shrink-0 glass-solid safe-bottom">
         <div className="px-6 py-5">
-          <button
-            onClick={handleNext}
-            className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl shadow-emerald-200/40 hover:shadow-emerald-200/60 transition-all press-effect"
-          >
-            {currentStep === TOTAL_STEPS ? (
-              <>
-                <span>יוצאים לדרך!</span>
-                <Sparkles size={22} />
-              </>
-            ) : (
-              <>
-                <span>המשך</span>
-                <ArrowLeft size={22} />
-              </>
-            )}
-          </button>
-          
-          {currentStep < TOTAL_STEPS && (
-            <button
-              onClick={handleSkip}
-              className="w-full mt-2 py-3 text-gray-400 font-medium text-sm hover:text-gray-600 transition-all"
-            >
-              אעשה את זה אחר כך
-            </button>
+          {/* Step 1: Show button only after selection, with fade-in animation */}
+          {currentStep === 1 ? (
+            hasSelectedGender ? (
+              <div className="animate-fade-in">
+                <button
+                  onClick={handleNext}
+                  className="w-full py-4 bg-gradient-to-r from-baby-pink-300 to-baby-blue-300 text-white rounded-full font-bold text-lg flex items-center justify-center gap-2 shadow-lg shadow-pink-200/30 hover:shadow-xl hover:shadow-pink-200/40 transition-all press-effect"
+                >
+                  <span>המשך</span>
+                  <ArrowLeft size={22} />
+                </button>
+              </div>
+            ) : null
+          ) : (
+            <>
+              <button
+                onClick={handleNext}
+                className="w-full py-4 bg-gradient-to-r from-baby-pink-300 to-baby-blue-300 text-white rounded-full font-bold text-lg flex items-center justify-center gap-2 shadow-lg shadow-pink-200/30 hover:shadow-xl hover:shadow-pink-200/40 transition-all press-effect"
+              >
+                {currentStep === TOTAL_STEPS ? (
+                  <>
+                    <span>יוצאים לדרך!</span>
+                    <Sparkles size={22} />
+                  </>
+                ) : (
+                  <>
+                    <span>המשך</span>
+                    <ArrowLeft size={22} />
+                  </>
+                )}
+              </button>
+              
+              {currentStep < TOTAL_STEPS && (
+                <button
+                  onClick={handleSkip}
+                  className="w-full mt-2 py-3 text-gray-400 font-medium text-sm hover:text-gray-600 transition-all"
+                >
+                  אעשה את זה אחר כך
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>

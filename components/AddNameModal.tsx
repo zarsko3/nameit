@@ -139,3 +139,4 @@ const AddNameModal: React.FC<AddNameModalProps> = ({ isOpen, onClose, onAdd }) =
 };
 
 export default AddNameModal;
+

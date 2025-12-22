@@ -44,8 +44,20 @@ const NotificationPrompt: React.FC<NotificationPromptProps> = ({ userId, show, o
   }
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-[90] animate-fade-up" dir="rtl">
-      <div className="max-w-md mx-auto bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+    <div 
+      className="fixed left-1/2 -translate-x-1/2 w-[90%] max-w-md z-[110] animate-fade-up" 
+      dir="rtl"
+      style={{
+        bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px) + 0.5rem)',
+      }}
+    >
+      <div 
+        className="w-full bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-white/50 overflow-hidden"
+        style={{
+          backdropFilter: 'blur(24px) saturate(150%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(150%)',
+        }}
+      >
         {/* Header */}
         <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -107,6 +119,7 @@ const NotificationPrompt: React.FC<NotificationPromptProps> = ({ userId, show, o
 };
 
 export default NotificationPrompt;
+
 
 
 
