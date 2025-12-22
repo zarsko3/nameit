@@ -8,6 +8,7 @@ import History from './components/History';
 import InstallPrompt from './components/InstallPrompt';
 import NotificationPrompt from './components/NotificationPrompt';
 import Settings from './components/Settings';
+import AuthLoadingScreen from './components/AuthLoadingScreen';
 import { BabyName, AppView, UserProfile, SwipeRecord, Match, Gender, FilterConfig, RoomSettings, NameStyle } from './types';
 import { INITIAL_NAMES } from './constants';
 import { Sparkles, SlidersHorizontal, X, CircleCheck } from 'lucide-react';
@@ -48,9 +49,8 @@ const DESIGN_MODE_ONBOARDING = true;
 // ============================================================
 
 const AppContent: React.FC = () => {
-  const { currentUser, loading: authLoading, initialized: authInitialized, signUp, login, loginWithGoogle, logout } = useAuth();
+  const { currentUser, userProfile: authUserProfile, loading: authLoading, initialized: authInitialized, signUp, login, loginWithGoogle, logout } = useAuth();
   
-  const [isSplash, setIsSplash] = useState(true);
   const [view, setView] = useState<AppView>('AUTH');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [roomSettings, setRoomSettings] = useState<RoomSettings | null>(null);
@@ -83,27 +83,8 @@ const AppContent: React.FC = () => {
     showTrendingOnly: false
   });
 
-  // Splash Timer - minimum display time
-  const [splashMinTimeComplete, setSplashMinTimeComplete] = useState(false);
-  
-  useEffect(() => {
-    const timer = setTimeout(() => setSplashMinTimeComplete(true), 1800);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Splash is complete when BOTH min time passed AND auth is initialized
-  // Skip splash in design mode
-  useEffect(() => {
-    if (DESIGN_MODE_ONBOARDING) {
-      setIsSplash(false);
-      return;
-    }
-    if (splashMinTimeComplete && authInitialized) {
-      setIsSplash(false);
-    }
-  }, [splashMinTimeComplete, authInitialized]);
-
-  // Handle auth state changes - only runs after auth is initialized
+  // CRITICAL: Wait for auth to fully initialize (including user profile fetch) before rendering routes
+  // This prevents the flash of content issue
   useEffect(() => {
     // DESIGN MODE: Force OnboardingFlow view for styling
     if (DESIGN_MODE_ONBOARDING) {
@@ -128,46 +109,53 @@ const AppContent: React.FC = () => {
       return;
     }
     
-    // Wait for auth to be fully initialized before making routing decisions
-    if (!authInitialized || authLoading) return;
+    // Wait for auth to be fully initialized (including user profile fetch) before making routing decisions
+    if (!authInitialized || authLoading) {
+      return; // Still loading - don't render routes yet
+    }
     
+    // Auth is fully initialized - now we can safely route
     if (!currentUser) {
-      // Only show AUTH screen after confirming no active session
+      // No user - show login
       console.log('🔐 No user session - showing login');
       setView('AUTH');
       setProfile(null);
       return;
     }
 
-    // User is logged in (either fresh login or restored session)
+    // User is authenticated - use profile from AuthContext (already fetched)
     console.log('✅ User authenticated:', currentUser.email);
-    setDataLoading(true);
     
-    getUserProfile(currentUser.uid).then((userProfile) => {
-      if (userProfile) {
-        console.log('📋 Profile loaded, routing to appropriate view');
-        setProfile(userProfile);
-        if (!userProfile.roomId) {
-          setView('ROOM_SETUP');
-        } else if (!userProfile.hasCompletedOnboarding) {
-          setView('ONBOARDING_FLOW');
-        } else {
-          setView('SWIPE');
-        }
-      } else {
-        // New user - needs room setup
-        console.log('👤 New user - starting room setup');
+    if (authUserProfile) {
+      // Profile exists - set it and route accordingly
+      console.log('📋 Profile loaded from AuthContext, routing to appropriate view');
+      setProfile(authUserProfile);
+      
+      if (!authUserProfile.roomId) {
         setView('ROOM_SETUP');
+      } else if (!authUserProfile.hasCompletedOnboarding) {
+        setView('ONBOARDING_FLOW');
+      } else {
+        setView('SWIPE');
       }
-      setDataLoading(false);
-    }).catch((error) => {
-      console.error('Failed to load profile:', error);
-      setDataLoading(false);
-      setView('AUTH'); // Fallback to auth on error
-    });
-  }, [currentUser, authLoading, authInitialized]);
+    } else {
+      // New user - needs room setup
+      console.log('👤 New user - starting room setup');
+      setView('ROOM_SETUP');
+    }
+  }, [currentUser, authUserProfile, authLoading, authInitialized]);
 
-  // Subscribe to profile changes
+  // Sync profile from AuthContext when it changes
+  useEffect(() => {
+    if (authUserProfile) {
+      setProfile(authUserProfile);
+    } else if (!currentUser) {
+      // User logged out - clear profile
+      setProfile(null);
+    }
+  }, [authUserProfile, currentUser]);
+
+  // Subscribe to profile changes for real-time updates
   useEffect(() => {
     if (!currentUser) return;
 
@@ -1059,17 +1047,15 @@ const AppContent: React.FC = () => {
         return [...prev, swipe];
       });
 
-      // Add the custom name to our custom names state so it appears in History
-      setCustomNames(prev => {
-        const exists = prev.some(n => n.id === nameId);
-        if (exists) {
-          return prev;
-        }
-        return [...prev, createdName];
-      });
-
       // Step 3: Inject to Partner (Fixes 'Room Sync')
-      await updateRoomPriorityAction(profile.roomId, nameId, currentUser.uid);
+      // Update priorityAction in room settings for real-time partner sync
+      await saveRoomSettings(profile.roomId, {
+        priorityAction: {
+          nameId,
+          timestamp: Date.now(),
+          addedBy: currentUser.uid
+        }
+      }, currentUser.uid);
       console.log('✅ Room priority action updated - partner will see it soon!');
 
       // Return the created name so caller can use it if needed
@@ -1118,53 +1104,10 @@ const AppContent: React.FC = () => {
     setSwipesLoaded(false);
   };
 
-  // Show splash screen (waits for both min time AND auth initialization)
-  if (isSplash) {
-    return (
-      <div 
-        className="fixed inset-0 flex flex-col items-center justify-center z-[200]"
-        style={{
-          background: 'linear-gradient(135deg, #FFF5F7 0%, #FFECF0 30%, #E3F2FD 70%, #F0FFF4 100%)',
-        }}
-      >
-        <div className="animate-splash flex flex-col items-center">
-          <div className="relative">
-            <div className="absolute inset-0 bg-baby-pink-200/30 blur-3xl rounded-full scale-150 animate-pulse" />
-            <img 
-              src="/LOGO.png" 
-              alt="NameIT" 
-              className="relative w-72 h-72 object-contain drop-shadow-2xl"
-            />
-          </div>
-          {/* Show subtle loading indicator if still checking auth */}
-          {!authInitialized && (
-            <div className="mt-8">
-              <div className="w-8 h-8 border-2 border-baby-pink-200 border-t-baby-pink-400 rounded-full animate-spin" />
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // Show loading while fetching user data (after auth is confirmed)
-  if (dataLoading) {
-    return (
-      <div 
-        className="fixed inset-0 flex flex-col items-center justify-center z-[200]"
-        style={{
-          background: 'linear-gradient(135deg, #FFF5F7 0%, #FFECF0 30%, #E3F2FD 70%, #F0FFF4 100%)',
-        }}
-      >
-        <img 
-          src="/LOGO.png" 
-          alt="NameIT" 
-          className="w-24 h-24 object-contain mb-6 opacity-50"
-        />
-        <div className="w-10 h-10 border-3 border-baby-pink-200 border-t-baby-pink-400 rounded-full animate-spin" />
-        <p className="mt-4 text-dreamy-slate-400 text-sm font-medium">מתחברים...</p>
-      </div>
-    );
+  // CRITICAL: Show loading screen while auth is initializing
+  // This prevents any flash of content - routes are only rendered after loading is false
+  if (authLoading || !authInitialized) {
+    return <AuthLoadingScreen />;
   }
 
   return (

@@ -22,7 +22,7 @@ import {
 
 interface OnboardingFlowProps {
   profile: UserProfile;
-  onUpdateProfile: (updates: Partial<UserProfile>) => void;
+  onUpdateProfile: (updates: Partial<UserProfile>) => Promise<void> | void;
   onComplete: () => void;
 }
 
@@ -145,9 +145,19 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     }
   };
 
-  const handleSkip = () => {
-    onUpdateProfile({ hasCompletedOnboarding: true });
-    onComplete();
+  const handleSkip = async () => {
+    try {
+      // Wait for profile update to complete before calling onComplete
+      const result = onUpdateProfile({ hasCompletedOnboarding: true });
+      if (result instanceof Promise) {
+        await result;
+      }
+      onComplete();
+    } catch (error) {
+      console.error('Error skipping onboarding:', error);
+      // Still call onComplete even if update fails
+      onComplete();
+    }
   };
 
   const handleBack = () => {
@@ -214,7 +224,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           
           <button 
             onClick={handleSkip}
-            className="text-gray-400 hover:text-gray-600 text-sm font-medium transition-all py-2"
+            className="text-gray-400 hover:text-gray-600 text-sm font-medium transition-all py-2 press-effect"
+            type="button"
           >
             דלג
           </button>

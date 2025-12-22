@@ -10,9 +10,11 @@ import {
   signInWithPopup
 } from 'firebase/auth';
 import { auth } from '../firebase';
+import { getUserProfile, UserProfile } from '../services/firestoreService';
 
 interface AuthContextType {
   currentUser: User | null;
+  userProfile: UserProfile | null; // User profile including hasCompletedOnboarding
   loading: boolean;
   initialized: boolean; // New: tracks if auth state has been checked
   signUp: (email: string, password: string, displayName: string) => Promise<User>;
@@ -39,6 +41,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
 
@@ -87,14 +90,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Auth State Observer - listens for persistent session
   // This fires immediately on app load if user was previously logged in
+  // CRITICAL: We must wait for BOTH Firebase auth AND user profile (including hasCompletedOnboarding) before setting loading to false
   useEffect(() => {
     console.log('🔐 Setting up auth state observer...');
     
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         console.log('✅ User session restored:', user.email);
+        // Fetch user profile to get hasCompletedOnboarding
+        try {
+          const profile = await getUserProfile(user.uid);
+          console.log('📋 User profile loaded:', profile ? 'exists' : 'new user');
+          setUserProfile(profile);
+        } catch (error) {
+          console.error('❌ Failed to load user profile:', error);
+          setUserProfile(null);
+        }
       } else {
         console.log('👤 No active session');
+        setUserProfile(null);
       }
       setCurrentUser(user);
       setLoading(false);
@@ -109,6 +123,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     currentUser,
+    userProfile,
     loading,
     initialized,
     signUp,
