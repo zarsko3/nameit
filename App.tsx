@@ -921,11 +921,17 @@ const AppContent: React.FC = () => {
     }
 
     try {
-      // Step A: Find or create the name in Firestore
+      // Step 1: Get or Create Name in Firestore
       const nameId = await findOrCreateName(hebrew, gender);
       console.log('✅ Name found/created:', nameId);
 
-      // Step B: Create a positive swipe (Like) for the current user
+      // Fetch the created name to get full details
+      const createdName = await getNameById(nameId);
+      if (!createdName) {
+        throw new Error('Failed to fetch created name');
+      }
+
+      // Step 2: Auto-Like for Current User (Fixes 'My List')
       const swipe: SwipeRecord = {
         nameId,
         liked: true,
@@ -936,9 +942,30 @@ const AppContent: React.FC = () => {
       await saveSwipe(swipe);
       console.log('✅ Swipe created for added name');
 
-      // Step C: Update room document with priorityNameId for partner sync
-      await updateRoomPriorityName(profile.roomId, nameId, currentUser.uid);
-      console.log('✅ Room priority name updated - partner will see it soon!');
+      // Update local swipes state immediately so it appears in the list
+      setSwipes(prev => {
+        const exists = prev.some(s => s.nameId === nameId && s.userId === currentUser.uid);
+        if (exists) {
+          return prev;
+        }
+        return [...prev, swipe];
+      });
+
+      // Add the custom name to our custom names state so it appears in History
+      setCustomNames(prev => {
+        const exists = prev.some(n => n.id === nameId);
+        if (exists) {
+          return prev;
+        }
+        return [...prev, createdName];
+      });
+
+      // Step 3: Inject to Partner (Fixes 'Room Sync')
+      await updateRoomPriorityAction(profile.roomId, nameId, currentUser.uid);
+      console.log('✅ Room priority action updated - partner will see it soon!');
+
+      // Return the created name so caller can use it if needed
+      return createdName;
     } catch (error) {
       console.error('❌ Failed to add name:', error);
       throw error;
@@ -1153,7 +1180,7 @@ const AppContent: React.FC = () => {
 
       {view === 'MATCHES' && (
         <History 
-          names={[...INITIAL_NAMES, ...customNames]} 
+          names={INITIAL_NAMES} 
           swipes={swipes} 
           matches={matches}
           currentUserId={currentUser?.uid}
