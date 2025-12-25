@@ -45,14 +45,52 @@ const isDev = import.meta.env.DEV;
 // ============ DESIGN MODE: Force Onboarding Flow ============
 // Set to true to force the app to show OnboardingFlow immediately for styling
 // TODO: Set to false when done designing
-const DESIGN_MODE_ONBOARDING = true;
+const DESIGN_MODE_ONBOARDING = false;
+// ============================================================
+
+// ============ FREE ROAM MODE: Disable Auth Guards for Testing ============
+// Set to true to bypass authentication and allow free navigation
+// This allows testing UI without logging in
+const FREE_ROAM_MODE = true; // Set to false for production
 // ============================================================
 
 const AppContent: React.FC = () => {
   const { currentUser, userProfile: authUserProfile, loading: authLoading, initialized: authInitialized, signUp, login, loginWithGoogle, logout } = useAuth();
   
-  const [view, setView] = useState<AppView>('AUTH');
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  // TEMPORARY MOCK USER for Free Roam Mode
+  const mockUser = FREE_ROAM_MODE ? {
+    uid: 'dev-test-user',
+    email: 'test@example.com',
+    displayName: 'Test User'
+  } : null;
+  
+  const mockProfile: UserProfile = {
+    id: 'dev-test-user',
+    name: 'Test User',
+    roomId: 'test-room-123',
+    isPartnerConnected: false,
+    genderPreference: [Gender.BOY, Gender.GIRL, Gender.UNISEX],
+    expectedGender: null, // unisex - show all
+    nameStyles: [NameStyle.MODERN, NameStyle.CLASSIC, NameStyle.INTERNATIONAL, NameStyle.UNIQUE, NameStyle.NATURE], // all styles
+    showTrendingOnly: false,
+    protectedNames: [],
+    blacklistedNames: [],
+    dislikedNames: [],
+    hasCompletedOnboarding: true
+  };
+  
+  const [view, setView] = useState<AppView>(FREE_ROAM_MODE ? 'SWIPE' : 'AUTH');
+  const [profile, setProfile] = useState<UserProfile | null>(FREE_ROAM_MODE ? mockProfile : null);
+  
+  // Use mock user/profile in free roam mode, otherwise use real auth
+  const effectiveUser = FREE_ROAM_MODE ? mockUser : currentUser;
+  const effectiveProfile = FREE_ROAM_MODE ? mockProfile : (authUserProfile || profile);
+  const effectiveAuthLoading = FREE_ROAM_MODE ? false : authLoading;
+  const effectiveAuthInitialized = FREE_ROAM_MODE ? true : authInitialized;
+  
+  // Alias currentUser to effectiveUser for free roam mode compatibility
+  // This allows all existing code to work without changes
+  const currentUserForCode = effectiveUser;
   const [roomSettings, setRoomSettings] = useState<RoomSettings | null>(null);
   const [swipes, setSwipes] = useState<SwipeRecord[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
@@ -86,6 +124,17 @@ const AppContent: React.FC = () => {
   // CRITICAL: Wait for auth to fully initialize (including user profile fetch) before rendering routes
   // This prevents the flash of content issue
   useEffect(() => {
+    // FREE ROAM MODE: Bypass all auth checks and allow free navigation
+    if (FREE_ROAM_MODE) {
+      console.log('🆓 FREE ROAM MODE: Bypassing auth guards - allowing free navigation');
+      setProfile(mockProfile);
+      // Don't override view if user manually changed it (allows navigation)
+      if (view === 'AUTH') {
+        setView('SWIPE'); // Default to swipe screen
+      }
+      return; // Skip all auth logic
+    }
+    
     // DESIGN MODE: Force OnboardingFlow view for styling
     if (DESIGN_MODE_ONBOARDING) {
       console.log('🎨 DESIGN MODE: Forcing OnboardingFlow view');
@@ -110,12 +159,12 @@ const AppContent: React.FC = () => {
     }
     
     // Wait for auth to be fully initialized (including user profile fetch) before making routing decisions
-    if (!authInitialized || authLoading) {
+    if (!effectiveAuthInitialized || effectiveAuthLoading) {
       return; // Still loading - don't render routes yet
     }
     
     // Auth is fully initialized - now we can safely route
-    if (!currentUser) {
+    if (!effectiveUser) {
       // No user - show login
       console.log('🔐 No user session - showing login');
       setView('AUTH');
@@ -124,7 +173,7 @@ const AppContent: React.FC = () => {
     }
 
     // User is authenticated - use profile from AuthContext (already fetched)
-    console.log('✅ User authenticated:', currentUser.email);
+    console.log('✅ User authenticated:', effectiveUser.email);
     
     if (authUserProfile) {
       // Profile exists - set it and route accordingly
@@ -174,7 +223,7 @@ const AppContent: React.FC = () => {
       console.log('👤 New user - starting room setup');
       setView('ROOM_SETUP');
     }
-  }, [currentUser, authUserProfile, authLoading, authInitialized]);
+  }, [effectiveUser, authUserProfile, effectiveAuthLoading, effectiveAuthInitialized, view]);
 
   // Sync profile from AuthContext when it changes
   useEffect(() => {
@@ -283,7 +332,7 @@ const AppContent: React.FC = () => {
   // TRIPLE-LAYER FILTERING: Blacklist + Protected + Already Swiped
   const calculateFilteredNames = useCallback(() => {
     const totalInDb = INITIAL_NAMES.length;
-    const userId = currentUser?.uid;
+    const userId = currentUserForCode?.uid;
     
     // CRITICAL: If no user ID, return all names (don't filter by swipes)
     if (!userId) {
@@ -388,9 +437,9 @@ const AppContent: React.FC = () => {
   // CRITICAL: Must wait for swipes to be loaded and ensure user-specific filtering
   useEffect(() => {
     // Wait for all required data before initializing
-    if (view === 'SWIPE' && profile?.roomId && currentUser?.uid && swipesLoaded) {
+    if (view === 'SWIPE' && profile?.roomId && currentUserForCode?.uid && swipesLoaded) {
       // IMPORTANT: Double-check user-specific swipe count
-      const mySwipeCount = swipes.filter(s => s.userId === currentUser.uid).length;
+      const mySwipeCount = swipes.filter(s => s.userId === currentUserForCode.uid).length;
       const partnerSwipeCount = swipes.length - mySwipeCount;
       
       // Check if we need to (re)initialize:
@@ -398,11 +447,11 @@ const AppContent: React.FC = () => {
       // 2. Session was initialized for a different user (edge case: user switch)
       // 3. Session names are empty but we have valid data
       const needsInit = !sessionInitialized.current || 
-                        swipesLoadedForUser.current !== currentUser.uid ||
+                        swipesLoadedForUser.current !== currentUserForCode.uid ||
                         sessionNames.length === 0;
       
       if (needsInit) {
-        console.log(`\n🔄 SESSION INIT TRIGGERED for user ${currentUser.uid.slice(0, 8)}`);
+        console.log(`\n🔄 SESSION INIT TRIGGERED for user ${currentUserForCode.uid.slice(0, 8)}`);
         console.log(`   Room: ${profile.roomId}`);
         console.log(`   Total swipes in room: ${swipes.length}`);
         console.log(`   MY swipes: ${mySwipeCount}`);
@@ -422,10 +471,10 @@ const AppContent: React.FC = () => {
         setSessionNames(newNames);
         setCurrentNameIndex(0);
         sessionInitialized.current = true;
-        swipesLoadedForUser.current = currentUser.uid;
+        swipesLoadedForUser.current = currentUserForCode.uid;
       }
     }
-  }, [view, profile?.roomId, currentUser?.uid, swipes, swipesLoaded, calculateFilteredNames]);
+  }, [view, profile?.roomId, currentUserForCode?.uid, swipes, swipesLoaded, calculateFilteredNames]);
 
   // Reset session when leaving SWIPE view
   useEffect(() => {
@@ -875,20 +924,20 @@ const AppContent: React.FC = () => {
   }, [showMatchCelebration]);
 
   const handleSwipe = async (liked: boolean) => {
-    if (!profile || !currentUser) return;
+    if (!profile || !currentUserForCode) return;
     const currentName = sessionNames[currentNameIndex];
     if (!currentName) return;
 
     console.log(`\n${'='.repeat(50)}`);
     console.log(`🎯 SWIPE: ${liked ? '❤️ LIKE' : '👎 DISLIKE'} for "${currentName.hebrew}" (ID: ${currentName.id})`);
-    console.log(`👤 User: ${currentUser.uid}`);
+    console.log(`👤 User: ${currentUserForCode.uid}`);
     console.log(`🏠 Room: ${profile.roomId}`);
     console.log(`${'='.repeat(50)}`);
 
     const newSwipe: SwipeRecord = {
       nameId: currentName.id,
       liked,
-      userId: currentUser.uid,
+      userId: currentUserForCode.uid,
       roomId: profile.roomId,
       timestamp: Date.now()
     };
@@ -1151,7 +1200,8 @@ const AppContent: React.FC = () => {
 
   // CRITICAL: Show loading screen while auth is initializing
   // This prevents any flash of content - routes are only rendered after loading is false
-  if (authLoading || !authInitialized) {
+  // Skip loading screen in free roam mode
+  if (!FREE_ROAM_MODE && (effectiveAuthLoading || !effectiveAuthInitialized)) {
     return <AuthLoadingScreen />;
   }
 
@@ -1172,9 +1222,9 @@ const AppContent: React.FC = () => {
         />
       )}
 
-      {view === 'ROOM_SETUP' && currentUser && (
+      {view === 'ROOM_SETUP' && effectiveUser && (
         <RoomSetup 
-          displayName={currentUser.displayName || profile?.name || 'משתמש'}
+          displayName={effectiveUser.displayName || profile?.name || 'משתמש'}
           onComplete={handleRoomSetupComplete}
         />
       )}
@@ -1280,7 +1330,7 @@ const AppContent: React.FC = () => {
           names={INITIAL_NAMES} 
           swipes={swipes} 
           matches={matches}
-          currentUserId={currentUser?.uid}
+          currentUserId={effectiveUser?.uid}
           onRate={handleRate}
           onRemoveLike={handleRemoveLike}
           onRemoveMatch={handleRemoveMatch}
@@ -1297,7 +1347,7 @@ const AppContent: React.FC = () => {
           onResetProgress={handleResetProgress}
           swipes={swipes}
           names={INITIAL_NAMES}
-          currentUserId={currentUser?.uid}
+          currentUserId={effectiveUser?.uid}
         />
       )}
 
@@ -1427,7 +1477,7 @@ const AppContent: React.FC = () => {
       <InstallPrompt isLoggedIn={profile !== null} />
       
       <NotificationPrompt 
-        userId={currentUser?.uid || null}
+        userId={currentUserForCode?.uid || null}
         show={showNotificationPrompt && view === 'SWIPE'}
         onClose={() => setShowNotificationPrompt(false)}
       />
@@ -1480,6 +1530,31 @@ const AppContent: React.FC = () => {
         >
           🧪 Test Match
         </button>
+      )}
+
+      {/* Free Roam Mode: Navigation Debug Panel */}
+      {FREE_ROAM_MODE && (
+        <div className="fixed top-4 right-4 z-[200] bg-white/90 backdrop-blur-md rounded-lg p-3 shadow-xl border border-gray-200">
+          <div className="text-xs font-bold text-gray-700 mb-2">🆓 Free Roam Mode</div>
+          <div className="flex flex-col gap-1">
+            {(['SWIPE', 'MATCHES', 'SETTINGS', 'AUTH', 'ROOM_SETUP'] as AppView[]).map((v) => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={`px-3 py-1 text-xs rounded transition-all ${
+                  view === v
+                    ? 'bg-blue-500 text-white font-bold'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+          <div className="mt-2 text-[10px] text-gray-500">
+            Current: {view}
+          </div>
+        </div>
       )}
     </Layout>
   );
