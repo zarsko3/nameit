@@ -129,14 +129,45 @@ const AppContent: React.FC = () => {
     if (authUserProfile) {
       // Profile exists - set it and route accordingly
       console.log('📋 Profile loaded from AuthContext, routing to appropriate view');
-      setProfile(authUserProfile);
       
-      // Skip onboarding - go straight to swipe if room exists, otherwise room setup
-      if (!authUserProfile.roomId) {
-        setView('ROOM_SETUP');
+      // TEMPORARY FIX: Ensure existing users have default preferences and onboarding is skipped
+      // This prevents crashes from missing preferences and ensures onboarding is disabled
+      const needsUpdate = !authUserProfile.hasCompletedOnboarding || 
+                         !authUserProfile.nameStyles || 
+                         authUserProfile.nameStyles.length === 0;
+      
+      if (needsUpdate && currentUser) {
+        console.log('🔧 Updating existing user with default preferences...');
+        const defaultUpdates: Partial<UserProfile> = {
+          hasCompletedOnboarding: true, // Skip onboarding
+          expectedGender: authUserProfile.expectedGender ?? null, // Keep existing or set to null (all genders)
+          nameStyles: authUserProfile.nameStyles && authUserProfile.nameStyles.length > 0 
+            ? authUserProfile.nameStyles 
+            : [NameStyle.MODERN, NameStyle.CLASSIC, NameStyle.INTERNATIONAL, NameStyle.UNIQUE, NameStyle.NATURE], // All styles if empty
+        };
+        // Update profile asynchronously (don't block routing)
+        saveUserProfile(currentUser.uid, defaultUpdates).catch(err => {
+          console.error('Failed to update user preferences:', err);
+        });
+        // Update local profile immediately
+        const updatedProfile = { ...authUserProfile, ...defaultUpdates };
+        setProfile(updatedProfile);
+        
+        // Route based on updated profile
+        if (!updatedProfile.roomId) {
+          setView('ROOM_SETUP');
+        } else {
+          setView('SWIPE');
+        }
       } else {
-        // User has room - go directly to swipe screen (onboarding removed)
-        setView('SWIPE');
+        setProfile(authUserProfile);
+        // Skip onboarding - go straight to swipe if room exists, otherwise room setup
+        if (!authUserProfile.roomId) {
+          setView('ROOM_SETUP');
+        } else {
+          // User has room - go directly to swipe screen (onboarding removed)
+          setView('SWIPE');
+        }
       }
     } else {
       // New user - needs room setup
@@ -613,13 +644,39 @@ const AppContent: React.FC = () => {
     // Check if user already has a profile
     const existingProfile = await getUserProfile(uid);
     if (existingProfile) {
-      setProfile(existingProfile);
-      // Skip onboarding - go straight to swipe if room exists, otherwise room setup
-      if (!existingProfile.roomId) {
-        setView('ROOM_SETUP');
+      // TEMPORARY FIX: Ensure existing users have default preferences and onboarding is skipped
+      const needsUpdate = !existingProfile.hasCompletedOnboarding || 
+                         !existingProfile.nameStyles || 
+                         existingProfile.nameStyles.length === 0;
+      
+      if (needsUpdate) {
+        console.log('🔧 Updating existing user with default preferences...');
+        const defaultUpdates: Partial<UserProfile> = {
+          hasCompletedOnboarding: true, // Skip onboarding
+          expectedGender: existingProfile.expectedGender ?? null, // Keep existing or set to null (all genders)
+          nameStyles: existingProfile.nameStyles && existingProfile.nameStyles.length > 0 
+            ? existingProfile.nameStyles 
+            : [NameStyle.MODERN, NameStyle.CLASSIC, NameStyle.INTERNATIONAL, NameStyle.UNIQUE, NameStyle.NATURE], // All styles if empty
+        };
+        await saveUserProfile(uid, defaultUpdates);
+        const updatedProfile = { ...existingProfile, ...defaultUpdates };
+        setProfile(updatedProfile);
+        
+        // Route based on updated profile
+        if (!updatedProfile.roomId) {
+          setView('ROOM_SETUP');
+        } else {
+          setView('SWIPE');
+        }
       } else {
-        // User has room - go directly to swipe screen (onboarding removed)
-        setView('SWIPE');
+        setProfile(existingProfile);
+        // Skip onboarding - go straight to swipe if room exists, otherwise room setup
+        if (!existingProfile.roomId) {
+          setView('ROOM_SETUP');
+        } else {
+          // User has room - go directly to swipe screen (onboarding removed)
+          setView('SWIPE');
+        }
       }
     } else {
       // New user - create initial profile with default preferences
@@ -1122,13 +1179,14 @@ const AppContent: React.FC = () => {
         />
       )}
       
-      {view === 'ONBOARDING_FLOW' && profile && (
+      {/* TEMPORARILY DISABLED: Onboarding flow is buggy - keeping component for Settings access later */}
+      {/* {view === 'ONBOARDING_FLOW' && profile && (
         <OnboardingFlow 
           profile={profile}
           onUpdateProfile={handleUpdateProfile}
           onComplete={handleOnboardingFlowComplete}
         />
-      )}
+      )} */}
       
       {view === 'SWIPE' && (
         <div className="h-full w-full flex flex-col relative animate-fade-in overflow-hidden overscroll-none" style={{ overscrollBehavior: 'none', touchAction: 'none' }}>

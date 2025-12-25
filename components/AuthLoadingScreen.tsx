@@ -42,3 +42,4 @@ const AuthLoadingScreen: React.FC = () => {
 };
 
 export default AuthLoadingScreen;
+

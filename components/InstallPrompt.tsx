@@ -222,3 +222,4 @@ const InstallPrompt: React.FC<InstallPromptProps> = ({ isLoggedIn }) => {
 
 export default InstallPrompt;
 
+
