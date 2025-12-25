@@ -263,6 +263,7 @@ const AppContent: React.FC = () => {
     if (!currentUserForCode || !profile) return;
 
     // Try to register for Expo push notifications
+    // This will fail silently in web builds (expected)
     const registerExpoPush = async () => {
       try {
         const { registerForPushNotificationsAsync } = await import('./hooks/useExpoPushNotifications');

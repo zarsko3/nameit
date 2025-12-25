@@ -32,14 +32,18 @@ interface UseExpoPushNotificationsReturn {
  */
 export const registerForPushNotificationsAsync = async (): Promise<string | null> => {
   // Check if we're in a React Native environment
+  // In web builds, this will always return null
   if (typeof window === 'undefined' || !('navigator' in window)) {
-    console.warn('⚠️ Expo push notifications require React Native environment');
     return null;
   }
 
+  // Early return for web builds - expo-notifications is not available
+  // This prevents Vite from trying to resolve the module during build
   try {
-    // Dynamic import to avoid errors in web environment
-    const Notifications = await import('expo-notifications');
+    // Dynamic import with @vite-ignore to prevent Vite from analyzing it
+    // This will only work in React Native/Expo environment
+    // @ts-ignore - expo-notifications doesn't exist in web builds
+    const Notifications = await import(/* @vite-ignore */ 'expo-notifications');
     
     // Request permissions
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -67,7 +71,7 @@ export const registerForPushNotificationsAsync = async (): Promise<string | null
     
     return token;
   } catch (error) {
-    console.error('❌ Error registering for push notifications:', error);
+    // Expected in web environment - expo-notifications not available
     return null;
   }
 };
@@ -118,8 +122,9 @@ export const useExpoPushNotifications = (userId: string | null): UseExpoPushNoti
   useEffect(() => {
     // Only auto-register in React Native (check for expo-notifications availability)
     if (userId && typeof window !== 'undefined' && !token && !loading) {
-      // Check if expo-notifications is available
-      import('expo-notifications')
+      // Try to import expo-notifications (only works in React Native)
+      // @ts-ignore - expo-notifications doesn't exist in web builds
+      import(/* @vite-ignore */ 'expo-notifications')
         .then(() => {
           // Expo is available, auto-register
           register();

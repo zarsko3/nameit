@@ -12,5 +12,10 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, '.'),
     }
+  },
+  build: {
+    rollupOptions: {
+      external: ['expo-notifications'], // Mark as external to prevent build errors
+    }
   }
 });
