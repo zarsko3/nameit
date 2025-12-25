@@ -112,6 +112,7 @@ const AppContent: React.FC = () => {
   const [currentNameIndex, setCurrentNameIndex] = useState(0);
   const sessionInitialized = useRef(false);
   const swipesLoadedForUser = useRef<string | null>(null); // Track which user's swipes were loaded
+  const freeRoamInitialized = useRef(false); // Track if free roam mode has been initialized
 
   const [filters, setFilters] = useState<FilterConfig>({
     genders: [Gender.BOY, Gender.GIRL, Gender.UNISEX],
@@ -126,14 +127,19 @@ const AppContent: React.FC = () => {
   // This prevents the flash of content issue
   useEffect(() => {
     // FREE ROAM MODE: Bypass all auth checks and allow free navigation (DEV ONLY)
+    // Only initialize once on mount - don't interfere with manual navigation
     if (isDev && FREE_ROAM_MODE) {
-      console.log('🆓 FREE ROAM MODE: Bypassing auth guards - allowing free navigation');
-      setProfile(mockProfile);
-      // Don't override view if user manually changed it (allows navigation)
-      if (view === 'AUTH') {
-        setView('SWIPE'); // Default to swipe screen
+      // Only initialize once - use ref to prevent re-initialization
+      if (!freeRoamInitialized.current) {
+        console.log('🆓 FREE ROAM MODE: Bypassing auth guards - allowing free navigation');
+        setProfile(mockProfile);
+        // Only set default view if we're still on AUTH (initial state)
+        if (view === 'AUTH') {
+          setView('SWIPE'); // Default to swipe screen
+        }
+        freeRoamInitialized.current = true;
       }
-      return; // Skip all auth logic
+      return; // Skip all auth logic - allow free navigation
     }
     
     // DESIGN MODE: Force OnboardingFlow view for styling
@@ -224,7 +230,7 @@ const AppContent: React.FC = () => {
       console.log('👤 New user - starting room setup');
       setView('ROOM_SETUP');
     }
-  }, [effectiveUser, authUserProfile, effectiveAuthLoading, effectiveAuthInitialized, view]);
+  }, [effectiveUser, authUserProfile, effectiveAuthLoading, effectiveAuthInitialized, profile]);
 
   // Sync profile from AuthContext when it changes
   useEffect(() => {
