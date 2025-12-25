@@ -41,6 +41,9 @@ export interface UserProfile {
   dislikedNames: string[];        // Name IDs that were swiped left - never show again
   // Onboarding state
   hasCompletedOnboarding: boolean; // Has user completed or skipped the onboarding flow
+  // Push notification token (Expo push token for React Native apps)
+  pushToken?: string;             // Expo push token for push notifications
+  pushTokenUpdatedAt?: string;     // Timestamp when token was last updated
 }
 
 export interface SwipeRecord {

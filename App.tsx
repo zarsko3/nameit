@@ -245,16 +245,42 @@ const AppContent: React.FC = () => {
 
   // Subscribe to profile changes for real-time updates
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUserForCode) return;
 
-    const unsubscribe = subscribeToUserProfile(currentUser.uid, (updatedProfile) => {
+    const unsubscribe = subscribeToUserProfile(currentUserForCode.uid, (updatedProfile) => {
       if (updatedProfile) {
         setProfile(updatedProfile);
       }
     });
 
     return () => unsubscribe();
-  }, [currentUser]);
+  }, [currentUserForCode]);
+
+  // Auto-register for Expo push notifications when user logs in
+  // NOTE: This only works in React Native/Expo environment
+  // In web apps, this will silently fail (expected behavior)
+  useEffect(() => {
+    if (!currentUserForCode || !profile) return;
+
+    // Try to register for Expo push notifications
+    const registerExpoPush = async () => {
+      try {
+        const { registerForPushNotificationsAsync } = await import('./hooks/useExpoPushNotifications');
+        const { saveExpoPushToken } = await import('./services/expoPushNotificationService');
+        
+        const token = await registerForPushNotificationsAsync();
+        if (token) {
+          await saveExpoPushToken(currentUserForCode.uid, token);
+          console.log('✅ Expo push token registered and saved');
+        }
+      } catch (error) {
+        // Expected in web environment - expo-notifications not available
+        // Silently fail - this is normal for web apps
+      }
+    };
+
+    registerExpoPush();
+  }, [currentUserForCode, profile]);
 
   // Onboarding flow removed - this effect is no longer needed
   // Preferences are now only accessible via Settings menu
@@ -289,7 +315,7 @@ const AppContent: React.FC = () => {
       setMatches(roomMatches);
     });
 
-    const unsubPartner = subscribeToPartnerConnection(profile.roomId, currentUser.uid, (connected) => {
+    const unsubPartner = subscribeToPartnerConnection(profile.roomId, currentUserForCode.uid, (connected) => {
       setIsPartnerOnline(connected);
     });
 
@@ -1002,13 +1028,24 @@ const AppContent: React.FC = () => {
           await saveMatch(profile.roomId, newMatch);
           console.log('✅ Match saved to Firestore');
           
-          // Trigger push notification to partner
+          // Trigger push notification to partner (Expo push)
           try {
-            const { triggerMatchNotification } = await import('./services/notificationService');
-            await triggerMatchNotification(profile.roomId, currentUser.uid, currentName.hebrew);
-            console.log('📤 Push notification triggered');
+            const { sendMatchNotificationToPartner } = await import('./services/expoPushNotificationService');
+            const sent = await sendMatchNotificationToPartner(profile.roomId, currentUserForCode.uid, currentName.hebrew);
+            if (sent) {
+              console.log('📤 Expo push notification sent to partner');
+            } else {
+              console.log('⚠️ Could not send Expo push notification (partner may not have token)');
+            }
           } catch (notifError) {
-            console.log('⚠️ Could not send notification:', notifError);
+            console.log('⚠️ Could not send Expo push notification:', notifError);
+            // Fallback to FCM if Expo fails
+            try {
+              const { triggerMatchNotification } = await import('./services/notificationService');
+              await triggerMatchNotification(profile.roomId, currentUserForCode.uid, currentName.hebrew);
+            } catch (fcmError) {
+              console.log('⚠️ FCM fallback also failed:', fcmError);
+            }
           }
           
           // Show celebration UI
