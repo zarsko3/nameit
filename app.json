@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "maybe?",
+    "slug": "maybe-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./public/icon_fix.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./public/logo_new.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.maybeapp.maybe"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./public/icon_fix.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.maybeapp.maybe"
+    },
+    "web": {
+      "favicon": "./public/icon_fix.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "scheme": "maybe"
+  }
+}
