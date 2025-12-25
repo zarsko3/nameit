@@ -49,16 +49,17 @@ const DESIGN_MODE_ONBOARDING = false;
 // ============================================================
 
 // ============ FREE ROAM MODE: Disable Auth Guards for Testing ============
-// Set to true to bypass authentication and allow free navigation
-// This allows testing UI without logging in
-const FREE_ROAM_MODE = true; // Set to false for production
+// Only enabled in development environment - automatically disabled in production
+// This allows testing UI without logging in locally
+const FREE_ROAM_MODE = isDev; // Uses import.meta.env.DEV - false in production builds
 // ============================================================
 
 const AppContent: React.FC = () => {
   const { currentUser, userProfile: authUserProfile, loading: authLoading, initialized: authInitialized, signUp, login, loginWithGoogle, logout } = useAuth();
   
-  // TEMPORARY MOCK USER for Free Roam Mode
-  const mockUser = FREE_ROAM_MODE ? {
+  // TEMPORARY MOCK USER for Free Roam Mode (DEV ONLY)
+  // Only create mock user in development - production uses real Firebase auth
+  const mockUser = (isDev && FREE_ROAM_MODE) ? {
     uid: 'dev-test-user',
     email: 'test@example.com',
     displayName: 'Test User'
@@ -79,14 +80,14 @@ const AppContent: React.FC = () => {
     hasCompletedOnboarding: true
   };
   
-  const [view, setView] = useState<AppView>(FREE_ROAM_MODE ? 'SWIPE' : 'AUTH');
-  const [profile, setProfile] = useState<UserProfile | null>(FREE_ROAM_MODE ? mockProfile : null);
+  const [view, setView] = useState<AppView>((isDev && FREE_ROAM_MODE) ? 'SWIPE' : 'AUTH');
+  const [profile, setProfile] = useState<UserProfile | null>((isDev && FREE_ROAM_MODE) ? mockProfile : null);
   
-  // Use mock user/profile in free roam mode, otherwise use real auth
-  const effectiveUser = FREE_ROAM_MODE ? mockUser : currentUser;
-  const effectiveProfile = FREE_ROAM_MODE ? mockProfile : (authUserProfile || profile);
-  const effectiveAuthLoading = FREE_ROAM_MODE ? false : authLoading;
-  const effectiveAuthInitialized = FREE_ROAM_MODE ? true : authInitialized;
+  // Use mock user/profile in free roam mode (DEV ONLY), otherwise use real auth
+  const effectiveUser = (isDev && FREE_ROAM_MODE) ? mockUser : currentUser;
+  const effectiveProfile = (isDev && FREE_ROAM_MODE) ? mockProfile : (authUserProfile || profile);
+  const effectiveAuthLoading = (isDev && FREE_ROAM_MODE) ? false : authLoading;
+  const effectiveAuthInitialized = (isDev && FREE_ROAM_MODE) ? true : authInitialized;
   
   // Alias currentUser to effectiveUser for free roam mode compatibility
   // This allows all existing code to work without changes
@@ -124,8 +125,8 @@ const AppContent: React.FC = () => {
   // CRITICAL: Wait for auth to fully initialize (including user profile fetch) before rendering routes
   // This prevents the flash of content issue
   useEffect(() => {
-    // FREE ROAM MODE: Bypass all auth checks and allow free navigation
-    if (FREE_ROAM_MODE) {
+    // FREE ROAM MODE: Bypass all auth checks and allow free navigation (DEV ONLY)
+    if (isDev && FREE_ROAM_MODE) {
       console.log('🆓 FREE ROAM MODE: Bypassing auth guards - allowing free navigation');
       setProfile(mockProfile);
       // Don't override view if user manually changed it (allows navigation)
@@ -1200,8 +1201,8 @@ const AppContent: React.FC = () => {
 
   // CRITICAL: Show loading screen while auth is initializing
   // This prevents any flash of content - routes are only rendered after loading is false
-  // Skip loading screen in free roam mode
-  if (!FREE_ROAM_MODE && (effectiveAuthLoading || !effectiveAuthInitialized)) {
+  // Skip loading screen in free roam mode (DEV ONLY)
+  if (!(isDev && FREE_ROAM_MODE) && (effectiveAuthLoading || !effectiveAuthInitialized)) {
     return <AuthLoadingScreen />;
   }
 
@@ -1532,8 +1533,8 @@ const AppContent: React.FC = () => {
         </button>
       )}
 
-      {/* Free Roam Mode: Navigation Debug Panel */}
-      {FREE_ROAM_MODE && (
+      {/* Free Roam Mode: Navigation Debug Panel - ONLY in development */}
+      {isDev && FREE_ROAM_MODE && (
         <div className="fixed top-4 right-4 z-[200] bg-white/90 backdrop-blur-md rounded-lg p-3 shadow-xl border border-gray-200">
           <div className="text-xs font-bold text-gray-700 mb-2">🆓 Free Roam Mode</div>
           <div className="flex flex-col gap-1">
