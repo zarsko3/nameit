@@ -23,7 +23,9 @@ import {
   Database,
   Upload,
   Terminal,
-  Leaf
+  Leaf,
+  Linkedin,
+  Mail
 } from 'lucide-react';
 import { uploadExistingNames, countNamesInFirestore, syncNamesToFirestore } from '../services/migrationService';
 
@@ -764,6 +766,49 @@ const Settings: React.FC<SettingsProps> = ({
                 </>
               )}
             </button>
+          </div>
+
+          {/* Contact & Support */}
+          <div className="glass-card rounded-3xl p-5 animate-fade-up" style={{ animationDelay: '0.4s' }}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-baby-blue-200 to-baby-blue-300 rounded-full flex items-center justify-center shadow-soft-blue">
+                <Mail size={18} className="text-white" />
+              </div>
+              <div>
+                <p className="font-bold text-dreamy-slate-700 font-heebo">יצירת קשר</p>
+                <p className="text-[10px] text-dreamy-slate-400">תמיכה ופידבק</p>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              {/* LinkedIn */}
+              <button
+                onClick={() => window.open('https://www.linkedin.com/in/gal-zarski', '_blank')}
+                className="w-full p-4 bg-white/60 hover:bg-white/80 rounded-full transition-all press-effect flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                    <Linkedin size={18} className="text-white" />
+                  </div>
+                  <span className="font-bold text-sm text-dreamy-slate-700 font-heebo">המפתח בלינקדאין</span>
+                </div>
+                <ChevronDown size={16} className="text-dreamy-slate-400 rotate-[-90deg]" />
+              </button>
+
+              {/* Email Support */}
+              <button
+                onClick={() => window.open('mailto:zarsko2@gmail.com?subject=NameIt%20App%20Feedback', '_blank')}
+                className="w-full p-4 bg-white/60 hover:bg-white/80 rounded-full transition-all press-effect flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-baby-pink-300 to-baby-pink-400 rounded-full flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                    <Mail size={18} className="text-white" />
+                  </div>
+                  <span className="font-bold text-sm text-dreamy-slate-700 font-heebo">דיווח על באג / הצעות</span>
+                </div>
+                <ChevronDown size={16} className="text-dreamy-slate-400 rotate-[-90deg]" />
+              </button>
+            </div>
           </div>
 
           {/* Logout */}
