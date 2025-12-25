@@ -58,7 +58,7 @@ const History: React.FC<HistoryProps> = ({
 
   return (
     <div className="h-full w-full flex flex-col">
-      {/* Scrollable Content Area */}
+      {/* Scrollable Content Area - Header is fixed, content scrolls below it */}
       <div 
         className="flex-1 overflow-y-auto overscroll-none"
         style={{ 

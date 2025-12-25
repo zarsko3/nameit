@@ -442,7 +442,7 @@ const Settings: React.FC<SettingsProps> = ({
 
   return (
     <div className="h-full w-full flex flex-col" dir="rtl">
-      {/* Scrollable Content */}
+      {/* Scrollable Content - Header is fixed, content scrolls below it */}
       <div 
         className="flex-1 overflow-y-auto overscroll-none"
         style={{ 
@@ -457,7 +457,7 @@ const Settings: React.FC<SettingsProps> = ({
             display: none;
           }
         `}</style>
-        <div className="px-5 pt-6 pb-24 space-y-4 safe-top">
+        <div className="px-5 pt-6 pb-24 space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-2 animate-fade-up">
             <h2 className="text-2xl font-bold text-dreamy-slate-700 tracking-tight font-heebo">הגדרות</h2>

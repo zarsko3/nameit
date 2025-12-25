@@ -16,9 +16,18 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, sh
     <>
       {/* Main App Container - Locked viewport, no scroll */}
       <div className={`flex flex-col h-[100dvh] w-full md:max-w-md mx-auto relative overflow-hidden overscroll-none font-assistant safe-top ${showNav ? 'pb-24' : ''}`} style={{ overscrollBehavior: 'none' }}>
-        {/* Header - Large Logo as Brand Header */}
+        {/* FIXED HEADER - Stays at top, outside scrollable content */}
         {showNav && (
-          <header className="px-4 py-1 flex items-center justify-center shrink-0 bg-transparent">
+          <header 
+            className="fixed top-0 left-0 right-0 z-[90] px-4 py-1 flex items-center justify-center shrink-0 bg-transparent md:max-w-md md:mx-auto md:left-1/2 md:-translate-x-1/2 safe-top"
+            style={{
+              background: 'rgba(255, 255, 255, 0.70)',
+              backdropFilter: 'blur(24px) saturate(150%)',
+              WebkitBackdropFilter: 'blur(24px) saturate(150%)',
+              boxShadow: '0 2px 20px rgba(69, 90, 100, 0.04)',
+              height: 'calc(4rem + env(safe-area-inset-top, 0px))',
+            }}
+          >
             <img 
               src="/LOGO.png" 
               alt="NameIT" 
@@ -27,9 +36,15 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, sh
           </header>
         )}
 
-        {/* Main Content - Flex grow to fill available space, no scroll on container */}
+        {/* Main Content - Flex grow to fill available space, accounts for fixed header */}
         {/* Children (History/Settings) handle their own scrolling internally */}
-        <main className="flex-1 flex flex-col overflow-hidden overscroll-none relative" style={{ overscrollBehavior: 'none' }}>
+        <main 
+          className="flex-1 flex flex-col overflow-hidden overscroll-none relative" 
+          style={{ 
+            overscrollBehavior: 'none',
+            paddingTop: showNav ? 'calc(4rem + env(safe-area-inset-top, 0px))' : '0'
+          }}
+        >
           {children}
         </main>
       </div>
