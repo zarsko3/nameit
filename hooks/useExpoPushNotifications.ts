@@ -40,10 +40,12 @@ export const registerForPushNotificationsAsync = async (): Promise<string | null
   // Early return for web builds - expo-notifications is not available
   // This prevents Vite from trying to resolve the module during build
   try {
-    // Dynamic import with @vite-ignore to prevent Vite from analyzing it
+    // Dynamic import with string variable to prevent Vite from analyzing it
     // This will only work in React Native/Expo environment
+    // Using a variable prevents Vite from statically analyzing the import
+    const moduleName = 'expo-notifications';
     // @ts-ignore - expo-notifications doesn't exist in web builds
-    const Notifications = await import(/* @vite-ignore */ 'expo-notifications');
+    const Notifications = await import(moduleName);
     
     // Request permissions
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -123,8 +125,9 @@ export const useExpoPushNotifications = (userId: string | null): UseExpoPushNoti
     // Only auto-register in React Native (check for expo-notifications availability)
     if (userId && typeof window !== 'undefined' && !token && !loading) {
       // Try to import expo-notifications (only works in React Native)
+      // Vite plugin will intercept this and return a stub in web builds
       // @ts-ignore - expo-notifications doesn't exist in web builds
-      import(/* @vite-ignore */ 'expo-notifications')
+      import('expo-notifications')
         .then(() => {
           // Expo is available, auto-register
           register();
