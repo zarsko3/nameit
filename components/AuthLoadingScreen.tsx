@@ -18,9 +18,9 @@ const AuthLoadingScreen: React.FC = () => {
           <div className="absolute inset-0 bg-baby-pink-200/30 blur-3xl rounded-full scale-150 animate-pulse" />
           {/* Logo with pulsing animation */}
           <img 
-            src="/LOGO.png" 
-            alt="NameIT" 
-            className="relative w-72 h-72 object-contain drop-shadow-2xl animate-pulse-scale"
+            src="/logo_new.png" 
+            alt="maybe?" 
+            className="relative h-72 w-auto object-contain drop-shadow-2xl animate-pulse-scale"
             style={{
               animation: 'pulse-scale 2s ease-in-out infinite',
             }}
@@ -42,4 +42,5 @@ const AuthLoadingScreen: React.FC = () => {
 };
 
 export default AuthLoadingScreen;
+
 

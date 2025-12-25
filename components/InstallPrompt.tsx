@@ -142,7 +142,7 @@ const InstallPrompt: React.FC<InstallPromptProps> = ({ isLoggedIn }) => {
               <div className="flex-1 min-w-0">
                 {/* Title - Dark text */}
                 <h3 className="font-bold text-dreamy-slate-700 mb-1 text-base font-heebo">
-                  התקן את NameIT
+                  התקן את maybe?
                 </h3>
                 {/* Message - Dark text */}
                 <p className="text-dreamy-slate-600 text-sm leading-relaxed mb-4">
@@ -221,5 +221,6 @@ const InstallPrompt: React.FC<InstallPromptProps> = ({ isLoggedIn }) => {
 };
 
 export default InstallPrompt;
+
 
 

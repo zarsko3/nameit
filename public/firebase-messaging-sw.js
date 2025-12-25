@@ -46,8 +46,8 @@ messaging.onBackgroundMessage((payload) => {
   // Notification options
   const notificationOptions = {
     body: notificationBody,
-    icon: '/LOGO.png',
-    badge: '/LOGO.png',
+    icon: '/logo_new.png',
+    badge: '/logo_new.png',
     tag: 'nameit-match-' + Date.now(), // Unique tag to allow multiple notifications
     renotify: true,
     requireInteraction: true, // Keep notification visible until user interacts
@@ -150,7 +150,7 @@ self.addEventListener('push', (event) => {
     const payload = event.data.json();
     console.log('🔔 [SW] Push payload:', payload);
     
-    const title = payload.notification?.title || 'NameIT';
+    const title = payload.notification?.title || 'maybe?';
     const options = {
       body: payload.notification?.body || 'יש לך הודעה חדשה',
       icon: '/LOGO.png',

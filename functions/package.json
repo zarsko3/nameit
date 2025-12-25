@@ -1,6 +1,6 @@
 {
   "name": "nameit-functions",
-  "description": "Firebase Cloud Functions for NameIT push notifications",
+  "description": "Firebase Cloud Functions for maybe? push notifications",
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
@@ -24,6 +24,7 @@
   },
   "private": true
 }
+
 
 
 

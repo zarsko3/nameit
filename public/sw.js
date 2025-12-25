@@ -1,4 +1,4 @@
-// NameIT Service Worker
+// maybe? Service Worker
 const CACHE_NAME = 'nameit-v1';
 
 // Assets to cache on install
@@ -78,6 +78,7 @@ self.addEventListener('fetch', (event) => {
       })
   );
 });
+
 
 
 

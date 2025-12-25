@@ -29,8 +29,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, sh
             }}
           >
             <img 
-              src="/LOGO.png" 
-              alt="NameIT" 
+              src="/logo_new.png" 
+              alt="maybe?" 
               className="h-16 md:h-20 w-auto object-contain cursor-pointer transition-transform duration-300 hover:scale-105"
             />
           </header>

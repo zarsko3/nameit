@@ -23,9 +23,9 @@ const RoomSetup: React.FC<RoomSetupProps> = ({ displayName, onComplete }) => {
           <div className="relative inline-block mb-4">
             <div className="absolute inset-0 w-40 h-40 mx-auto bg-gradient-to-br from-pink-300/30 via-purple-300/20 to-teal-300/30 blur-2xl animate-pulse" />
             <img 
-              src="/LOGO.png" 
-              alt="NameIT" 
-              className="relative w-40 h-40 object-contain drop-shadow-2xl"
+              src="/logo_new.png" 
+              alt="maybe?" 
+              className="relative h-40 w-auto object-contain drop-shadow-2xl"
             />
           </div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2 font-heebo">
@@ -90,6 +90,7 @@ const RoomSetup: React.FC<RoomSetupProps> = ({ displayName, onComplete }) => {
 };
 
 export default RoomSetup;
+
 
 
 

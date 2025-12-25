@@ -1,5 +1,5 @@
 /**
- * Firebase Cloud Functions for NameIT
+ * Firebase Cloud Functions for maybe?
  * 
  * This function sends push notifications when a new match is created.
  * 
@@ -97,8 +97,8 @@ export const onMatchCreated = functions.firestore
           notification: {
             title: 'יש לכם התאמה! 👶',
             body: 'שניכם אהבתם את אותו השם!',
-            icon: '/LOGO.png',
-            badge: '/LOGO.png',
+            icon: '/logo_new.png',
+            badge: '/logo_new.png',
             tag: `match-${nameId}`,
             renotify: true,
             requireInteraction: true,
@@ -206,6 +206,7 @@ export const cleanupInvalidTokens = functions.pubsub
 
     return null;
   });
+
 
 
 

@@ -41,7 +41,7 @@ const History: React.FC<HistoryProps> = ({
   );
 
   const shareOnWhatsApp = (name: BabyName) => {
-    const text = `מצאנו שם פוטנציאלי ב-NameIT! 😍\n\nשם: ${name.hebrew}\nפירוש: ${name.meaning}`;
+    const text = `מצאנו שם פוטנציאלי ב-maybe?! 😍\n\nשם: ${name.hebrew}\nפירוש: ${name.meaning}`;
     window.open(`whatsapp://send?text=${encodeURIComponent(text)}`);
   };
 

@@ -181,8 +181,8 @@ export const showLocalNotification = (title: string, body: string, icon?: string
 
   new Notification(title, {
     body,
-    icon: icon || '/LOGO.png',
-    badge: '/LOGO.png',
+    icon: icon || '/logo_new.png',
+    badge: '/logo_new.png',
     tag: 'nameit-match',
     renotify: true,
     requireInteraction: true,
@@ -250,7 +250,7 @@ export const testNotification = (): void => {
     showLocalNotification(
       'יש לכם התאמה! 👶',
       'שניכם אהבתם את אותו השם!',
-      '/LOGO.png'
+      '/logo_new.png'
     );
   } else {
     console.warn('Permission not granted. Request permission first.');

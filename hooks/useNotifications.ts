@@ -58,7 +58,7 @@ export const useNotifications = (userId: string | null): UseNotificationsReturn 
       // Show in-app notification for foreground messages
       if (payload.notification) {
         showLocalNotification(
-          payload.notification.title || 'NameIT',
+          payload.notification.title || 'maybe?',
           payload.notification.body || '',
           payload.notification.icon
         );

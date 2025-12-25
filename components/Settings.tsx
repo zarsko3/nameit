@@ -797,7 +797,7 @@ const Settings: React.FC<SettingsProps> = ({
 
               {/* Email Support */}
               <button
-                onClick={() => window.open('mailto:zarsko2@gmail.com?subject=NameIt%20App%20Feedback', '_blank')}
+                onClick={() => window.open('mailto:zarsko2@gmail.com?subject=maybe?%20App%20Feedback', '_blank')}
                 className="w-full p-4 bg-white/60 hover:bg-white/80 rounded-full transition-all press-effect flex items-center justify-between group"
               >
                 <div className="flex items-center gap-3">
@@ -823,7 +823,7 @@ const Settings: React.FC<SettingsProps> = ({
           
           {/* Version */}
           <p className="text-center text-[10px] text-dreamy-slate-400/60 pt-2 animate-fade-up" style={{ animationDelay: '0.45s' }}>
-            NameIT v1.0.0
+            maybe? v1.0.0
           </p>
         </div>
       </div>

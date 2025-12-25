@@ -170,9 +170,9 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, onDevLogin, sign
             <div className="relative inline-block">
               <div className="absolute inset-0 w-28 h-28 sm:w-36 sm:h-36 mx-auto bg-gradient-to-br from-baby-pink-300/40 via-baby-lavender-200/30 to-baby-blue-200/40 blur-2xl animate-pulse" />
               <img 
-                src="/LOGO.png" 
-                alt="NameIT" 
-                className="relative w-28 h-28 sm:w-36 sm:h-36 object-contain drop-shadow-2xl"
+                src="/logo_new.png" 
+                alt="maybe?" 
+                className="relative h-28 sm:h-36 w-auto object-contain drop-shadow-2xl"
               />
             </div>
           </div>
