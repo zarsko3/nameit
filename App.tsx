@@ -9,6 +9,7 @@ import InstallPrompt from './components/InstallPrompt';
 import NotificationPrompt from './components/NotificationPrompt';
 import Settings from './components/Settings';
 import AuthLoadingScreen from './components/AuthLoadingScreen';
+import MobileContainer from './components/MobileContainer';
 import { BabyName, AppView, UserProfile, SwipeRecord, Match, Gender, FilterConfig, RoomSettings, NameStyle } from './types';
 import { INITIAL_NAMES } from './constants';
 import { Sparkles, SlidersHorizontal, X, CircleCheck } from 'lucide-react';
@@ -1568,12 +1569,14 @@ const AppContent: React.FC = () => {
   );
 };
 
-// Main App component with AuthProvider
+// Main App component with AuthProvider and Mobile Container
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <MobileContainer>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </MobileContainer>
   );
 };
 

@@ -19,7 +19,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, sh
         {/* FIXED HEADER - Stays at top, outside scrollable content */}
         {showNav && (
           <header 
-            className="fixed top-0 left-0 right-0 z-[90] px-4 py-1 flex items-center justify-center shrink-0 bg-transparent md:max-w-md md:mx-auto md:left-1/2 md:-translate-x-1/2 safe-top"
+            className="fixed top-0 left-0 right-0 z-[90] px-4 py-1 flex items-center justify-center shrink-0 bg-transparent w-full max-w-full md:max-w-md md:mx-auto md:left-1/2 md:-translate-x-1/2 safe-top"
             style={{
               background: 'rgba(255, 255, 255, 0.70)',
               backdropFilter: 'blur(24px) saturate(150%)',
@@ -52,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setActiveView, sh
       {/* Fixed Bottom Navigation - OUTSIDE the scrollable container */}
       {showNav && (
         <nav 
-          className="fixed bottom-0 left-0 right-0 z-[100] rounded-t-3xl px-10 pt-3 flex justify-center items-center border-t border-white/50 md:max-w-md md:mx-auto md:left-1/2 md:-translate-x-1/2"
+          className="fixed bottom-0 left-0 right-0 z-[100] rounded-t-3xl px-10 pt-3 flex justify-center items-center border-t border-white/50 w-full max-w-full md:max-w-md md:mx-auto md:left-1/2 md:-translate-x-1/2"
           style={{
             background: 'rgba(255, 255, 255, 0.70)',
             backdropFilter: 'blur(24px) saturate(150%)',
