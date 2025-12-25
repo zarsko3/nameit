@@ -9,7 +9,7 @@ import InstallPrompt from './components/InstallPrompt';
 import NotificationPrompt from './components/NotificationPrompt';
 import Settings from './components/Settings';
 import AuthLoadingScreen from './components/AuthLoadingScreen';
-import MobileContainer from './components/MobileContainer';
+import MobileOnlyBlock from './components/MobileOnlyBlock';
 import { BabyName, AppView, UserProfile, SwipeRecord, Match, Gender, FilterConfig, RoomSettings, NameStyle } from './types';
 import { INITIAL_NAMES } from './constants';
 import { Sparkles, SlidersHorizontal, X, CircleCheck } from 'lucide-react';
@@ -1569,14 +1569,30 @@ const AppContent: React.FC = () => {
   );
 };
 
-// Main App component with AuthProvider and Mobile Container
+// Main App component with AuthProvider and Mobile-Only Check
 const App: React.FC = () => {
+  const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
+  const MAX_MOBILE_WIDTH = 550; // Blocks tablets and desktops, allows all phones
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Block desktop/tablet access - show mobile-only message
+  if (windowWidth > MAX_MOBILE_WIDTH) {
+    return <MobileOnlyBlock />;
+  }
+
+  // Mobile: Render app normally
   return (
-    <MobileContainer>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </MobileContainer>
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 };
 
