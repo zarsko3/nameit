@@ -14,6 +14,8 @@ import { BabyName, AppView, UserProfile, SwipeRecord, Match, Gender, FilterConfi
 import { INITIAL_NAMES } from './constants';
 import { Sparkles, SlidersHorizontal, X, CircleCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { Toaster } from 'react-hot-toast';
+import showToast from './utils/toast';
 
 // Firebase imports
 import { useAuth, AuthProvider } from './contexts/AuthContext';
@@ -1176,8 +1178,8 @@ const AppContent: React.FC = () => {
 
     try {
       // Step 1: Get or Create Name in Firestore
-      const nameId = await findOrCreateName(hebrew, gender);
-      console.log('✅ Name found/created:', nameId);
+      const { nameId, wasCreated } = await findOrCreateName(hebrew, gender);
+      console.log('✅ Name found/created:', nameId, 'wasCreated:', wasCreated);
 
       // Fetch the created name to get full details
       const createdName = await getNameById(nameId);
@@ -1216,10 +1218,19 @@ const AppContent: React.FC = () => {
       }, currentUser.uid);
       console.log('✅ Room priority action updated - partner will see it soon!');
 
+      // Show success toast based on whether name was created or found
+      if (wasCreated) {
+        showToast.success(`השם "${hebrew}" נוצר ונוסף לרשימה שלך! 🎉`);
+      } else {
+        showToast.success(`השם "${hebrew}" נוסף לרשימה שלך! ❤️`);
+      }
+
       // Return the created name so caller can use it if needed
       return createdName;
     } catch (error) {
       console.error('❌ Failed to add name:', error);
+      // Show error toast
+      showToast.error('אופס! משהו השתבש. נסה שוב.');
       throw error;
     }
   };
@@ -1647,6 +1658,7 @@ const App: React.FC = () => {
   // Mobile: Render app normally
   return (
     <AuthProvider>
+      <Toaster />
       <AppContent />
     </AuthProvider>
   );

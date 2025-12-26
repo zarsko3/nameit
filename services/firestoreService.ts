@@ -395,12 +395,12 @@ export const subscribeToRoomSettings = (
 
 /**
  * Find or create a name in the names collection
- * Returns the name ID (either existing or newly created)
+ * Returns the name ID and whether it was newly created
  */
 export const findOrCreateName = async (
   hebrew: string,
   gender: Gender
-): Promise<string> => {
+): Promise<{ nameId: string; wasCreated: boolean }> => {
   console.log('🔍 Finding or creating name:', { hebrew, gender });
   
   // Capitalize the Hebrew name (first letter uppercase, rest as-is for Hebrew)
@@ -426,8 +426,8 @@ export const findOrCreateName = async (
   
   if (existingName) {
     console.log('✅ Found existing name:', existingName.id);
-    // Return the name ID
-    return existingName.id;
+    // Return the name ID with wasCreated flag
+    return { nameId: existingName.id, wasCreated: false };
   }
   
   // Name doesn't exist - create it
@@ -457,7 +457,7 @@ export const findOrCreateName = async (
   await setDoc(nameRef, nameDoc);
   console.log('✅ New name created:', docId);
   
-  return docId;
+  return { nameId: docId, wasCreated: true };
 };
 
 /**
