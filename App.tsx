@@ -828,10 +828,10 @@ const AppContent: React.FC = () => {
   const handleRoomSetupComplete = async (roomId: string) => {
     if (!currentUser || !profile) return;
     
-    const updatedProfile = { ...profile, roomId };
+    // Save to Firestore - subscribeToUserProfile listener will update local state
     await saveUserProfile(currentUser.uid, { roomId });
-    setProfile(updatedProfile);
-    // Go directly to swipe screen - onboarding is skipped
+    
+    // Navigate immediately - profile state will sync via subscription
     setView('SWIPE');
   };
 
@@ -858,25 +858,34 @@ const AppContent: React.FC = () => {
   const handleUpdateProfile = async (updates: Partial<UserProfile>) => {
     if (!currentUser || !profile) return;
     
-    const updatedProfile = { ...profile, ...updates };
-    await saveUserProfile(currentUser.uid, updates);
-    setProfile(updatedProfile);
+    try {
+      // Save to Firestore first
+      await saveUserProfile(currentUser.uid, updates);
+      
+      // Only update local state after successful save
+      const updatedProfile = { ...profile, ...updates };
+      setProfile(updatedProfile);
 
-    // Sync shared settings to room (for couples real-time sync)
-    if (profile.roomId) {
-      const sharedSettings: Partial<RoomSettings> = {};
-      
-      // Only sync settings that should be shared between partners
-      if (updates.expectedGender !== undefined) sharedSettings.expectedGender = updates.expectedGender;
-      if (updates.nameStyles !== undefined) sharedSettings.nameStyles = updates.nameStyles;
-      if (updates.showTrendingOnly !== undefined) sharedSettings.showTrendingOnly = updates.showTrendingOnly;
-      if (updates.protectedNames !== undefined) sharedSettings.protectedNames = updates.protectedNames;
-      if (updates.blacklistedNames !== undefined) sharedSettings.blacklistedNames = updates.blacklistedNames;
-      
-      if (Object.keys(sharedSettings).length > 0) {
-        console.log('📤 Syncing settings to room for partner:', sharedSettings);
-        await saveRoomSettings(profile.roomId, sharedSettings, currentUser.uid);
+      // Sync shared settings to room (for couples real-time sync)
+      if (profile.roomId) {
+        const sharedSettings: Partial<RoomSettings> = {};
+        
+        // Only sync settings that should be shared between partners
+        if (updates.expectedGender !== undefined) sharedSettings.expectedGender = updates.expectedGender;
+        if (updates.nameStyles !== undefined) sharedSettings.nameStyles = updates.nameStyles;
+        if (updates.showTrendingOnly !== undefined) sharedSettings.showTrendingOnly = updates.showTrendingOnly;
+        if (updates.protectedNames !== undefined) sharedSettings.protectedNames = updates.protectedNames;
+        if (updates.blacklistedNames !== undefined) sharedSettings.blacklistedNames = updates.blacklistedNames;
+        
+        if (Object.keys(sharedSettings).length > 0) {
+          console.log('📤 Syncing settings to room for partner:', sharedSettings);
+          await saveRoomSettings(profile.roomId, sharedSettings, currentUser.uid);
+        }
       }
+    } catch (error) {
+      console.error('❌ Failed to update profile:', error);
+      // Don't update local state if save failed - prevents desync
+      // User will see their old settings and can retry
     }
   };
 
@@ -979,94 +988,101 @@ const AppContent: React.FC = () => {
       timestamp: Date.now()
     };
 
-    // Save swipe to Firestore FIRST
-    await saveSwipe(newSwipe);
-    console.log('✅ Swipe saved to Firestore');
+    try {
+      // Save swipe to Firestore FIRST
+      await saveSwipe(newSwipe);
+      console.log('✅ Swipe saved to Firestore');
 
-    // If DISLIKED (swiped left) - save to user's personal disliked list
-    // NOTE: Dislikes are NOT shared with partner - they might like a name you dislike
-    if (!liked) {
-      const currentDisliked = profile.dislikedNames || [];
-      if (!currentDisliked.includes(currentName.id)) {
-        const updatedDisliked = [...currentDisliked, currentName.id];
-        
-        // Save to user profile ONLY (not to room)
-        await saveUserProfile(currentUser.uid, { dislikedNames: updatedDisliked });
-        
-        // Update local state immediately
-        setProfile(prev => prev ? { ...prev, dislikedNames: updatedDisliked } : prev);
-        
-        console.log('👎 Name disliked and saved to personal list:', currentName.hebrew);
-      }
-    }
-
-    // Check for match (both partners liked the same name)
-    if (liked) {
-      console.log('\n🔍 CHECKING FOR MATCH...');
-      
-      // Query Firestore directly to check if partner already liked this name
-      // This is more reliable than using local state
-      const { isMatch, likedByUsers } = await checkForMatch(
-        profile.roomId,
-        currentName.id,
-        currentUser.uid
-      );
-      
-      console.log(`📊 Match check result: isMatch=${isMatch}, likedBy=[${likedByUsers.join(', ')}]`);
-      
-      if (isMatch) {
-        // Double-check that this match doesn't already exist
-        const alreadyMatched = await matchExists(profile.roomId, currentName.id);
-        
-        if (alreadyMatched) {
-          console.log('⚠️ Match already exists in database, skipping...');
-        } else {
-          console.log('🎉 NEW MATCH CONFIRMED! Creating match record...');
+      // If DISLIKED (swiped left) - save to user's personal disliked list
+      // NOTE: Dislikes are NOT shared with partner - they might like a name you dislike
+      if (!liked) {
+        const currentDisliked = profile.dislikedNames || [];
+        if (!currentDisliked.includes(currentName.id)) {
+          const updatedDisliked = [...currentDisliked, currentName.id];
           
-          const newMatch: Match = {
-            nameId: currentName.id,
-            timestamp: Date.now(),
-            rating: 0
-          };
-          await saveMatch(profile.roomId, newMatch);
-          console.log('✅ Match saved to Firestore');
+          // Save to user profile ONLY (not to room)
+          await saveUserProfile(currentUser.uid, { dislikedNames: updatedDisliked });
           
-          // Trigger push notification to partner (Expo push)
-          try {
-            const { sendMatchNotificationToPartner } = await import('./services/expoPushNotificationService');
-            const sent = await sendMatchNotificationToPartner(profile.roomId, currentUserForCode.uid, currentName.hebrew);
-            if (sent) {
-              console.log('📤 Expo push notification sent to partner');
-            } else {
-              console.log('⚠️ Could not send Expo push notification (partner may not have token)');
-            }
-          } catch (notifError) {
-            console.log('⚠️ Could not send Expo push notification:', notifError);
-            // Fallback to FCM if Expo fails
-            try {
-              const { triggerMatchNotification } = await import('./services/notificationService');
-              await triggerMatchNotification(profile.roomId, currentUserForCode.uid, currentName.hebrew);
-            } catch (fcmError) {
-              console.log('⚠️ FCM fallback also failed:', fcmError);
-            }
-          }
+          // Update local state immediately
+          setProfile(prev => prev ? { ...prev, dislikedNames: updatedDisliked } : prev);
           
-          // Show celebration UI
-          setTimeout(() => {
-            console.log('🎊 Showing match celebration UI');
-            setShowMatchCelebration(currentName);
-            triggerConfetti();
-          }, 350);
+          console.log('👎 Name disliked and saved to personal list:', currentName.hebrew);
         }
       }
+
+      // Check for match (both partners liked the same name)
+      if (liked) {
+        console.log('\n🔍 CHECKING FOR MATCH...');
+        
+        // Query Firestore directly to check if partner already liked this name
+        // This is more reliable than using local state
+        const { isMatch, likedByUsers } = await checkForMatch(
+          profile.roomId,
+          currentName.id,
+          currentUser.uid
+        );
+        
+        console.log(`📊 Match check result: isMatch=${isMatch}, likedBy=[${likedByUsers.join(', ')}]`);
+        
+        if (isMatch) {
+          // Double-check that this match doesn't already exist
+          const alreadyMatched = await matchExists(profile.roomId, currentName.id);
+          
+          if (alreadyMatched) {
+            console.log('⚠️ Match already exists in database, skipping...');
+          } else {
+            console.log('🎉 NEW MATCH CONFIRMED! Creating match record...');
+            
+            const newMatch: Match = {
+              nameId: currentName.id,
+              timestamp: Date.now(),
+              rating: 0
+            };
+            await saveMatch(profile.roomId, newMatch);
+            console.log('✅ Match saved to Firestore');
+            
+            // Trigger push notification to partner (Expo push)
+            try {
+              const { sendMatchNotificationToPartner } = await import('./services/expoPushNotificationService');
+              const sent = await sendMatchNotificationToPartner(profile.roomId, currentUserForCode.uid, currentName.hebrew);
+              if (sent) {
+                console.log('📤 Expo push notification sent to partner');
+              } else {
+                console.log('⚠️ Could not send Expo push notification (partner may not have token)');
+              }
+            } catch (notifError) {
+              console.log('⚠️ Could not send Expo push notification:', notifError);
+              // Fallback to FCM if Expo fails
+              try {
+                const { triggerMatchNotification } = await import('./services/notificationService');
+                await triggerMatchNotification(profile.roomId, currentUserForCode.uid, currentName.hebrew);
+              } catch (fcmError) {
+                console.log('⚠️ FCM fallback also failed:', fcmError);
+              }
+            }
+            
+            // Show celebration UI
+            setTimeout(() => {
+              console.log('🎊 Showing match celebration UI');
+              setShowMatchCelebration(currentName);
+              triggerConfetti();
+            }, 350);
+          }
+        }
+      }
+      
+      // Track this swipe for potential undo
+      lastSwipedNameRef.current = { nameId: currentName.id, liked };
+      
+      // Move to next name in the stable session list - ONLY if all operations succeeded
+      setCurrentNameIndex(prev => prev + 1);
+      console.log(`\n➡️ Moving to next name (index: ${currentNameIndex + 1})`);
+    } catch (error) {
+      console.error('❌ Failed to save swipe:', error);
+      console.error('Card will remain visible - user can retry the swipe');
+      // Don't move to next card - keep current card visible so user can retry
+      // This prevents data loss when network fails
     }
-    
-    // Track this swipe for potential undo
-    lastSwipedNameRef.current = { nameId: currentName.id, liked };
-    
-    // Move to next name in the stable session list
-    setCurrentNameIndex(prev => prev + 1);
-    console.log(`\n➡️ Moving to next name (index: ${currentNameIndex + 1})`);
   };
 
   // Track last swiped name for undo

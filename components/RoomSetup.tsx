@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Users, Heart } from 'lucide-react';
+import { ArrowLeft, Users, Heart, Loader2 } from 'lucide-react';
 
 interface RoomSetupProps {
   displayName: string;
@@ -8,10 +8,18 @@ interface RoomSetupProps {
 
 const RoomSetup: React.FC<RoomSetupProps> = ({ displayName, onComplete }) => {
   const [roomId, setRoomId] = useState('');
+  const [isJoining, setIsJoining] = useState(false);
 
-  const handleSubmit = () => {
-    if (!roomId.trim()) return;
-    onComplete(roomId.trim().toLowerCase());
+  const handleSubmit = async () => {
+    if (!roomId.trim() || isJoining) return;
+    
+    setIsJoining(true);
+    try {
+      await onComplete(roomId.trim().toLowerCase());
+    } finally {
+      // Reset loading state in case of error or navigation delay
+      setIsJoining(false);
+    }
   };
 
   return (
@@ -63,12 +71,21 @@ const RoomSetup: React.FC<RoomSetupProps> = ({ displayName, onComplete }) => {
         {/* Submit Button */}
         <div className="w-full max-w-sm animate-fade-up" style={{ animationDelay: '0.2s' }}>
           <button 
-            disabled={!roomId.trim()}
+            disabled={!roomId.trim() || isJoining}
             onClick={handleSubmit}
             className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl shadow-emerald-200/40 hover:shadow-emerald-200/60 disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none transition-all press-effect"
           >
-            המשך
-            <ArrowLeft size={20} />
+            {isJoining ? (
+              <>
+                מצטרף...
+                <Loader2 size={20} className="animate-spin" />
+              </>
+            ) : (
+              <>
+                המשך
+                <ArrowLeft size={20} />
+              </>
+            )}
           </button>
           
           {/* Trust badges */}
@@ -90,6 +107,7 @@ const RoomSetup: React.FC<RoomSetupProps> = ({ displayName, onComplete }) => {
 };
 
 export default RoomSetup;
+
 
 
 
