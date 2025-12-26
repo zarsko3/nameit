@@ -126,6 +126,8 @@ const AppContent: React.FC = () => {
 
   // CRITICAL: Wait for auth to fully initialize (including user profile fetch) before rendering routes
   // This prevents the flash of content issue
+  // IMPORTANT: This effect should ONLY run on auth state changes, NOT on profile updates
+  // Removing 'profile' from dependencies prevents interference with manual navigation
   useEffect(() => {
     // FREE ROAM MODE: Bypass all auth checks and allow free navigation (DEV ONLY)
     // Only initialize once on mount - don't interfere with manual navigation
@@ -231,7 +233,7 @@ const AppContent: React.FC = () => {
       console.log('👤 New user - starting room setup');
       setView('ROOM_SETUP');
     }
-  }, [effectiveUser, authUserProfile, effectiveAuthLoading, effectiveAuthInitialized, profile]);
+  }, [effectiveUser, authUserProfile, effectiveAuthLoading, effectiveAuthInitialized]);
 
   // Sync profile from AuthContext when it changes
   useEffect(() => {
